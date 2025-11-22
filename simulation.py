@@ -19,8 +19,227 @@ from events import (
 )
 from world_state import WorldState
 
+DEFAULT_WORLD_NAMES: List[str] = [
+    "Alice",
+    "Bob",
+    "Charlie",
+    "Diana",
+    "Ethan",
+    "Fiona",
+    "George",
+    "Hannah",
+    "Ian",
+    "Julia",
+    "Kevin",
+    "Laura",
+    "Michael",
+    "Nina",
+    "Oscar",
+    "Paula",
+    "Quentin",
+    "Rachel",
+    "Sam",
+    "Tina",
+    "Umar",
+    "Vera",
+    "Walter",
+    "Xenia",
+    "Yannis",
+    "Zara",
+    "Aaron",
+    "Beatrice",
+    "Caleb",
+    "Delia",
+    "Eli",
+    "Freya",
+    "Gavin",
+    "Helena",
+    "Iris",
+    "Jonas",
+    "Kara",
+    "Liam",
+    "Mira",
+    "Noah",
+    "Olivia",
+    "Peter",
+    "Rita",
+    "Simon",
+    "Tara",
+    "Ulysses",
+    "Valerie",
+    "Wesley",
+    "Xander",
+    "Yara",
+    "Zane",
+    "Adele",
+    "Boris",
+    "Celine",
+    "Derek",
+    "Elaine",
+    "Felix",
+    "Greta",
+    "Harvey",
+    "Isabel",
+    "Jasper",
+    "Kelsey",
+    "Leon",
+    "Marina",
+    "Nikolai",
+    "Ophelia",
+    "Paolo",
+    "Queenie",
+    "Rafael",
+    "Sienna",
+    "Theo",
+    "Uma",
+    "Viktor",
+    "Wendy",
+    "Ximena",
+    "Yuri",
+    "Zoey",
+    "Alfred",
+    "Bella",
+    "Cedric",
+    "Daisy",
+    "Edgar",
+    "Flora",
+    "Gordon",
+    "Hazel",
+    "Ismael",
+    "Joy",
+    "Kai",
+    "Lara",
+    "Marcus",
+    "Noelle",
+    "Orion",
+    "Penelope",
+    "Quincy",
+    "Roxanne",
+    "Sebastian",
+    "Thalia",
+    "Ulrich",
+    "Violet",
+    "Wyatt",
+    "Xavier",
+    "Yasmine",
+    "Zoltan",
+    "Abigail",
+    "Bruno",
+    "Clara",
+    "Damian",
+    "Evelyn",
+    "Frederick",
+    "Georgia",
+    "Hector",
+    "Ingrid",
+    "Jade",
+    "Kurt",
+    "Leona",
+    "Mason",
+    "Nadia",
+    "Owen",
+    "Phoebe",
+    "Quinn",
+    "Rosalind",
+    "Stefan",
+    "Tobias",
+    "Ursula",
+    "Vance",
+    "Whitney",
+    "Xyla",
+    "Yakov",
+    "Ziva",
+    "Aiden",
+    "Bianca",
+    "Carter",
+    "Dahlia",
+    "Emil",
+    "Farah",
+    "Gideon",
+    "Holly",
+    "Irene",
+    "Julius",
+    "Keira",
+    "Lorenzo",
+    "Maddie",
+    "Nolan",
+    "Oriana",
+    "Pierce",
+    "Renee",
+    "Silas",
+    "Tessa",
+    "Uliana",
+    "Vera",
+    "Warren",
+    "Xoel",
+    "Yvette",
+    "Zarek",
+    "Adrian",
+    "Brielle",
+    "Cyrus",
+    "Daria",
+    "Eamon",
+    "Felicity",
+    "Graham",
+    "Helga",
+    "Isaias",
+    "Janelle",
+    "Kian",
+    "Lydia",
+    "Malcolm",
+    "Nora",
+    "Otto",
+    "Priscilla",
+    "Ronan",
+    "Sabrina",
+    "Terrence",
+    "Usha",
+    "Vladimir",
+    "Willa",
+    "Xandra",
+    "Yosef",
+    "Zelda",
+    "Ari",
+    "Bridget",
+    "Caden",
+    "Delilah",
+    "Emilia",
+    "Floyd",
+    "Gemma",
+    "Huxley",
+    "Imogen",
+    "Jace",
+    "Kira",
+    "Lucian",
+    "Maeve",
+    "Nelson",
+    "Orla",
+    "Paxton",
+    "Rhea",
+    "Shawn",
+    "Talia",
+    "Umarion",
+    "Vesper",
+]
 
-def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig) -> WorldState:
+
+class NameAllocator:
+    """Sequentially dispense world names."""
+
+    def __init__(self, names: Sequence[str] | None = None) -> None:
+        self._names = list(names) if names is not None else list(DEFAULT_WORLD_NAMES)
+        self._counter = 0
+
+    def next_name(self) -> str:
+        if self._counter < len(self._names):
+            name = self._names[self._counter]
+        else:
+            name = f"World_{self._counter + 1}"
+        self._counter += 1
+        return name
+
+
+def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig, *, name: str) -> WorldState:
     """Initialize a world using config data."""
     initial_family = user_cfg.extras.get("family_status", "single")
     initial_children = int(user_cfg.extras.get("children", 0))
@@ -29,6 +248,7 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig) -> Worl
     starting_cash = float(user_cfg.extras.get("starting_cash", 0.0))
     starting_stock = float(user_cfg.extras.get("starting_stock", 0.0))
     return WorldState(
+        name=name,
         current_income=user_cfg.income,
         current_loan=0.0,
         stock_value=starting_stock,
@@ -84,6 +304,7 @@ def _branch_worlds_on_event(
     global_cfg: GlobalConfig,
     user_cfg: UserConfig,
     rng: random.Random | None = None,
+    name_allocator: NameAllocator | None = None,
 ) -> List[WorldState]:
     """
     Apply an event or choice.
@@ -102,19 +323,29 @@ def _branch_worlds_on_event(
         not_happens_history = world.trajectory_events + [f"{event.name}_not_chosen"]
         not_happens_world = world.copy_with_updates(trajectory_events=not_happens_history)
         if probability <= 0.0:
-            return [not_happens_world]
-        if probability >= 1.0:
-            return [happens_world]
-        return [happens_world, not_happens_world]
+            results = [not_happens_world]
+        elif probability >= 1.0:
+            results = [happens_world]
+        else:
+            results = [happens_world, not_happens_world]
+    else:
+        if probability <= 0.0:
+            skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
+            results = [world.copy_with_updates(trajectory_events=skipped_history)]
+        else:
+            random_fn = rng.random if rng is not None else random.random
+            if probability >= 1.0 or random_fn() < probability:
+                results = [event.apply(world, global_cfg, user_cfg)]
+            else:
+                skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
+                results = [world.copy_with_updates(trajectory_events=skipped_history)]
 
-    if probability <= 0.0:
-        skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
-        return [world.copy_with_updates(trajectory_events=skipped_history)]
-    random_fn = rng.random if rng is not None else random.random
-    if probability >= 1.0 or random_fn() < probability:
-        return [event.apply(world, global_cfg, user_cfg)]
-    skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
-    return [world.copy_with_updates(trajectory_events=skipped_history)]
+    if len(results) > 1:
+        if name_allocator is None:
+            raise ValueError("name_allocator is required when branching worlds.")
+        renamed = [world.copy_with_updates(name=name_allocator.next_name()) for world in results]
+        return renamed
+    return results
 
 
 def _build_weighted(
@@ -146,12 +377,15 @@ def simulate_layers(
     output_dir: Path | None = None,
     scenario_name: str | None = None,
     rng: random.Random | None = None,
+    name_allocator: NameAllocator | None = None,
 ) -> List[WorldState]:
     """Run the branching simulation for N layers and return resulting worlds."""
     random_gen = rng or random.Random()
-    active_worlds: List[WorldState] = list(initial_worlds) if initial_worlds is not None else [
-        create_initial_world(global_cfg, user_cfg)
-    ]
+    allocator = name_allocator or NameAllocator()
+    if initial_worlds is not None:
+        active_worlds = list(initial_worlds)
+    else:
+        active_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name())]
     events, event_weights = _build_weighted(event_names, event_probabilities or {})
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
@@ -165,7 +399,16 @@ def simulate_layers(
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
-            next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg, rng=random_gen))
+            next_worlds.extend(
+                _branch_worlds_on_event(
+                    world,
+                    sampled_event,
+                    global_cfg,
+                    user_cfg,
+                    rng=random_gen,
+                    name_allocator=allocator,
+                )
+            )
         active_worlds = next_worlds
         if output_dir is not None:
             _write_layer_output(output_dir, scenario_label, layer_idx, active_worlds)
@@ -185,10 +428,12 @@ def run_scenario(
     loan_amount: float = 200_000.0,
     output_dir: Path | None = None,
     scenario_name: str | None = None,
+    name_allocator: NameAllocator | None = None,
 ) -> List[WorldState]:
     """Run a scenario where a loan is taken at a specific layer."""
     random_gen = rng or random.Random()
-    current_worlds = [create_initial_world(global_cfg, user_cfg)]
+    allocator = name_allocator or NameAllocator()
+    current_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name())]
     events, event_weights = _build_weighted(event_names, event_probabilities or {})
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
@@ -203,7 +448,16 @@ def run_scenario(
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in current_worlds:
-            next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg, rng=random_gen))
+            next_worlds.extend(
+                _branch_worlds_on_event(
+                    world,
+                    sampled_event,
+                    global_cfg,
+                    user_cfg,
+                    rng=random_gen,
+                    name_allocator=allocator,
+                )
+            )
         current_worlds = next_worlds
         if output_dir is not None:
             _write_layer_output(output_dir, scenario_label, layer_idx, current_worlds)
@@ -236,6 +490,9 @@ def _write_layer_output(
 ) -> None:
     """Persist layer snapshot as JSON."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    payload = summarize_worlds(worlds, timestamp=layer_idx)
+    payload = {
+        "timestamp": layer_idx,
+        "worlds": summarize_worlds(worlds),
+    }
     file_path = output_dir / f"{scenario_name}_layer_{layer_idx}.json"
     file_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")

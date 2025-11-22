@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from config_models import GlobalConfig, UserConfig
-from simulation import run_scenario, summarize_worlds
+from simulation import NameAllocator, run_scenario, summarize_worlds
 
 
 def _load_json(path: Path) -> Dict[str, Any]:
@@ -101,6 +101,8 @@ def main() -> None:
         raise ValueError("Settings must define 'loan_amount'.")
     loan_amount = float(loan_amount_setting)
 
+    name_provider = NameAllocator()
+
     loan_now_worlds = run_scenario(
         global_cfg,
         user_cfg,
@@ -113,6 +115,7 @@ def main() -> None:
         loan_amount=loan_amount,
         output_dir=args.output_dir,
         scenario_name="loan_now",
+        name_allocator=name_provider,
     )
     loan_next_year_worlds = run_scenario(
         global_cfg,
@@ -126,6 +129,7 @@ def main() -> None:
         loan_amount=loan_amount,
         output_dir=args.output_dir,
         scenario_name="loan_next_year",
+        name_allocator=name_provider,
     )
 
     print("=== Final worlds: take loan now ===")
