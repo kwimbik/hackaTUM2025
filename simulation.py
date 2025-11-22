@@ -239,7 +239,14 @@ class NameAllocator:
         return name
 
 
-def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig, *, name: str) -> WorldState:
+def create_initial_world(
+    global_cfg: GlobalConfig,
+    user_cfg: UserConfig,
+    *,
+    name: str,
+    highlight: bool | None = None,
+    rng: random.Random | None = None,
+) -> WorldState:
     """Initialize a world using config data."""
     initial_family = user_cfg.extras.get("family_status", "single")
     initial_children = int(user_cfg.extras.get("children", 0))
@@ -251,6 +258,9 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig, *, name
     property_type = str(property_data.get("type", "apartment"))
     property_rooms = int(property_data.get("rooms", 0))
     property_price = float(property_data.get("price", 0.0))
+    if highlight is None:
+        rand = rng.random() if rng is not None else random.random()
+        highlight = rand < 0.2
     return WorldState(
         name=name,
         current_income=user_cfg.income,
@@ -264,6 +274,7 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig, *, name
         property_type=property_type,
         property_rooms=property_rooms,
         property_price=property_price,
+        highlight=bool(highlight),
         metadata={"global_extras": global_cfg.extras, "user_extras": user_cfg.extras},
         trajectory_events=[],
     )
@@ -362,12 +373,17 @@ def _branch_worlds_on_event(
         happens_world = event.apply(world, global_cfg, user_cfg)
         not_happens_history = world.trajectory_events + [f"{event.name}_not_chosen"]
         not_happens_world = world.copy_with_updates(trajectory_events=not_happens_history)
-        if probability <= 0.0:
-            results = [not_happens_world]
-        elif probability >= 1.0:
-            results = [happens_world]
+        if not world.highlight:
+            rand_fn = rng.random if rng is not None else random.random
+            take_choice = probability >= 1.0 or (probability > 0 and rand_fn() < probability)
+            results = [happens_world if take_choice else not_happens_world]
         else:
-            results = [happens_world, not_happens_world]
+            if probability <= 0.0:
+                results = [not_happens_world]
+            elif probability >= 1.0:
+                results = [happens_world]
+            else:
+                results = [happens_world, not_happens_world]
     else:
         if probability <= 0.0:
             skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
@@ -425,7 +441,7 @@ def simulate_layers(
     if initial_worlds is not None:
         active_worlds = list(initial_worlds)
     else:
-        active_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name())]
+        active_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name(), highlight=True, rng=random_gen)]
     events, event_weights = _build_weighted(event_names, event_probabilities or {})
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
@@ -436,6 +452,10 @@ def simulate_layers(
     for layer_idx in range(num_layers):
         global_cfg = adjust_global_parameters(global_cfg, layer_idx)
         active_worlds = [apply_loan_repayment(world, global_cfg) for world in active_worlds]
+        # Small chance to toggle highlight each month.
+        for idx, world in enumerate(active_worlds):
+            if random_gen.random() < 0.1:
+                active_worlds[idx] = world.copy_with_updates(highlight=not world.highlight)
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
@@ -473,7 +493,7 @@ def run_scenario(
     """Run a scenario where a loan is taken at a specific layer."""
     random_gen = rng or random.Random()
     allocator = name_allocator or NameAllocator()
-    current_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name())]
+    current_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name(), highlight=True, rng=random_gen)]
     events, event_weights = _build_weighted(event_names, event_probabilities or {})
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
@@ -485,6 +505,9 @@ def run_scenario(
         if layer_idx == take_loan_at_layer:
             current_worlds = [apply_take_loan(w, layer_idx, global_cfg, amount=loan_amount) for w in current_worlds]
         current_worlds = [apply_loan_repayment(world, global_cfg) for world in current_worlds]
+        for idx, world in enumerate(current_worlds):
+            if random_gen.random() < 0.1:
+                current_worlds[idx] = world.copy_with_updates(highlight=not world.highlight)
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in current_worlds:

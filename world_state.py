@@ -23,6 +23,7 @@ class WorldState:
     property_rooms: int
     property_price: float
     bankrupt: bool = False
+    highlight: bool = False
     metadata: Dict[str, Any] = field(default_factory=dict)
     trajectory_events: List[str] = field(default_factory=list)
 
