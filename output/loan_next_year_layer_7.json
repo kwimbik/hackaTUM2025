@@ -1,0 +1,78 @@
+[
+  {
+    "current_income": 34080.75,
+    "current_loan": 208000.0,
+    "cash": 208000.0,
+    "family_status": "married",
+    "children": 0,
+    "health_status": "sick",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "loan_history": [
+        {
+          "layer": 1,
+          "base_amount": 200000.0,
+          "effective_amount": 208000.0
+        }
+      ],
+      "employment": "employed"
+    },
+    "trajectory_events": [
+      "income_decrease",
+      "take_loan_layer_1",
+      "nothing",
+      "marry",
+      "layoff",
+      "income_increase",
+      "new_job",
+      "sickness",
+      "income_decrease"
+    ],
+    "timestamp": 7
+  },
+  {
+    "current_income": 34080.75,
+    "current_loan": 208000.0,
+    "cash": 208000.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "sick",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "loan_history": [
+        {
+          "layer": 1,
+          "base_amount": 200000.0,
+          "effective_amount": 208000.0
+        }
+      ],
+      "employment": "employed"
+    },
+    "trajectory_events": [
+      "income_decrease",
+      "take_loan_layer_1",
+      "nothing",
+      "marry_not_chosen",
+      "layoff",
+      "income_increase",
+      "new_job",
+      "sickness",
+      "income_decrease"
+    ],
+    "timestamp": 7
+  }
+]

@@ -1,0 +1,73 @@
+[
+  {
+    "current_income": 19237.5,
+    "current_loan": 208000.0,
+    "cash": 206000.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "healthy",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "loan_history": [
+        {
+          "layer": 0,
+          "base_amount": 200000.0,
+          "effective_amount": 208000.0
+        }
+      ],
+      "employment": "unemployed",
+      "recent_vacation": true
+    },
+    "trajectory_events": [
+      "take_loan_layer_0",
+      "new_job",
+      "layoff",
+      "layoff",
+      "go_on_vacation",
+      "income_decrease"
+    ],
+    "timestamp": 4
+  },
+  {
+    "current_income": 20250.0,
+    "current_loan": 208000.0,
+    "cash": 208000.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "healthy",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "loan_history": [
+        {
+          "layer": 0,
+          "base_amount": 200000.0,
+          "effective_amount": 208000.0
+        }
+      ],
+      "employment": "unemployed"
+    },
+    "trajectory_events": [
+      "take_loan_layer_0",
+      "new_job",
+      "layoff",
+      "layoff",
+      "go_on_vacation_not_chosen",
+      "income_decrease"
+    ],
+    "timestamp": 4
+  }
+]

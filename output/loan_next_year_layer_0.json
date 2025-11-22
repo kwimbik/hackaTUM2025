@@ -1,0 +1,24 @@
+[
+  {
+    "current_income": 67500.0,
+    "current_loan": 0.0,
+    "cash": 0.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "healthy",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      }
+    },
+    "trajectory_events": [
+      "income_decrease"
+    ],
+    "timestamp": 0
+  }
+]

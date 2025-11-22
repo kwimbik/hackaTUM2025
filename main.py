@@ -81,6 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--user-config", type=Path, help="Path to user config JSON.")
     parser.add_argument("--layers", type=int, default=None, help="Number of simulation layers (overrides settings).")
     parser.add_argument("--settings", type=Path, help="Path to simulation settings JSON (events, choices, params).")
+    parser.add_argument("--output-dir", type=Path, default=Path("output"), help="Directory to store per-layer outputs.")
     return parser.parse_args()
 
 
@@ -123,6 +124,8 @@ def main() -> None:
         event_probabilities=event_probabilities,
         choice_probabilities=choice_probabilities,
         loan_amount=loan_amount,
+        output_dir=args.output_dir,
+        scenario_name="loan_now",
     )
     loan_next_year_worlds = run_scenario(
         global_cfg,
@@ -134,13 +137,15 @@ def main() -> None:
         event_probabilities=event_probabilities,
         choice_probabilities=choice_probabilities,
         loan_amount=loan_amount,
+        output_dir=args.output_dir,
+        scenario_name="loan_next_year",
     )
 
     print("=== Final worlds: take loan now ===")
-    print(json.dumps(summarize_worlds(loan_now_worlds), indent=2))
+    print(json.dumps(summarize_worlds(loan_now_worlds, timestamp=num_layers), indent=2))
 
     print("\n=== Final worlds: take loan next year ===")
-    print(json.dumps(summarize_worlds(loan_next_year_worlds), indent=2))
+    print(json.dumps(summarize_worlds(loan_next_year_worlds, timestamp=num_layers), indent=2))
 
 
 if __name__ == "__main__":

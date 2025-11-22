@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import random
 from dataclasses import asdict
+from pathlib import Path
 from typing import Iterable, List, Mapping, Sequence
 
 from config_models import GlobalConfig, UserConfig
@@ -100,6 +101,8 @@ def simulate_layers(
     choice_names: Iterable[str] = DEFAULT_CHOICE_NAMES,
     event_probabilities: Mapping[str, float] | None = None,
     choice_probabilities: Mapping[str, float] | None = None,
+    output_dir: Path | None = None,
+    scenario_name: str | None = None,
     rng: random.Random | None = None,
 ) -> List[WorldState]:
     """Run the branching simulation for N layers and return resulting worlds."""
@@ -112,12 +115,16 @@ def simulate_layers(
     selectable = events + choices
     weights = event_weights + choice_weights
 
-    for _layer_idx in range(num_layers):
+    scenario_label = scenario_name or "simulation"
+
+    for layer_idx in range(num_layers):
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
             next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
         active_worlds = next_worlds
+        if output_dir is not None:
+            _write_layer_output(output_dir, scenario_label, layer_idx, active_worlds)
     return active_worlds
 
 
@@ -132,6 +139,8 @@ def run_scenario(
     choice_probabilities: Mapping[str, float] | None = None,
     rng: random.Random | None = None,
     loan_amount: float = 200_000.0,
+    output_dir: Path | None = None,
+    scenario_name: str | None = None,
 ) -> List[WorldState]:
     """Run a scenario where a loan is taken at a specific layer."""
     random_gen = rng or random.Random()
@@ -140,6 +149,7 @@ def run_scenario(
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
     weights = event_weights + choice_weights
+    scenario_label = scenario_name or "scenario"
 
     for layer_idx in range(num_layers):
         if layer_idx == take_loan_at_layer:
@@ -149,19 +159,37 @@ def run_scenario(
         for world in current_worlds:
             next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
         current_worlds = next_worlds
+        if output_dir is not None:
+            _write_layer_output(output_dir, scenario_label, layer_idx, current_worlds)
     return current_worlds
 
 
-def serialize_world(world: WorldState) -> dict:
+def serialize_world(world: WorldState, timestamp: int | None = None) -> dict:
     """Serialize a world into JSON-friendly data."""
-    return asdict(world)
+    data = asdict(world)
+    if timestamp is not None:
+        data["timestamp"] = timestamp
+    return data
 
 
-def summarize_worlds(worlds: List[WorldState]) -> list[dict]:
+def summarize_worlds(worlds: List[WorldState], timestamp: int | None = None) -> list[dict]:
     """Serialize all worlds."""
-    return [serialize_world(w) for w in worlds]
+    return [serialize_world(w, timestamp=timestamp) for w in worlds]
 
 
 def worlds_to_json(worlds: List[WorldState]) -> str:
     """Helper for pretty-printing JSON output."""
     return json.dumps(summarize_worlds(worlds), indent=2)
+
+
+def _write_layer_output(
+    output_dir: Path,
+    scenario_name: str,
+    layer_idx: int,
+    worlds: List[WorldState],
+) -> None:
+    """Persist layer snapshot as JSON."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    payload = summarize_worlds(worlds, timestamp=layer_idx)
+    file_path = output_dir / f"{scenario_name}_layer_{layer_idx}.json"
+    file_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
