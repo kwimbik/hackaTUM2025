@@ -28,22 +28,20 @@ DEFAULT_USER_CONFIG: Dict[str, Any] = {
 
 DEFAULT_SETTINGS: Dict[str, Any] = {
     "events": [
-        "nothing",
-        "divorce",
-        "income_increase",
-        "income_decrease",
-        "sickness",
-        "layoff",
-        "new_job",
+        {"name": "nothing", "probability": 0.5, "flag": 0},
+        {"name": "divorce", "probability": 0.5, "flag": 0},
+        {"name": "income_increase", "probability": 0.5, "flag": 0},
+        {"name": "income_decrease", "probability": 0.5, "flag": 0},
+        {"name": "sickness", "probability": 0.5, "flag": 0},
+        {"name": "layoff", "probability": 0.5, "flag": 0},
+        {"name": "new_job", "probability": 0.5, "flag": 0},
     ],
     "choices": [
-        "marry",
-        "kid",
-        "go_on_vacation",
-        "buy_insurance",
+        {"name": "marry", "probability": 0.5, "flag": 0},
+        {"name": "kid", "probability": 0.5, "flag": 0},
+        {"name": "go_on_vacation", "probability": 0.5, "flag": 0},
+        {"name": "buy_insurance", "probability": 0.5, "flag": 0},
     ],
-    "event_probabilities": {},
-    "choice_probabilities": {},
     "num_layers": 10,
     "loan_amount": 200_000.0,
 }
@@ -53,6 +51,28 @@ def _load_json(path: Path) -> Dict[str, Any]:
     # Use utf-8-sig to tolerate BOM-prefixed files from some editors.
     with path.open("r", encoding="utf-8-sig") as fp:
         return json.load(fp)
+
+
+def _extract_names_and_probs(items: list[Any], default_prob: float = 0.5) -> tuple[list[str], dict[str, float]]:
+    """
+    Accept either a list of names or a list of dicts with name/probability/flag.
+
+    Returns (names, probability_mapping).
+    """
+    names: list[str] = []
+    probs: dict[str, float] = {}
+    for item in items:
+        if isinstance(item, dict):
+            name = item.get("name")
+            if not name:
+                continue
+            prob = float(item.get("probability", default_prob))
+            names.append(name)
+            probs[name] = prob
+        else:
+            names.append(str(item))
+            probs[str(item)] = default_prob
+    return names, probs
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,10 +106,10 @@ def main() -> None:
     global_cfg = GlobalConfig.from_dict(global_data)
     user_cfg = UserConfig.from_dict(user_data)
 
-    event_names = settings_data.get("events", DEFAULT_SETTINGS["events"])
-    choice_names = settings_data.get("choices", DEFAULT_SETTINGS["choices"])
-    event_probabilities = settings_data.get("event_probabilities", DEFAULT_SETTINGS["event_probabilities"])
-    choice_probabilities = settings_data.get("choice_probabilities", DEFAULT_SETTINGS["choice_probabilities"])
+    event_items = settings_data.get("events", DEFAULT_SETTINGS["events"])
+    choice_items = settings_data.get("choices", DEFAULT_SETTINGS["choices"])
+    event_names, event_probabilities = _extract_names_and_probs(event_items)
+    choice_names, choice_probabilities = _extract_names_and_probs(choice_items)
     num_layers = args.layers if args.layers is not None else settings_data.get("num_layers", DEFAULT_SETTINGS["num_layers"])
     loan_amount = float(settings_data.get("loan_amount", DEFAULT_SETTINGS["loan_amount"]))
 
