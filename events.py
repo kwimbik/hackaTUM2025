@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Callable, Dict
+import random
 
 from config_models import GlobalConfig, UserConfig
 from world_state import WorldState
@@ -194,18 +195,135 @@ def _get_loan(world: WorldState, global_cfg: GlobalConfig, _: UserConfig) -> Wor
     )
 
 
+def _promotion(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    bump = world.current_income * random.uniform(0.10, 0.20)
+    return _with_history(world, "promotion", current_income=world.current_income + bump)
+
+
+def _bonus(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    bonus_cash = world.current_income
+    return _with_history(world, "bonus", cash=world.cash + bonus_cash)
+
+
+def _disability(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    new_income = world.current_income * 0.5
+    return _with_history(world, "disability", health_status="disabled", current_income=new_income)
+
+
+def _inheritance(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    windfall = 100_000.0
+    return _with_history(world, "inheritance", cash=world.cash + windfall)
+
+
+def _house_damage_minor(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    cost = 10_000.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "house_damage_minor": cost}
+    return _with_history(world, "house_damage_minor", cash=new_cash, metadata=new_meta)
+
+
+def _house_damage_major(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    cost = 35_000.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "house_damage_major": cost}
+    return _with_history(world, "house_damage_major", cash=new_cash, metadata=new_meta)
+
+
+def _car_breakdown(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    cost = 3_000.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "car_breakdown": cost}
+    return _with_history(world, "car_breakdown", cash=new_cash, metadata=new_meta)
+
+
+def _have_first_child(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    if world.children >= 1:
+        return _with_history(world, "have_first_child_skipped")
+    return _with_history(world, "have_first_child", children=world.children + 1)
+
+
+def _have_second_child(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    if world.children >= 2:
+        return _with_history(world, "have_second_child_skipped")
+    return _with_history(world, "have_second_child", children=world.children + 1)
+
+
+def _have_third_child(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    if world.children >= 3:
+        return _with_history(world, "have_third_child_skipped")
+    return _with_history(world, "have_third_child", children=world.children + 1)
+
+
+def _make_extra_payment(world: WorldState, global_cfg: GlobalConfig, __: UserConfig) -> WorldState:
+    payment = 5_000.0
+    new_cash = max(0.0, world.cash - payment)
+    new_loan = max(0.0, world.current_loan - payment)
+    new_meta = {**world.metadata, "extra_payment": payment}
+    return _with_history(world, "make_extra_payment", cash=new_cash, current_loan=new_loan, metadata=new_meta)
+
+
+def _increase_payment_rate(world: WorldState, global_cfg: GlobalConfig, __: UserConfig) -> WorldState:
+    base_payment = float(global_cfg.extras.get("monthly_loan_payment", 0.0))
+    current_override = float(world.metadata.get("monthly_payment_override", base_payment))
+    new_override = max(base_payment, current_override * 1.25) if current_override > 0 else base_payment * 1.5
+    new_meta = {**world.metadata, "monthly_payment_override": new_override}
+    return _with_history(world, "increase_payment_rate", metadata=new_meta)
+
+
+def _decrease_payment_rate(world: WorldState, global_cfg: GlobalConfig, __: UserConfig) -> WorldState:
+    base_payment = float(global_cfg.extras.get("monthly_loan_payment", 0.0))
+    current_override = float(world.metadata.get("monthly_payment_override", base_payment))
+    new_override = max(0.0, current_override * 0.5)
+    new_meta = {**world.metadata, "monthly_payment_override": new_override}
+    return _with_history(world, "decrease_payment_rate", metadata=new_meta)
+
+
+def _buy_disability_insurance(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    cost = 500.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "has_disability_insurance": True}
+    return _with_history(world, "buy_disability_insurance", cash=new_cash, metadata=new_meta)
+
+
+def _buy_second_car(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    cost = 15_000.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "second_car": True}
+    return _with_history(world, "buy_second_car", cash=new_cash, metadata=new_meta)
+
+
+def _renovate_house(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    cost = 30_000.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "renovated_house": True}
+    return _with_history(world, "renovate_house", cash=new_cash, metadata=new_meta)
+
+
+def _change_career(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    new_income = world.current_income * 0.9
+    new_meta = {**world.metadata, "career_change": True}
+    return _with_history(world, "change_career", current_income=new_income, metadata=new_meta)
+
+
 EVENT_REGISTRY: Dict[str, Event] = {
     "nothing": Event("nothing", _nothing, description="No change this layer.", is_choice=False),
     "marry": Event("marry", _marry, description="Get married if currently single.", is_choice=True),
     "divorce": Event("divorce", _divorce, description="Divorce if currently married.", is_choice=False),
     "income_increase": Event("income_increase", _income_increase, description="Income grows by 10%.", is_choice=False),
+    "promotion": Event("promotion", _promotion, description="Promotion with 10-20% salary jump.", is_choice=False),
+    "bonus": Event("bonus", _bonus, description="Year-end bonus received.", is_choice=False),
     "income_decrease": Event("income_decrease", _income_decrease, description="Income falls by 10%.", is_choice=False),
     "kid": Event("kid", _kid, description="Family gains a child.", is_choice=True),
+    "have_first_child": Event("have_first_child", _have_first_child, description="Have first child.", is_choice=True),
+    "have_second_child": Event("have_second_child", _have_second_child, description="Have second child.", is_choice=True),
+    "have_third_child": Event("have_third_child", _have_third_child, description="Have third child.", is_choice=True),
     "sickness": Event("sickness", _sickness, description="Temporary health setback.", is_choice=False),
+    "disability": Event("disability", _disability, description="Occupational disability.", is_choice=False),
     "layoff": Event("layoff", _layoff, description="Lose job and income halves.", is_choice=False),
     "new_job": Event("new_job", _new_job, description="New job with 20% higher income.", is_choice=False),
     "go_on_vacation": Event("go_on_vacation", _go_on_vacation, description="Spend on vacation; small income dip.", is_choice=True),
     "buy_insurance": Event("buy_insurance", _buy_insurance, description="Purchase insurance coverage.", is_choice=True),
+    "buy_disability_insurance": Event("buy_disability_insurance", _buy_disability_insurance, description="Purchase occupational disability insurance.", is_choice=True),
     "invest_in_stock": Event("invest_in_stock", _invest_in_stock, description="Allocate cash into stock holdings.", is_choice=True),
     "unexpected_expense": Event("unexpected_expense", _unexpected_expense, description="Sudden 20% cash expense.", is_choice=False),
     "natural_disaster": Event("natural_disaster", _natural_disaster, description="Disaster impacts finances and income.", is_choice=False),
@@ -213,6 +331,16 @@ EVENT_REGISTRY: Dict[str, Event] = {
     "stock_market_increase": Event("stock_market_increase", _stock_market_increase, description="Portfolio gains 15%.", is_choice=False),
     "stock_market_crash": Event("stock_market_crash", _stock_market_crash, description="Portfolio loses 30%.", is_choice=False),
     "get_loan": Event("get_loan", _get_loan, description="Take a mortgage to buy a property.", is_choice=False),
+    "inheritance": Event("inheritance", _inheritance, description="Inheritance windfall.", is_choice=False),
+    "house_damage_minor": Event("house_damage_minor", _house_damage_minor, description="Water damage/repair 5k-15k.", is_choice=False),
+    "house_damage_major": Event("house_damage_major", _house_damage_major, description="Major damage 20k-50k.", is_choice=False),
+    "car_breakdown": Event("car_breakdown", _car_breakdown, description="Car repair 1k-5k.", is_choice=False),
+    "make_extra_payment": Event("make_extra_payment", _make_extra_payment, description="Make extra mortgage payment.", is_choice=True),
+    "increase_payment_rate": Event("increase_payment_rate", _increase_payment_rate, description="Increase repayment rate.", is_choice=True),
+    "decrease_payment_rate": Event("decrease_payment_rate", _decrease_payment_rate, description="Decrease repayment rate.", is_choice=True),
+    "buy_second_car": Event("buy_second_car", _buy_second_car, description="Buy second car.", is_choice=True),
+    "renovate_house": Event("renovate_house", _renovate_house, description="Major renovation.", is_choice=True),
+    "change_career": Event("change_career", _change_career, description="Career change.", is_choice=True),
 }
 
 # Defaults used for sampling during simulation.
