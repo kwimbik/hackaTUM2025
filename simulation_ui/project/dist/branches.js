@@ -4,12 +4,11 @@ export const branchSpacing = 80;
 export const branchTransitionDistance = 200;
 // Generate random stats for a branch
 export function generateRandomStats() {
-    const statuses = ['Single', 'Married', 'Divorced', 'Widowed'];
     return {
         money: Math.floor(Math.random() * 100000) + 20000,
         monthlyWage: Math.floor(Math.random() * 5000) + 2000,
-        maritalStatus: statuses[Math.floor(Math.random() * statuses.length)],
-        hasChildren: Math.random() > 0.5
+        maritalStatus: 'Single',
+        childCount: 0
     };
 }
 // Inherit stats from parent with small variations
@@ -18,7 +17,7 @@ export function inheritStats(parent) {
         money: parent.money + Math.floor((Math.random() - 0.5) * 10000), // ±5k variation
         monthlyWage: parent.monthlyWage + Math.floor((Math.random() - 0.5) * 1000), // ±500 variation
         maritalStatus: parent.maritalStatus,
-        hasChildren: parent.hasChildren
+        childCount: parent.childCount
     };
 }
 // Find a free Y position near targetY that doesn't overlap with existing branches
@@ -73,7 +72,7 @@ export function initBranches(timelineOffset) {
             money: stats.money,
             monthlyWage: stats.monthlyWage,
             maritalStatus: stats.maritalStatus,
-            hasChildren: stats.hasChildren
+            childCount: stats.childCount
         }];
 }
 // Reset to single timeline
@@ -82,11 +81,16 @@ export function resetBranches(timelineOffset) {
         branches[i].stickmanGif.remove();
     }
     if (branches.length > 0) {
+        const stats = generateRandomStats();
         branches[0].id = 0;
         branches[0].slot = 0;
         branches[0].startYOffset = 0;
         branches[0].targetYOffset = 0;
         branches[0].createdAt = timelineOffset;
+        branches[0].money = stats.money;
+        branches[0].monthlyWage = stats.monthlyWage;
+        branches[0].maritalStatus = stats.maritalStatus;
+        branches[0].childCount = stats.childCount;
         branches = [branches[0]];
     }
 }
@@ -127,7 +131,7 @@ export function splitAllBranches(timelineOffset) {
             money: stats1.money,
             monthlyWage: stats1.monthlyWage,
             maritalStatus: stats1.maritalStatus,
-            hasChildren: stats1.hasChildren
+            childCount: stats1.childCount
         });
         newBranches.push({
             id: bottomId,
@@ -139,17 +143,18 @@ export function splitAllBranches(timelineOffset) {
             money: stats2.money,
             monthlyWage: stats2.monthlyWage,
             maritalStatus: stats2.maritalStatus,
-            hasChildren: stats2.hasChildren
+            childCount: stats2.childCount
         });
         branch.stickmanGif.remove();
     }
     branches = newBranches;
 }
 // Split a specific branch by ID
+// Returns the ID of the branch that should receive event modifications (keeps original ID)
 export function splitSpecificBranch(branchId, timelineOffset) {
     const branchIndex = branches.findIndex(b => b.id === branchId);
     if (branchIndex === -1)
-        return;
+        return branchId;
     const branchToSplit = branches[branchIndex];
     const currentYOffset = calculateBranchYOffset(branchToSplit, timelineOffset);
     const gif1 = createStickmanGif();
@@ -170,8 +175,20 @@ export function splitSpecificBranch(branchId, timelineOffset) {
     const bottomTarget = findFreePosition(idealBottom, occupiedPositions, branchSpacing);
     const newBranches = [];
     let slotCounter = 0;
-    const stats1 = inheritStats(branchToSplit);
-    const stats2 = inheritStats(branchToSplit);
+    // Instead of inheriting (which includes variations), make exact copies of parent state
+    // This way both branches start identical, and we'll apply the event to only one
+    const stats1 = {
+        money: branchToSplit.money,
+        monthlyWage: branchToSplit.monthlyWage,
+        maritalStatus: branchToSplit.maritalStatus,
+        childCount: branchToSplit.childCount
+    };
+    const stats2 = {
+        money: branchToSplit.money,
+        monthlyWage: branchToSplit.monthlyWage,
+        maritalStatus: branchToSplit.maritalStatus,
+        childCount: branchToSplit.childCount
+    };
     for (let i = 0; i < branches.length; i++) {
         if (i === branchIndex) {
             newBranches.push({
@@ -184,7 +201,7 @@ export function splitSpecificBranch(branchId, timelineOffset) {
                 money: stats1.money,
                 monthlyWage: stats1.monthlyWage,
                 maritalStatus: stats1.maritalStatus,
-                hasChildren: stats1.hasChildren
+                childCount: stats1.childCount
             });
             newBranches.push({
                 id: bottomId,
@@ -196,7 +213,7 @@ export function splitSpecificBranch(branchId, timelineOffset) {
                 money: stats2.money,
                 monthlyWage: stats2.monthlyWage,
                 maritalStatus: stats2.maritalStatus,
-                hasChildren: stats2.hasChildren
+                childCount: stats2.childCount
             });
             branches[i].stickmanGif.remove();
         }
@@ -210,6 +227,9 @@ export function splitSpecificBranch(branchId, timelineOffset) {
         }
     }
     branches = newBranches;
+    // Return the ID of the branch that should receive the event modification
+    // (the one that keeps the original ID)
+    return topId;
 }
 // Add monthly wage to all branches
 export function addMonthlyWage() {

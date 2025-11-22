@@ -10,7 +10,7 @@ export interface Branch {
   money: number;
   monthlyWage: number;
   maritalStatus: string;
-  hasChildren: boolean;
+  childCount: number; // Changed from hasChildren boolean to count
 }
 
 // Event system
@@ -24,6 +24,11 @@ export interface GameEvent {
   causesSplit?: boolean; // life-altering events
   reactionType: 'emoji' | 'image'; // type of reaction to show
   reactionContent: string; // emoji character or path to PNG
+  apiData?: {
+    monthlyWage?: number;
+    maritalStatus?: string;
+    childCount?: number;
+  }; // Data from API to apply when event triggers
 }
 
 export interface Reaction {
@@ -38,5 +43,5 @@ export interface BranchStats {
   money: number;
   monthlyWage: number;
   maritalStatus: string;
-  hasChildren: boolean;
+  childCount: number;
 }

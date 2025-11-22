@@ -51,6 +51,29 @@ export function drawEventMarkers(ctx, timelineOffset) {
         ctx.strokeStyle = isLifeAltering ? "gold" : "black";
         ctx.lineWidth = isLifeAltering ? 4 : 2;
         ctx.stroke();
+        // Draw event name above the star with background for visibility
+        const textPadding = 4;
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        // Measure text width for background
+        const textWidth = ctx.measureText(event.eventName).width;
+        const textHeight = 14;
+        const bgX = ex - textWidth / 2 - textPadding;
+        const bgY = ey - actualSize - textHeight - textPadding - 5;
+        // Draw white background rectangle
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillRect(bgX, bgY, textWidth + textPadding * 2, textHeight + textPadding);
+        // Draw black border
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bgX, bgY, textWidth + textPadding * 2, textHeight + textPadding);
+        // Draw text
+        ctx.fillStyle = "black";
+        ctx.fillText(event.eventName, ex, ey - actualSize - 5);
+        // Reset text alignment for other drawing
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
     }
 }
 // Draw markers for all branches

@@ -1,8 +1,9 @@
 import { branches, initBranches, resetBranches, splitAllBranches, splitSpecificBranch, addMonthlyWage } from './branches.js';
-import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing } from './events.js';
+import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, generateEventFromAPI } from './events.js';
 import { setupCameraControls, areStickmenVisible, resetCamera, isDragging } from './camera.js';
 import { updateStatsTable } from './ui.js';
 import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBranchNumbers, updateStickmanPositions } from './rendering.js';
+import { startPolling, mapFamilyStatus } from './apiClient.js';
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 // UI Elements
@@ -63,6 +64,7 @@ resetBtn.addEventListener("click", () => {
     resetBranches(timelineOffset);
     clearEvents();
     lastMonthIndex = -1;
+    timelineOffset = 0; // Reset time back to January 2025
     updateStatsTable();
 });
 // Auto-pause when stickmen are off-screen
@@ -96,7 +98,7 @@ function loop() {
     requestAnimationFrame(loop);
     if (!paused) {
         timelineOffset -= scrollSpeed;
-        checkEventTriggers(timelineOffset);
+        checkEventTriggers(timelineOffset, updateStatsTable);
         checkMonthlyWage();
     }
     if (!isDragging) {
@@ -113,4 +115,32 @@ function loop() {
 // Initialize and start
 initBranches(timelineOffset);
 updateStatsTable();
+// Handle events from external API
+function handleExternalEvent(event) {
+    console.log(`📨 Processing external event: ${event.text}`);
+    const { data } = event;
+    // Prepare API data to be applied when event triggers (not immediately)
+    const apiData = {
+        monthlyWage: data.current_income / 12, // Convert annual to monthly
+        maritalStatus: mapFamilyStatus(data.family_status),
+        childCount: data.children
+    };
+    console.log(`✓ Event data queued to apply when stickman reaches it:`);
+    console.log(`  - Monthly Wage: ${apiData.monthlyWage}`);
+    console.log(`  - Marital Status: ${apiData.maritalStatus}`);
+    console.log(`  - Children: ${apiData.childCount}`);
+    // Generate the event on the timeline with API data
+    const eventGenerated = generateEventFromAPI(data.recent_event, data.year, data.month, 0, // Apply to branch 0
+    timelineOffset, apiData // Pass data to be applied when event triggers
+    );
+    if (eventGenerated) {
+        console.log(`✓ Event "${data.recent_event}" added to timeline at ${data.year}-${data.month}`);
+    }
+    else {
+        console.warn(`Failed to generate event "${data.recent_event}" - may be in the past or invalid`);
+    }
+}
+// Start polling for external events from API
+startPolling(handleExternalEvent);
+console.log('🔗 API integration enabled - listening for external events');
 loop();

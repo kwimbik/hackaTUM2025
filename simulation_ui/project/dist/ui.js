@@ -22,7 +22,7 @@ export function updateStatsTable() {
         statusCell.textContent = branch.maritalStatus;
         const kidsCell = document.createElement("td");
         kidsCell.style.padding = "8px";
-        kidsCell.textContent = branch.hasChildren ? "Yes" : "No";
+        kidsCell.textContent = branch.childCount.toString();
         row.appendChild(branchCell);
         row.appendChild(moneyCell);
         row.appendChild(wageCell);
