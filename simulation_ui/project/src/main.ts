@@ -24,6 +24,8 @@ const countdownOverlay = document.getElementById("countdownOverlay") as HTMLElem
 const countdownValue = document.getElementById("countdownValue") as HTMLElement | null;
 const bottomCurtain = document.getElementById("bottomCurtain") as HTMLElement | null;
 const simulationShell = document.getElementById("simulationShell") as HTMLElement | null;
+const speedSlider = document.getElementById("speedSlider") as HTMLInputElement | null;
+const speedValue = document.getElementById("speedValue") as HTMLElement | null;
 
 // State
 let paused = true;
@@ -33,7 +35,7 @@ let lastMonthIndex = -1; // Track which month we're on
 let revealStarted = false;
 let simulationStarted = false;
 
-const scrollSpeed = 1.0;
+let scrollSpeed = 1.0;
 
 // Setup camera controls
 setupCameraControls(canvas);
@@ -90,6 +92,18 @@ resetBtn.addEventListener("click", () => {
   timelineOffset = 0; // Reset time back to January 2025
   updateStatsTable();
 });
+
+// Speed control
+speedSlider?.addEventListener("input", () => {
+  const value = parseFloat(speedSlider.value);
+  scrollSpeed = isNaN(value) ? 1.0 : value;
+  if (speedValue) {
+    speedValue.textContent = `${scrollSpeed.toFixed(1)}x`;
+  }
+});
+if (speedValue && speedSlider) {
+  speedValue.textContent = `${parseFloat(speedSlider.value || "1").toFixed(1)}x`;
+}
 
 function resizeCanvas() {
   if (canvasContainer) {
@@ -171,7 +185,31 @@ function startRevealAnimation() {
   tick();
 }
 
-ctaBtn?.addEventListener("click", startRevealAnimation);
+async function triggerBackendRun() {
+  try {
+    const response = await fetch("http://localhost:3000/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) {
+      console.warn(`Backend run failed: ${response.status}`);
+    } else {
+      const data = await response.json();
+      console.log("Backend simulation run result:", data);
+    }
+  } catch (err) {
+    console.warn("Unable to trigger backend run from UI:", err);
+  }
+}
+
+async function handleCtaClick() {
+  if (revealStarted) return;
+  // Fire-and-forget backend run; do not block the countdown
+  triggerBackendRun();
+  startRevealAnimation();
+}
+
+ctaBtn?.addEventListener("click", handleCtaClick);
 
 // Auto-pause when stickmen are off-screen
 function checkAutoPause() {

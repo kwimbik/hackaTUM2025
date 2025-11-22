@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = 3000;
+const BRIDGE_PORT = 5000;
 
 // Middleware
 app.use(cors());
@@ -84,6 +86,49 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', pendingEvents: pendingEvents.length });
 });
 
+// Trigger main.py directly from the Node server (alternative to the Python bridge)
+app.post('/run', (req, res) => {
+  const mainPath = path.join(__dirname, '..', '..', 'main.py');
+  console.log(`Executing main.py via Node bridge: ${mainPath}`);
+  const proc = spawn('python', [mainPath], {
+    cwd: path.join(__dirname, '..', '..'),
+    shell: false,
+  });
+
+  let stdout = '';
+  let stderr = '';
+  proc.stdout.on('data', (data) => (stdout += data.toString()));
+  proc.stderr.on('data', (data) => (stderr += data.toString()));
+
+  proc.on('close', (code) => {
+    res.status(code === 0 ? 200 : 500).json({
+      status: code === 0 ? 'ok' : 'error',
+      returncode: code,
+      stdout,
+      stderr,
+    });
+  });
+
+  proc.on('error', (err) => {
+    console.error('Failed to start main.py:', err);
+    res.status(500).json({ status: 'error', error: String(err) });
+  });
+});
+
+
+// Spawn the Python bridge (ui_bridge.py) to run main.py on demand
+function startBridgeServer() {
+  const bridgePath = path.join(__dirname, '..', '..', 'ui_bridge.py');
+  const bridgeProc = spawn('python', [bridgePath], {
+    cwd: path.join(__dirname, '..', '..'),
+    stdio: 'inherit',
+    shell: false
+  });
+  bridgeProc.on('exit', (code) => {
+    console.log(`ui_bridge.py exited with code ${code}`);
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`\n🚀 Timeline API Server running on http://localhost:${PORT}`);
   console.log(`📊 Frontend: http://localhost:${PORT}`);
@@ -93,4 +138,6 @@ app.listen(PORT, () => {
   console.log(`  -H "Content-Type: application/json" \\`);
   console.log(`  -d '{"text":"Oscar went on vacation","data":{"name":"Oscar","current_income":64303.125,"family_status":"single","children":0,"recent_event":"go_on_vacation","year":2025,"month":5}}'`);
   console.log('');
+  console.log(`Spawning Python bridge on http://localhost:${BRIDGE_PORT} (ui_bridge.py)...`);
+  startBridgeServer();
 });
