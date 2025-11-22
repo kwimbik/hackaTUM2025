@@ -1,6 +1,7 @@
 import { GameEvent, Reaction } from './types.js';
 import { branches, splitSpecificBranch } from './branches.js';
 import { EVENT_DEFINITIONS, EventDefinition } from './eventConfig.js';
+import { showEventPopup } from './eventPopups.js';
 
 export let gameEvents: GameEvent[] = [];
 export let reactions: Reaction[] = [];
@@ -261,6 +262,14 @@ export function checkEventTriggers(timelineOffset: number, onBranchModified?: ()
         });
         console.log(`TTS queued: ${event.apiData.ttsAudioId} (${event.apiData.ttsDuration?.toFixed(2)}s)`);
       }
+
+      showEventPopup(event.eventName, {
+        description: event.description,
+        branchId: event.branchId,
+        monthIndex: event.monthIndex,
+        reactionContent: event.reactionContent,
+        apiData: event.apiData
+      });
 
       console.log(`Event "${event.eventName}" triggered on branch #${event.branchId}!`);
       

@@ -1,5 +1,6 @@
 import { branches, splitSpecificBranch } from './branches.js';
 import { EVENT_DEFINITIONS } from './eventConfig.js';
+import { showEventPopup } from './eventPopups.js';
 export let gameEvents = [];
 export let reactions = [];
 export let nextEventId = 0;
@@ -194,6 +195,13 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                 });
                 console.log(`TTS queued: ${event.apiData.ttsAudioId} (${(_b = event.apiData.ttsDuration) === null || _b === void 0 ? void 0 : _b.toFixed(2)}s)`);
             }
+            showEventPopup(event.eventName, {
+                description: event.description,
+                branchId: event.branchId,
+                monthIndex: event.monthIndex,
+                reactionContent: event.reactionContent,
+                apiData: event.apiData
+            });
             console.log(`Event "${event.eventName}" triggered on branch #${event.branchId}!`);
             // For life-altering events: split FIRST, then modify only the original branch
             // This way the split creates an alternate timeline with the OLD stats
