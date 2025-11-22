@@ -239,11 +239,33 @@ class NameAllocator:
         return name
 
 
+class IdAllocator:
+    """Sequentially dispense world IDs."""
+
+    def __init__(self, start: int = 0) -> None:
+        self._counter = start
+
+    def next_id(self) -> int:
+        current = self._counter
+        self._counter += 1
+        return current
+
+    def reset(self, start: int) -> None:
+        """Reset the counter to a specific starting point (inclusive)."""
+        self._counter = start
+
+    def ensure_at_least(self, start: int) -> None:
+        """Bump the counter forward without rewinding it."""
+        if start > self._counter:
+            self._counter = start
+
+
 def create_initial_world(
     global_cfg: GlobalConfig,
     user_cfg: UserConfig,
     *,
     name: str,
+    world_id: int,
     highlight: bool | None = None,
     rng: random.Random | None = None,
 ) -> WorldState:
@@ -262,6 +284,7 @@ def create_initial_world(
         rand = rng.random() if rng is not None else random.random()
         highlight = rand < 0.2
     return WorldState(
+        id=world_id,
         name=name,
         current_income=user_cfg.income,
         current_loan=0.0,
@@ -356,6 +379,7 @@ def _branch_worlds_on_event(
     user_cfg: UserConfig,
     rng: random.Random | None = None,
     name_allocator: NameAllocator | None = None,
+    id_allocator: IdAllocator | None = None,
 ) -> List[WorldState]:
     """
     Apply an event or choice.
@@ -397,9 +421,11 @@ def _branch_worlds_on_event(
                 results = [world.copy_with_updates(trajectory_events=skipped_history)]
 
     if len(results) > 1:
-        if name_allocator is None:
-            raise ValueError("name_allocator is required when branching worlds.")
-        renamed = [world.copy_with_updates(name=name_allocator.next_name()) for world in results]
+        if name_allocator is None or id_allocator is None:
+            raise ValueError("name_allocator and id_allocator are required when branching worlds.")
+        renamed = [
+            world.copy_with_updates(name=name_allocator.next_name(), id=id_allocator.next_id()) for world in results
+        ]
         return renamed
     return results
 
@@ -434,14 +460,27 @@ def simulate_layers(
     scenario_name: str | None = None,
     rng: random.Random | None = None,
     name_allocator: NameAllocator | None = None,
+    id_allocator: IdAllocator | None = None,
 ) -> List[WorldState]:
     """Run the branching simulation for N layers and return resulting worlds."""
     random_gen = rng or random.Random()
-    allocator = name_allocator or NameAllocator()
+    name_alloc = name_allocator or NameAllocator()
+    id_alloc = id_allocator or IdAllocator()
     if initial_worlds is not None:
         active_worlds = list(initial_worlds)
+        max_existing_id = max((w.id for w in active_worlds), default=-1)
+        id_alloc.ensure_at_least(max_existing_id + 1)
     else:
-        active_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name(), highlight=True, rng=random_gen)]
+        active_worlds = [
+            create_initial_world(
+                global_cfg,
+                user_cfg,
+                name=name_alloc.next_name(),
+                world_id=id_alloc.next_id(),
+                highlight=True,
+                rng=random_gen,
+            )
+        ]
     events, event_weights = _build_weighted(event_names, event_probabilities or {})
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
@@ -466,7 +505,8 @@ def simulate_layers(
                     global_cfg,
                     user_cfg,
                     rng=random_gen,
-                    name_allocator=allocator,
+                    name_allocator=name_alloc,
+                    id_allocator=id_alloc,
                 )
             )
         active_worlds = next_worlds
@@ -489,11 +529,22 @@ def run_scenario(
     output_dir: Path | None = None,
     scenario_name: str | None = None,
     name_allocator: NameAllocator | None = None,
+    id_allocator: IdAllocator | None = None,
 ) -> List[WorldState]:
     """Run a scenario where a loan is taken at a specific layer."""
     random_gen = rng or random.Random()
-    allocator = name_allocator or NameAllocator()
-    current_worlds = [create_initial_world(global_cfg, user_cfg, name=allocator.next_name(), highlight=True, rng=random_gen)]
+    name_alloc = name_allocator or NameAllocator()
+    id_alloc = id_allocator or IdAllocator()
+    current_worlds = [
+        create_initial_world(
+            global_cfg,
+            user_cfg,
+            name=name_alloc.next_name(),
+            world_id=id_alloc.next_id(),
+            highlight=True,
+            rng=random_gen,
+        )
+    ]
     events, event_weights = _build_weighted(event_names, event_probabilities or {})
     choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
@@ -518,7 +569,8 @@ def run_scenario(
                     global_cfg,
                     user_cfg,
                     rng=random_gen,
-                    name_allocator=allocator,
+                    name_allocator=name_alloc,
+                    id_allocator=id_alloc,
                 )
             )
         current_worlds = next_worlds

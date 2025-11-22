@@ -10,6 +10,7 @@ from typing import Any, Dict
 
 from config_models import GlobalConfig, UserConfig
 from simulation import (
+    IdAllocator,
     NameAllocator,
     apply_take_loan,
     create_initial_world,
@@ -107,8 +108,9 @@ def main() -> None:
         raise ValueError("Settings must define 'loan_amount'.")
     loan_amount = float(loan_amount_setting)
 
+    id_provider = IdAllocator()
     name_provider = NameAllocator()
-    base_world = create_initial_world(global_cfg, user_cfg, name=name_provider.next_name())
+    base_world = create_initial_world(global_cfg, user_cfg, name=name_provider.next_name(), world_id=id_provider.next_id())
     loan_now_world = apply_take_loan(
         base_world,
         layer_index=0,
@@ -118,6 +120,7 @@ def main() -> None:
         tag="initial_loan",
     )
     no_loan_world = base_world.copy_with_updates(
+        id=id_provider.next_id(),
         name=name_provider.next_name(),
         metadata={**base_world.metadata, "monthly_payment_override": 0.0},
         trajectory_events=base_world.trajectory_events + ["no_initial_loan"],
@@ -138,6 +141,7 @@ def main() -> None:
         output_dir=args.output_dir,
         scenario_name="combined",
         name_allocator=name_provider,
+        id_allocator=id_provider,
     )
 
     print("=== Final worlds: combined scenario ===")

@@ -10,6 +10,7 @@ from typing import Any, Dict, List
 class WorldState:
     """Represents a single world in the branching simulation."""
 
+    id: int
     name: str
     current_income: float
     current_loan: float
