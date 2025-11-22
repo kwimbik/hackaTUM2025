@@ -42,6 +42,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
         "go_on_vacation",
         "buy_insurance",
     ],
+    "event_probabilities": {},
+    "choice_probabilities": {},
     "num_layers": 10,
     "loan_amount": 200_000.0,
 }
@@ -86,6 +88,8 @@ def main() -> None:
 
     event_names = settings_data.get("events", DEFAULT_SETTINGS["events"])
     choice_names = settings_data.get("choices", DEFAULT_SETTINGS["choices"])
+    event_probabilities = settings_data.get("event_probabilities", DEFAULT_SETTINGS["event_probabilities"])
+    choice_probabilities = settings_data.get("choice_probabilities", DEFAULT_SETTINGS["choice_probabilities"])
     num_layers = args.layers if args.layers is not None else settings_data.get("num_layers", DEFAULT_SETTINGS["num_layers"])
     loan_amount = float(settings_data.get("loan_amount", DEFAULT_SETTINGS["loan_amount"]))
 
@@ -96,6 +100,8 @@ def main() -> None:
         num_layers=num_layers,
         event_names=event_names,
         choice_names=choice_names,
+        event_probabilities=event_probabilities,
+        choice_probabilities=choice_probabilities,
         loan_amount=loan_amount,
     )
     loan_next_year_worlds = run_scenario(
@@ -105,6 +111,8 @@ def main() -> None:
         num_layers=num_layers,
         event_names=event_names,
         choice_names=choice_names,
+        event_probabilities=event_probabilities,
+        choice_probabilities=choice_probabilities,
         loan_amount=loan_amount,
     )
 

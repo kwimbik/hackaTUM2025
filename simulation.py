@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import random
 from dataclasses import asdict
-from typing import Iterable, List, Sequence
+from typing import Iterable, List, Mapping, Sequence
 
 from config_models import GlobalConfig, UserConfig
 from events import (
@@ -78,6 +78,19 @@ def _branch_worlds_on_event(
     return [event.apply(world, global_cfg, user_cfg)]
 
 
+def _build_weighted(
+    names: Iterable[str],
+    probabilities: Mapping[str, float],
+) -> tuple[List[Event], List[float]]:
+    """Return events/choices with weights pulled from probabilities mapping."""
+    items: List[Event] = []
+    weights: List[float] = []
+    for name in names:
+        items.append(EVENT_REGISTRY[name])
+        weights.append(float(probabilities.get(name, 0.5)))
+    return items, weights
+
+
 def simulate_layers(
     global_cfg: GlobalConfig,
     user_cfg: UserConfig,
@@ -85,6 +98,8 @@ def simulate_layers(
     num_layers: int = 10,
     event_names: Iterable[str] = DEFAULT_EVENT_NAMES,
     choice_names: Iterable[str] = DEFAULT_CHOICE_NAMES,
+    event_probabilities: Mapping[str, float] | None = None,
+    choice_probabilities: Mapping[str, float] | None = None,
     rng: random.Random | None = None,
 ) -> List[WorldState]:
     """Run the branching simulation for N layers and return resulting worlds."""
@@ -92,12 +107,13 @@ def simulate_layers(
     active_worlds: List[WorldState] = list(initial_worlds) if initial_worlds is not None else [
         create_initial_world(global_cfg, user_cfg)
     ]
-    events: List[Event] = [EVENT_REGISTRY[name] for name in event_names]
-    choices: List[Event] = [EVENT_REGISTRY[name] for name in choice_names]
+    events, event_weights = _build_weighted(event_names, event_probabilities or {})
+    choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
+    weights = event_weights + choice_weights
 
     for _layer_idx in range(num_layers):
-        sampled_event = random_gen.choice(selectable)
+        sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
             next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
@@ -112,20 +128,23 @@ def run_scenario(
     num_layers: int = 10,
     event_names: Iterable[str] = DEFAULT_EVENT_NAMES,
     choice_names: Iterable[str] = DEFAULT_CHOICE_NAMES,
+    event_probabilities: Mapping[str, float] | None = None,
+    choice_probabilities: Mapping[str, float] | None = None,
     rng: random.Random | None = None,
     loan_amount: float = 200_000.0,
 ) -> List[WorldState]:
     """Run a scenario where a loan is taken at a specific layer."""
     random_gen = rng or random.Random()
     current_worlds = [create_initial_world(global_cfg, user_cfg)]
-    events: List[Event] = [EVENT_REGISTRY[name] for name in event_names]
-    choices: List[Event] = [EVENT_REGISTRY[name] for name in choice_names]
+    events, event_weights = _build_weighted(event_names, event_probabilities or {})
+    choices, choice_weights = _build_weighted(choice_names, choice_probabilities or {})
     selectable = events + choices
+    weights = event_weights + choice_weights
 
     for layer_idx in range(num_layers):
         if layer_idx == take_loan_at_layer:
             current_worlds = [apply_take_loan(w, layer_idx, global_cfg, amount=loan_amount) for w in current_worlds]
-        sampled_event = random_gen.choice(selectable)
+        sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in current_worlds:
             next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))

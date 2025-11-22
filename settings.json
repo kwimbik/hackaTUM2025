@@ -14,6 +14,21 @@
     "go_on_vacation",
     "buy_insurance"
   ],
+  "event_probabilities": {
+    "nothing": 0.5,
+    "divorce": 0.5,
+    "income_increase": 0.5,
+    "income_decrease": 0.5,
+    "sickness": 0.5,
+    "layoff": 0.5,
+    "new_job": 0.5
+  },
+  "choice_probabilities": {
+    "marry": 0.5,
+    "kid": 0.5,
+    "go_on_vacation": 0.5,
+    "buy_insurance": 0.5
+  },
   "num_layers": 10,
   "loan_amount": 200000.0
 }
