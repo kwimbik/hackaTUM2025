@@ -105,38 +105,88 @@ export function calculateBranchYOffset(branch, timelineOffset) {
 // Initialize with the original GIF as first branch
 export function initBranches(timelineOffset) {
     const originalGif = document.getElementById("stickmanGif");
-    const stats = generateRandomStats();
-    branches = [{
+    const statsPrimary = generateRandomStats();
+    const statsSecondary = generateRandomStats();
+    const secondGif = createStickmanGif();
+    const offsetPrimary = -branchSpacing / 2;
+    const offsetSecondary = branchSpacing / 2;
+    branches = [
+        {
             id: 0,
             slot: 0,
-            startYOffset: 0,
-            targetYOffset: 0,
+            startYOffset: offsetPrimary,
+            targetYOffset: offsetPrimary,
             stickmanGif: originalGif,
             createdAt: timelineOffset,
-            money: stats.money,
-            monthlyWage: stats.monthlyWage,
-            maritalStatus: stats.maritalStatus,
-            childCount: stats.childCount
-        }];
+            money: statsPrimary.money,
+            monthlyWage: statsPrimary.monthlyWage,
+            maritalStatus: statsPrimary.maritalStatus,
+            childCount: statsPrimary.childCount
+        },
+        {
+            id: 1,
+            slot: 1,
+            startYOffset: offsetSecondary,
+            targetYOffset: offsetSecondary,
+            stickmanGif: secondGif,
+            createdAt: timelineOffset,
+            money: statsSecondary.money,
+            monthlyWage: statsSecondary.monthlyWage,
+            maritalStatus: statsSecondary.maritalStatus,
+            childCount: statsSecondary.childCount
+        }
+    ];
 }
 // Reset to single timeline
 export function resetBranches(timelineOffset) {
+    // Remove all extra avatars beyond the original DOM element
     for (let i = 1; i < branches.length; i++) {
         branches[i].stickmanGif.remove();
     }
-    if (branches.length > 0) {
-        const stats = generateRandomStats();
+    const statsPrimary = generateRandomStats();
+    const statsSecondary = generateRandomStats();
+    const offsetPrimary = -branchSpacing / 2;
+    const offsetSecondary = branchSpacing / 2;
+    if (branches.length === 0) {
+        const originalGif = document.getElementById("stickmanGif");
+        branches.push({
+            id: 0,
+            slot: 0,
+            startYOffset: offsetPrimary,
+            targetYOffset: offsetPrimary,
+            stickmanGif: originalGif,
+            createdAt: timelineOffset,
+            money: statsPrimary.money,
+            monthlyWage: statsPrimary.monthlyWage,
+            maritalStatus: statsPrimary.maritalStatus,
+            childCount: statsPrimary.childCount
+        });
+    }
+    else {
         branches[0].id = 0;
         branches[0].slot = 0;
-        branches[0].startYOffset = 0;
-        branches[0].targetYOffset = 0;
+        branches[0].startYOffset = offsetPrimary;
+        branches[0].targetYOffset = offsetPrimary;
         branches[0].createdAt = timelineOffset;
-        branches[0].money = stats.money;
-        branches[0].monthlyWage = stats.monthlyWage;
-        branches[0].maritalStatus = stats.maritalStatus;
-        branches[0].childCount = stats.childCount;
+        branches[0].money = statsPrimary.money;
+        branches[0].monthlyWage = statsPrimary.monthlyWage;
+        branches[0].maritalStatus = statsPrimary.maritalStatus;
+        branches[0].childCount = statsPrimary.childCount;
         branches = [branches[0]];
     }
+    const secondGif = createStickmanGif();
+    branches.push({
+        id: 1,
+        slot: 1,
+        startYOffset: offsetSecondary,
+        targetYOffset: offsetSecondary,
+        stickmanGif: secondGif,
+        createdAt: timelineOffset,
+        money: statsSecondary.money,
+        monthlyWage: statsSecondary.monthlyWage,
+        maritalStatus: statsSecondary.maritalStatus,
+        childCount: statsSecondary.childCount
+    });
 }
 // Split all branches
 export function splitAllBranches(timelineOffset) {
