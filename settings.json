@@ -185,6 +185,6 @@
       "description": "Further education/career change"
     }
   ],
-  "num_layers": 10,
+  "num_layers": 30,
   "loan_amount": 200000.0
 }
