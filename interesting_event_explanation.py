@@ -143,7 +143,7 @@ def compute_most_risky_event_for_world(
     if recent_event == "layoff":
         base = 8
         candidates.append(
-            (f"{name} got laid off this year — a serious negative shock.", base)
+            (f"{name} got laid off this month — a serious negative shock.", base)
         )
         if has_kids:
             candidates.append(
@@ -164,7 +164,7 @@ def compute_most_risky_event_for_world(
     elif recent_event == "kid":
         base = 6
         candidates.append(
-            (f"{name} had a child this year — major life change.", base)
+            (f"{name} had a child this month — major life change.", base)
         )
         if has_loan:
             candidates.append(
@@ -183,7 +183,7 @@ def compute_most_risky_event_for_world(
         while partner == name:
             partner = random_name()
         candidates.append(
-            (f"{name} got married this year to {partner}.", base)
+            (f"{name} got married this month to {partner}.", base)
         )
         if has_loan:
             candidates.append(
@@ -204,7 +204,7 @@ def compute_most_risky_event_for_world(
     elif recent_event == "sickness":
         base = 7
         candidates.append(
-            (f"{name} experienced health problems this year.", base)
+            (f"{name} experienced health problems this month.", base)
         )
         if has_kids:
             candidates.append(
@@ -215,7 +215,7 @@ def compute_most_risky_event_for_world(
     elif recent_event == "divorce":
         base = 8
         candidates.append(
-            (f"{name} went through a divorce this year — major emotional and financial shift.",
+            (f"{name} went through a divorce this month — major emotional and financial shift.",
              base)
         )
         if has_kids:
@@ -232,7 +232,7 @@ def compute_most_risky_event_for_world(
     elif recent_event == "income_decrease":
         base = 6
         candidates.append(
-            (f"{name}'s income decreased this year.", base)
+            (f"{name}'s income decreased this month.", base)
         )
         if has_loan:
             candidates.append(
@@ -241,14 +241,14 @@ def compute_most_risky_event_for_world(
             )
         if has_kids:
             candidates.append(
-                (f"{name}'s household income decreased while raising children — tough year.",
+                (f"{name}'s household income decreased while raising children — tough month.",
                  base + 2)
             )
 
     elif recent_event == "income_increase":
         base = 2
         candidates.append(
-            (f"{name}'s income increased this year.", base)
+            (f"{name}'s income increased this month.", base)
         )
         if has_loan and thin_buffer:
             candidates.append(
@@ -259,7 +259,7 @@ def compute_most_risky_event_for_world(
     elif recent_event == "go_on_vacation":
         base = 3
         candidates.append(
-            (f"{name} went on vacation this year.", base)
+            (f"{name} went on vacation this month.", base)
         )
         if has_loan and thin_buffer:
             candidates.append(
@@ -270,7 +270,7 @@ def compute_most_risky_event_for_world(
     elif recent_event.startswith("take_loan"):
         base = 7
         candidates.append(
-            (f"{name} took out a loan this year — long-term obligations increased.", base)
+            (f"{name} took out a loan this month — long-term obligations increased.", base)
         )
         if thin_buffer:
             candidates.append(
