@@ -1,6 +1,29 @@
 [
   {
-    "current_income": 67500.0,
+    "current_income": 71250.0,
+    "current_loan": 0.0,
+    "cash": 0.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "healthy",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "recent_vacation": true
+    },
+    "trajectory_events": [
+      "go_on_vacation"
+    ],
+    "timestamp": 0
+  },
+  {
+    "current_income": 75000.0,
     "current_loan": 0.0,
     "cash": 0.0,
     "family_status": "single",
@@ -17,7 +40,7 @@
       }
     },
     "trajectory_events": [
-      "income_decrease"
+      "go_on_vacation_not_chosen"
     ],
     "timestamp": 0
   }

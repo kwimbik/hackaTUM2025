@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import random
+import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import Iterable, List, Mapping, Sequence
@@ -87,7 +88,11 @@ def _build_weighted(
     items: List[Event] = []
     weights: List[float] = []
     for name in names:
-        items.append(EVENT_REGISTRY[name])
+        if name not in EVENT_REGISTRY:
+            print(f"Skipping unknown event/choice '{name}' from settings.", file=sys.stderr)
+            continue
+        event = EVENT_REGISTRY[name]
+        items.append(event)
         weights.append(float(probabilities.get(name, 0.5)))
     return items, weights
 
