@@ -5,7 +5,8 @@ const { spawn } = require('child_process');
 
 const app = express();
 const PORT = 3000;
-const BRIDGE_PORT = 5000;
+const BRIDGE_PORT = 5001;
+const AUDIO_SERVICE_PORT = 5000;
 
 // TTS control flag
 const DISABLE_TTS = process.env.DISABLE_TTS === 'true';
@@ -123,6 +124,19 @@ app.post('/run', (req, res) => {
 });
 
 
+// Spawn the audio mixer service
+function startAudioService() {
+  const audioServicePath = path.join(__dirname, '..', '..', 'audio_mixer_service.py');
+  const audioProc = spawn('python3', [audioServicePath], {
+    cwd: path.join(__dirname, '..', '..'),
+    stdio: 'inherit',
+    shell: false
+  });
+  audioProc.on('exit', (code) => {
+    console.log(`audio_mixer_service.py exited with code ${code}`);
+  });
+}
+
 // Spawn the Python bridge (ui_bridge.py) to run main.py on demand
 function startBridgeServer() {
   const bridgePath = path.join(__dirname, '..', '..', 'ui_bridge.py');
@@ -146,6 +160,8 @@ app.listen(PORT, () => {
   console.log(`  -H "Content-Type: application/json" \\`);
   console.log(`  -d '{"text":"Oscar went on vacation","data":{"name":"Oscar","current_income":64303.125,"family_status":"single","children":0,"recent_event":"go_on_vacation","year":2025,"month":5}}'`);
   console.log('');
-  console.log(`Spawning Python bridge on http://localhost:${BRIDGE_PORT} (ui_bridge.py)...`);
+  console.log(`Starting audio mixer service on http://localhost:${AUDIO_SERVICE_PORT}...`);
+  startAudioService();
+  console.log(`Starting Python bridge on http://localhost:${BRIDGE_PORT} (ui_bridge.py)...`);
   startBridgeServer();
 });

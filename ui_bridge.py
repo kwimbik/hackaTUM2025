@@ -51,7 +51,7 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"status": "error", "error": str(exc)}).encode("utf-8"))
 
 
-def run_server(host: str = "0.0.0.0", port: int = 5000) -> None:
+def run_server(host: str = "0.0.0.0", port: int = 5001) -> None:
     server = HTTPServer((host, port), Handler)
     print(f"Bridge server listening at http://{host}:{port} (POST /run)")
     server.serve_forever()
