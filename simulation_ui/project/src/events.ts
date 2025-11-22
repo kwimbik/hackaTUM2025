@@ -249,8 +249,20 @@ export function checkEventTriggers(timelineOffset: number, onBranchModified?: ()
         reactionType: event.reactionType,
         reactionContent: event.reactionContent
       });
-      
-      console.log(`🎯 Event "${event.eventName}" triggered on branch #${event.branchId}!`);
+
+      // Tell audio mixer to mix in TTS
+      if (event.apiData?.ttsAudioId) {
+        fetch('http://localhost:5000/play_event_audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioId: event.apiData.ttsAudioId })
+        }).catch(err => {
+          console.warn('Failed to trigger audio playback:', err);
+        });
+        console.log(`TTS queued: ${event.apiData.ttsAudioId} (${event.apiData.ttsDuration?.toFixed(2)}s)`);
+      }
+
+      console.log(`Event "${event.eventName}" triggered on branch #${event.branchId}!`);
       
       // For life-altering events: split FIRST, then modify only the original branch
       // This way the split creates an alternate timeline with the OLD stats

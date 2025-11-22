@@ -4,6 +4,7 @@ import { setupCameraControls, areStickmenVisible, resetCamera, isDragging } from
 import { updateStatsTable } from './ui.js';
 import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBranchNumbers, updateStickmanPositions } from './rendering.js';
 import { startPolling, mapFamilyStatus } from './apiClient.js';
+import { BackgroundAudioPlayer } from './audioPlayer.js';
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const canvasContainer = document.querySelector(".canvas-container");
@@ -204,6 +205,15 @@ function loop() {
 // Initialize and start
 initBranches(timelineOffset);
 updateStatsTable();
+// Start background audio stream
+let audioPlayer = null;
+try {
+    audioPlayer = new BackgroundAudioPlayer('http://localhost:5000/audio_stream');
+    console.log('Background audio stream started');
+}
+catch (error) {
+    console.error('Failed to start background audio:', error);
+}
 // Handle events from external API
 function handleExternalEvent(event) {
     console.log(`📨 Processing external event: ${event.text}`);
@@ -212,7 +222,9 @@ function handleExternalEvent(event) {
     const apiData = {
         monthlyWage: data.current_income / 12, // Convert annual to monthly
         maritalStatus: mapFamilyStatus(data.family_status),
-        childCount: data.children
+        childCount: data.children,
+        ttsAudioId: data.ttsAudioId,
+        ttsDuration: data.ttsDuration
     };
     console.log(`✓ Event data queued to apply when stickman reaches it:`);
     console.log(`  - Monthly Wage: ${apiData.monthlyWage}`);

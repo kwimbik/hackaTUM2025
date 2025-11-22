@@ -28,6 +28,8 @@ export interface GameEvent {
     monthlyWage?: number;
     maritalStatus?: string;
     childCount?: number;
+    ttsAudioId?: string; // Audio ID from audio service
+    ttsDuration?: number; // TTS duration in seconds
   }; // Data from API to apply when event triggers
 }
 

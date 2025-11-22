@@ -168,6 +168,7 @@ export function generateEventFromAPI(eventName, year, month, branchId, timelineO
 }
 // Check if stickman has passed events and trigger reactions
 export function checkEventTriggers(timelineOffset, onBranchModified) {
+    var _a, _b;
     const stickmanWorldX = 200;
     for (const event of gameEvents) {
         if (event.triggered)
@@ -182,7 +183,18 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                 reactionType: event.reactionType,
                 reactionContent: event.reactionContent
             });
-            console.log(`🎯 Event "${event.eventName}" triggered on branch #${event.branchId}!`);
+            // Tell audio mixer to mix in TTS
+            if ((_a = event.apiData) === null || _a === void 0 ? void 0 : _a.ttsAudioId) {
+                fetch('http://localhost:5000/play_event_audio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ audioId: event.apiData.ttsAudioId })
+                }).catch(err => {
+                    console.warn('Failed to trigger audio playback:', err);
+                });
+                console.log(`TTS queued: ${event.apiData.ttsAudioId} (${(_b = event.apiData.ttsDuration) === null || _b === void 0 ? void 0 : _b.toFixed(2)}s)`);
+            }
+            console.log(`Event "${event.eventName}" triggered on branch #${event.branchId}!`);
             // For life-altering events: split FIRST, then modify only the original branch
             // This way the split creates an alternate timeline with the OLD stats
             if (event.causesSplit) {
