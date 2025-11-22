@@ -1,6 +1,6 @@
 [
   {
-    "current_income": 75000.0,
+    "current_income": 82500.0,
     "current_loan": 0.0,
     "cash": 0.0,
     "family_status": "single",
@@ -17,7 +17,7 @@
       }
     },
     "trajectory_events": [
-      "divorce_no_change"
+      "income_increase"
     ],
     "timestamp": 0
   }

@@ -1,8 +1,8 @@
 [
   {
-    "current_income": 67500.0,
+    "current_income": 94050.0,
     "current_loan": 208000.0,
-    "cash": 207500.0,
+    "cash": 206000.0,
     "family_status": "single",
     "children": 0,
     "health_status": "healthy",
@@ -22,18 +22,19 @@
           "effective_amount": 208000.0
         }
       ],
-      "has_insurance": true
+      "employment": "employed",
+      "recent_vacation": true
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "nothing",
-      "income_decrease",
-      "buy_insurance"
+      "income_increase",
+      "new_job",
+      "go_on_vacation"
     ],
     "timestamp": 2
   },
   {
-    "current_income": 67500.0,
+    "current_income": 99000.0,
     "current_loan": 208000.0,
     "cash": 208000.0,
     "family_status": "single",
@@ -54,13 +55,14 @@
           "base_amount": 200000.0,
           "effective_amount": 208000.0
         }
-      ]
+      ],
+      "employment": "employed"
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "nothing",
-      "income_decrease",
-      "buy_insurance_not_chosen"
+      "income_increase",
+      "new_job",
+      "go_on_vacation_not_chosen"
     ],
     "timestamp": 2
   }

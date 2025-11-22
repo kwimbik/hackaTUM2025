@@ -11,42 +11,6 @@ from config_models import GlobalConfig, UserConfig
 from simulation import run_scenario, summarize_worlds
 
 
-DEFAULT_GLOBAL_CONFIG: Dict[str, Any] = {
-    "mortgage_rate": 0.04,
-    "interest_rate": 0.03,
-    "risk_factor": 0.3,
-    "inflation": 0.02,  # example extra field
-}
-
-DEFAULT_USER_CONFIG: Dict[str, Any] = {
-    "income": 75_000,
-    "age": 30,
-    "education": "bachelor",
-    "family_status": "single",
-    "career_length": 7,
-}
-
-DEFAULT_SETTINGS: Dict[str, Any] = {
-    "events": [
-        {"name": "nothing", "probability": 0.5, "flag": 0},
-        {"name": "divorce", "probability": 0.5, "flag": 0},
-        {"name": "income_increase", "probability": 0.5, "flag": 0},
-        {"name": "income_decrease", "probability": 0.5, "flag": 0},
-        {"name": "sickness", "probability": 0.5, "flag": 0},
-        {"name": "layoff", "probability": 0.5, "flag": 0},
-        {"name": "new_job", "probability": 0.5, "flag": 0},
-    ],
-    "choices": [
-        {"name": "marry", "probability": 0.5, "flag": 0},
-        {"name": "kid", "probability": 0.5, "flag": 0},
-        {"name": "go_on_vacation", "probability": 0.5, "flag": 0},
-        {"name": "buy_insurance", "probability": 0.5, "flag": 0},
-    ],
-    "num_layers": 10,
-    "loan_amount": 200_000.0,
-}
-
-
 def _load_json(path: Path) -> Dict[str, Any]:
     # Use utf-8-sig to tolerate BOM-prefixed files from some editors.
     with path.open("r", encoding="utf-8-sig") as fp:
@@ -80,7 +44,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--global-config", type=Path, help="Path to global config JSON.")
     parser.add_argument("--user-config", type=Path, help="Path to user config JSON.")
     parser.add_argument("--layers", type=int, default=None, help="Number of simulation layers (overrides settings).")
-    parser.add_argument("--settings", type=Path, help="Path to simulation settings JSON (events, choices, params).")
+    parser.add_argument(
+        "--settings",
+        type=Path,
+        default=Path("settings.json"),
+        help="Path to simulation settings JSON (required if not in default location).",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("output"), help="Directory to store per-layer outputs.")
     return parser.parse_args()
 
@@ -88,31 +57,43 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
+    if not args.settings.exists():
+        raise FileNotFoundError(f"Settings file not found: {args.settings}")
+    settings_data = _load_json(args.settings)
+
     if args.global_config and args.global_config.exists():
         global_data = _load_json(args.global_config)
     else:
-        global_data = DEFAULT_GLOBAL_CONFIG
+        global_data = settings_data.get("global_config")
+        if global_data is None:
+            raise ValueError("global_config must be present in settings or provided via --global-config.")
 
     if args.user_config and args.user_config.exists():
         user_data = _load_json(args.user_config)
     else:
-        user_data = DEFAULT_USER_CONFIG
-
-    if args.settings and args.settings.exists():
-        settings_data = _load_json(args.settings)
-    else:
-        default_settings_path = Path(__file__).parent / "settings.json"
-        settings_data = _load_json(default_settings_path) if default_settings_path.exists() else DEFAULT_SETTINGS
+        user_data = settings_data.get("user_config")
+        if user_data is None:
+            raise ValueError("user_config must be present in settings or provided via --user-config.")
 
     global_cfg = GlobalConfig.from_dict(global_data)
     user_cfg = UserConfig.from_dict(user_data)
 
-    event_items = settings_data.get("events", DEFAULT_SETTINGS["events"])
-    choice_items = settings_data.get("choices", DEFAULT_SETTINGS["choices"])
+    event_items = settings_data.get("events")
+    choice_items = settings_data.get("choices")
+    if not event_items:
+        raise ValueError("Settings must include a non-empty 'events' list.")
+    if choice_items is None:
+        choice_items = []
     event_names, event_probabilities = _extract_names_and_probs(event_items)
     choice_names, choice_probabilities = _extract_names_and_probs(choice_items)
-    num_layers = args.layers if args.layers is not None else settings_data.get("num_layers", DEFAULT_SETTINGS["num_layers"])
-    loan_amount = float(settings_data.get("loan_amount", DEFAULT_SETTINGS["loan_amount"]))
+    num_layers_setting = settings_data.get("num_layers")
+    if num_layers_setting is None:
+        raise ValueError("Settings must define 'num_layers'.")
+    num_layers = args.layers if args.layers is not None else int(num_layers_setting)
+    loan_amount_setting = settings_data.get("loan_amount")
+    if loan_amount_setting is None:
+        raise ValueError("Settings must define 'loan_amount'.")
+    loan_amount = float(loan_amount_setting)
 
     loan_now_worlds = run_scenario(
         global_cfg,

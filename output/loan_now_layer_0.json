@@ -1,6 +1,6 @@
 [
   {
-    "current_income": 75000.0,
+    "current_income": 82500.0,
     "current_loan": 208000.0,
     "cash": 208000.0,
     "family_status": "single",
@@ -25,7 +25,7 @@
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "nothing"
+      "income_increase"
     ],
     "timestamp": 0
   }

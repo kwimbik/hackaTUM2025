@@ -1,6 +1,6 @@
 [
   {
-    "current_income": 67500.0,
+    "current_income": 99000.0,
     "current_loan": 208000.0,
     "cash": 208000.0,
     "family_status": "single",
@@ -21,12 +21,13 @@
           "base_amount": 200000.0,
           "effective_amount": 208000.0
         }
-      ]
+      ],
+      "employment": "employed"
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "nothing",
-      "income_decrease"
+      "income_increase",
+      "new_job"
     ],
     "timestamp": 1
   }
