@@ -96,6 +96,7 @@ def run_scenario(
     num_layers: int = 10,
     event_names: Iterable[str] = DEFAULT_EVENT_NAMES,
     rng: random.Random | None = None,
+    loan_amount: float = 200_000.0,
 ) -> List[WorldState]:
     """Run a scenario where a loan is taken at a specific layer."""
     random_gen = rng or random.Random()
@@ -104,7 +105,7 @@ def run_scenario(
 
     for layer_idx in range(num_layers):
         if layer_idx == take_loan_at_layer:
-            current_worlds = [apply_take_loan(w, layer_idx, global_cfg) for w in current_worlds]
+            current_worlds = [apply_take_loan(w, layer_idx, global_cfg, amount=loan_amount) for w in current_worlds]
         sampled_event = random_gen.choice(events)
         next_worlds: List[WorldState] = []
         for world in current_worlds:
