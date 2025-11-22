@@ -1,6 +1,6 @@
 ﻿{
   "global_config": {
-    "mortgage_rate": 0.04,
+    "mortgage_rate": 0.04, 
     "interest_rate": 0.03,
     "risk_factor": 0.3,
     "inflation": 0.02,
@@ -23,166 +23,442 @@
       "name": "nothing",
       "probability": 0.40,
       "flag": 0,
-      "description": "Normal year without special events"
+      "description": "Normal month without special events"
     },
     {
-      "name": "income_increase",
-      "probability": 0.75,
-      "flag": 0,
-      "description": "Salary increase 2-6%"
+      "name": "salary_increase",
+      "probability": 0.109,
+      "flag": "employed",
+      "description": "Annual salary increase 2-6% (75% annual)"
     },
     {
       "name": "promotion",
-      "probability": 0.12,
-      "flag": 0,
-      "description": "Promotion with 10-20% salary jump"
+      "probability": 0.011,
+      "flag": "employed",
+      "description": "Promotion with 8-20% salary jump (12% annual)"
     },
     {
-      "name": "bonus",
-      "probability": 0.50,
-      "flag": 0,
-      "description": "Year-end bonus received"
-    },
-    {
-      "name": "get_loan",
-      "probability": 0.02,
-      "flag": 0,
-      "description": "You can get loan"
-    },
-    {
-      "name": "layoff",
-      "probability": 0.02,
-      "flag": 0,
-      "description": "Job loss, 6 months unemployment"
-    },
-    {
-      "name": "new_job",
-      "probability": 0.18,
-      "flag": 0,
-      "description": "New job with +10% salary"
-    },
-    {
-      "name": "income_decrease",
-      "probability": 0.08,
-      "flag": 0,
-      "description": "Salary cut or short-time work"
-    },
-    {
-      "name": "sickness",
-      "probability": 0.015,
-      "flag": 0,
-      "description": "Serious illness, 6-12 months reduced income"
-    },
-    {
-      "name": "disability",
-      "probability": 0.008,
-      "flag": 0,
-      "description": "Occupational disability (age-dependent 0.3-1.2%)"
-    },
-    {
-      "name": "divorce",
-      "probability": 0.025,
-      "flag": "married",
-      "description": "Divorce (only if married, peak years 6-10)"
+      "name": "bonus_payment",
+      "probability": 0.042,
+      "flag": "employed",
+      "description": "Annual bonus 0.5-2 monthly salaries (50% annual)"
     },
     {
       "name": "inheritance",
-      "probability": 0.015,
+      "probability": 0.0014,
       "flag": 0,
-      "description": "Inheritance €50k-€200k"
+      "description": "Inheritance €50k-€500k, median €107k (1.5% annual)"
     },
     {
-      "name": "house_damage_minor",
-      "probability": 0.01,
+      "name": "gift_from_family",
+      "probability": 0.010,
       "flag": 0,
-      "description": "Water damage/repair €5k-€15k"
+      "description": "Major gift from family €10k-€100k (12% annual)"
     },
     {
-      "name": "house_damage_major",
-      "probability": 0.002,
+      "name": "tax_refund",
+      "probability": 0.021,
       "flag": 0,
-      "description": "Major damage €20k-€50k"
+      "description": "Unexpected high tax refund €500-€3000 (25% annual)"
     },
     {
-      "name": "car_breakdown",
-      "probability": 0.25,
+      "name": "partner_returns_fulltime",
+      "probability": 0.052,
+      "flag": "partner_parental_leave",
+      "description": "Partner returns from parental leave fulltime (60% annual)"
+    },
+    {
+      "name": "partner_finds_job",
+      "probability": 0.075,
+      "flag": "partner_unemployed",
+      "description": "Unemployed partner finds job (60% within 6 months)"
+    },
+    {
+      "name": "job_loss_academic",
+      "probability": 0.0014,
+      "flag": "employed",
+      "description": "Job loss for academics (1.5% annual)"
+    },
+    {
+      "name": "job_loss_skilled",
+      "probability": 0.0021,
+      "flag": "employed",
+      "description": "Job loss with vocational training (2.5% annual)"
+    },
+    {
+      "name": "kurzarbeit",
+      "probability": 0.003,
+      "flag": "employed",
+      "description": "Short-time work, -20-40% income (3% annual normal times)"
+    },
+    {
+      "name": "salary_cut",
+      "probability": 0.006,
+      "flag": "employed",
+      "description": "Salary reduction -5-15% (7% annual in crisis)"
+    },
+    {
+      "name": "berufsunfaehigkeit_25_30",
+      "probability": 0.00035,
+      "flag": "age_25_30",
+      "description": "Occupational disability age 25-30 (0.4% annual)"
+    },
+    {
+      "name": "berufsunfaehigkeit_30_35",
+      "probability": 0.00058,
+      "flag": "age_30_35",
+      "description": "Occupational disability age 30-35 (0.7% annual)"
+    },
+    {
+      "name": "berufsunfaehigkeit_35_40",
+      "probability": 0.00092,
+      "flag": "age_35_40",
+      "description": "Occupational disability age 35-40 (1.1% annual)"
+    },
+    {
+      "name": "severe_illness",
+      "probability": 0.0014,
       "flag": 0,
-      "description": "Car repair €1k-€5k"
+      "description": "Severe illness (cancer, heart attack), 6-24 months unable to work (1.5% annual)"
+    },
+    {
+      "name": "work_accident",
+      "probability": 0.021,
+      "flag": "employed",
+      "description": "Work accident, 2 weeks-6 months inability (25% annual)"
+    },
+    {
+      "name": "mental_illness",
+      "probability": 0.003,
+      "flag": 0,
+      "description": "Mental illness (burnout, depression) 3-12 months (4% annual)"
+    },
+    {
+      "name": "divorce_years_1_5",
+      "probability": 0.0017,
+      "flag": "married_years_1_5",
+      "description": "Divorce in years 1-5 of marriage (2% annual)"
+    },
+    {
+      "name": "divorce_years_6_10",
+      "probability": 0.0025,
+      "flag": "married_years_6_10",
+      "description": "Divorce in years 6-10 of marriage, peak period (3% annual)"
+    },
+    {
+      "name": "divorce_years_11_15",
+      "probability": 0.0019,
+      "flag": "married_years_11_15",
+      "description": "Divorce in years 11-15 of marriage (2.25% annual)"
+    },
+    {
+      "name": "child_with_disability",
+      "probability": 0.0033,
+      "flag": "has_kids",
+      "description": "Child with disability/chronic illness, +€300-1000/month (4% of births)"
+    },
+    {
+      "name": "care_for_relatives",
+      "probability": 0.003,
+      "flag": "age_35_40",
+      "description": "Need to care for relatives, -20-50% work (4% annual age 35-45)"
+    },
+    {
+      "name": "partner_death",
+      "probability": 0.00035,
+      "flag": "married",
+      "description": "Death of partner (<0.5% annual age 25-40)"
+    },
+    {
+      "name": "house_fire",
+      "probability": 0.00003,
+      "flag": "owns_home",
+      "description": "House fire, €10k-500k+ damage (0.04% annual)"
+    },
+    {
+      "name": "water_damage",
+      "probability": 0.00058,
+      "flag": "owns_home",
+      "description": "Water damage (pipe burst), €5k-50k (0.7% annual)"
+    },
+    {
+      "name": "storm_damage",
+      "probability": 0.00033,
+      "flag": "owns_home",
+      "description": "Storm damage to roof/windows, €3k-30k (0.4% annual)"
+    },
+    {
+      "name": "burglary",
+      "probability": 0.00058,
+      "flag": "owns_home",
+      "description": "Burglary/vandalism, €2k-10k theft + repairs (0.7% annual)"
+    },
+    {
+      "name": "flood_low_risk",
+      "probability": 0.00008,
+      "flag": "owns_home_low_flood_risk",
+      "description": "Flood damage €30k-150k, low risk area (0.1% annual)"
+    },
+    {
+      "name": "flood_high_risk",
+      "probability": 0.0014,
+      "flag": "owns_home_high_flood_risk",
+      "description": "Flood damage €30k-150k, high risk area (1.5% annual)"
+    },
+    {
+      "name": "mold_problem",
+      "probability": 0.006,
+      "flag": "owns_home",
+      "description": "Mold/moisture problem, €5k-20k remediation (7% annual)"
+    },
+    {
+      "name": "hidden_defect",
+      "probability": 0.010,
+      "flag": "owns_home",
+      "description": "Hidden building defect discovered, €10k-100k (12% annual first 10 years)"
+    },
+    {
+      "name": "car_total_loss",
+      "probability": 0.00058,
+      "flag": "owns_car",
+      "description": "Car total loss in accident, need replacement (0.7% annual)"
+    },
+    {
+      "name": "major_car_repair",
+      "probability": 0.021,
+      "flag": "owns_old_car",
+      "description": "Major unexpected car repair €1k-5k (25% annual for cars >8 years)"
+    },
+    {
+      "name": "property_value_increase",
+      "probability": 0.052,
+      "flag": "owns_home",
+      "description": "Property value increases +2-8% (60% of years)"
+    },
+    {
+      "name": "property_value_decrease",
+      "probability": 0.021,
+      "flag": "owns_home",
+      "description": "Property value decreases -2-10% (25% of years)"
+    },
+    {
+      "name": "interest_rate_increase",
+      "probability": 0.025,
+      "flag": "refinancing_period",
+      "description": "Interest rates increase +0.5-2% at refinancing (30% chance)"
+    },
+    {
+      "name": "interest_rate_decrease",
+      "probability": 0.035,
+      "flag": "refinancing_period",
+      "description": "Interest rates decrease -0.5-2% at refinancing (40% chance)"
+    },
+    {
+      "name": "high_inflation",
+      "probability": 0.008,
+      "flag": 0,
+      "description": "High inflation period +3-5%, nominal salary increases (10% of years)"
+    },
+    {
+      "name": "recession",
+      "probability": 0.013,
+      "flag": 0,
+      "description": "Economic recession, higher unemployment risk (15% of years)"
     }
   ],
   
   "choices": [
     {
-      "name": "marry",
-      "probability": 0.06,
-      "flag": "not_married",
-      "description": "Get married (only if unmarried, peak age 30-35)"
-    },
-    {
-      "name": "have_first_child",
-      "probability": 0.08,
-      "flag": "married_no_kids",
-      "description": "Have first child (peak age 30-35)"
-    },
-    {
-      "name": "have_second_child",
-      "probability": 0.20,
-      "flag": "one_kid",
-      "description": "Have second child (70% of families, 3-4 years after first)"
-    },
-    {
-      "name": "have_third_child",
-      "probability": 0.10,
-      "flag": "two_kids",
-      "description": "Have third child (30% of families)"
-    },
-    {
-      "name": "make_extra_payment",
-      "probability": 0.30,
+      "name": "do_nothing",
+      "probability": 0.50,
       "flag": 0,
-      "description": "Make extra mortgage payment €3k-€15k"
+      "description": "No major decisions this month"
     },
     {
-      "name": "increase_payment_rate",
-      "probability": 0.15,
+      "name": "marry_age_25_30",
+      "probability": 0.0033,
+      "flag": "not_married_age_25_30",
+      "description": "Get married age 25-30 (4% annual)"
+    },
+    {
+      "name": "marry_age_30_35",
+      "probability": 0.0054,
+      "flag": "not_married_age_30_35",
+      "description": "Get married age 30-35, peak period (6.5% annual)"
+    },
+    {
+      "name": "marry_age_35_40",
+      "probability": 0.0021,
+      "flag": "not_married_age_35_40",
+      "description": "Get married age 35-40 (2.5% annual)"
+    },
+    {
+      "name": "first_child_age_25_30",
+      "probability": 0.0033,
+      "flag": "married_no_kids_age_25_30",
+      "description": "Have first child age 25-30 (4% annual)"
+    },
+    {
+      "name": "first_child_age_30_35",
+      "probability": 0.0067,
+      "flag": "married_no_kids_age_30_35",
+      "description": "Have first child age 30-35, peak period (8% annual)"
+    },
+    {
+      "name": "first_child_age_35_40",
+      "probability": 0.0025,
+      "flag": "married_no_kids_age_35_40",
+      "description": "Have first child age 35-40 (3% annual)"
+    },
+    {
+      "name": "second_child",
+      "probability": 0.015,
+      "flag": "has_one_child",
+      "description": "Have second child, 67-70% do so, 3-4 year spacing"
+    },
+    {
+      "name": "third_child",
+      "probability": 0.008,
+      "flag": "has_two_children",
+      "description": "Have third child, 30-35% do so"
+    },
+    {
+      "name": "sondertilgung_small",
+      "probability": 0.025,
+      "flag": "has_mortgage",
+      "description": "Small special repayment €3k-7k (30% use annually)"
+    },
+    {
+      "name": "sondertilgung_large",
+      "probability": 0.010,
+      "flag": "has_mortgage",
+      "description": "Large special repayment €8k-15k (12% use annually)"
+    },
+    {
+      "name": "increase_tilgung",
+      "probability": 0.015,
+      "flag": "has_mortgage",
+      "description": "Increase repayment rate +1-2% (18% annually)"
+    },
+    {
+      "name": "decrease_tilgung",
+      "probability": 0.004,
+      "flag": "has_mortgage_financial_stress",
+      "description": "Decrease repayment rate due to financial stress (5% annually)"
+    },
+    {
+      "name": "refinance",
+      "probability": 0.083,
+      "flag": "end_of_zinsbindung",
+      "description": "Refinance at end of fixed rate period (100% need to decide)"
+    },
+    {
+      "name": "early_refinance",
+      "probability": 0.0017,
+      "flag": "has_mortgage_before_10_years",
+      "description": "Early refinancing before 10 years with penalty (2% annual)"
+    },
+    {
+      "name": "invest_instead_of_tilgung",
+      "probability": 0.010,
+      "flag": "has_mortgage_low_interest",
+      "description": "Invest in ETFs instead of extra repayment (12% annually)"
+    },
+    {
+      "name": "job_change_for_raise",
+      "probability": 0.042,
+      "flag": "employed",
+      "description": "Change job for +8-15% salary, 15-20% every 3-5 years"
+    },
+    {
+      "name": "start_side_income",
+      "probability": 0.013,
+      "flag": "employed",
+      "description": "Start freelancing/side income €200-1000/month (15% annual)"
+    },
+    {
+      "name": "weiterbildung_part_time",
+      "probability": 0.042,
+      "flag": "employed",
+      "description": "Part-time continuing education, 2-4 years, +10-25% salary after (50% annually)"
+    },
+    {
+      "name": "weiterbildung_full_time",
+      "probability": 0.0017,
+      "flag": "employed",
+      "description": "Full-time study with income loss, 1-3 years, very risky (2% annual)"
+    },
+    {
+      "name": "become_self_employed",
+      "probability": 0.0025,
+      "flag": "employed",
+      "description": "Quit job to become self-employed, high risk/reward (3% annual)"
+    },
+    {
+      "name": "take_sabbatical",
+      "probability": 0.0058,
+      "flag": "employed",
+      "description": "Take 3-12 month sabbatical, no income (7% annual)"
+    },
+    {
+      "name": "go_part_time",
+      "probability": 0.021,
+      "flag": "employed_with_kids",
+      "description": "Switch to part-time for childcare, -20-50% income (25% annually for parents)"
+    },
+    {
+      "name": "major_renovation",
+      "probability": 0.010,
+      "flag": "owns_home",
+      "description": "Major renovation €50k-150k (kitchen, bath, energy) (12% annually)"
+    },
+    {
+      "name": "install_solar",
+      "probability": 0.008,
+      "flag": "owns_home",
+      "description": "Install photovoltaic system €10k-20k, ROI 8-12 years (10% annually)"
+    },
+    {
+      "name": "move_job_related",
+      "probability": 0.0025,
+      "flag": "owns_home",
+      "description": "Move for job, sell house with fees (3% annually)"
+    },
+    {
+      "name": "upgrade_to_larger_home",
+      "probability": 0.017,
+      "flag": "owns_home_with_kids",
+      "description": "Upgrade to larger home as family grows (20% over 15 years)"
+    },
+    {
+      "name": "rent_out_einliegerwohnung",
+      "probability": 0.006,
+      "flag": "owns_home",
+      "description": "Create and rent out in-law unit +€400-800/month (7% annually)"
+    },
+    {
+      "name": "expensive_vacation",
+      "probability": 0.008,
       "flag": 0,
-      "description": "Increase repayment rate from 2% to 3-4%"
-    },
-    {
-      "name": "decrease_payment_rate",
-      "probability": 0.05,
-      "flag": 0,
-      "description": "Decrease repayment rate (financial hardship)"
-    },
-    {
-      "name": "buy_disability_insurance",
-      "probability": 0.25,
-      "flag": "no_disability_insurance",
-      "description": "Purchase occupational disability insurance"
-    },
-    {
-      "name": "go_on_vacation",
-      "probability": 0.60,
-      "flag": 0,
-      "description": "Vacation €2k-€5k"
+      "description": "Expensive vacation/travel €5k-15k instead of sondertilgung (10% annually)"
     },
     {
       "name": "buy_second_car",
-      "probability": 0.08,
-      "flag": "one_car",
-      "description": "Buy second car (with kids/two jobs)"
+      "probability": 0.017,
+      "flag": "owns_one_car_with_kids",
+      "description": "Buy second car €10k-25k + €150-300/month costs (20% annually with family)"
     },
     {
-      "name": "renovate_house",
-      "probability": 0.10,
-      "flag": 0,
-      "description": "Major renovation €20k-€50k"
+      "name": "upgrade_car",
+      "probability": 0.083,
+      "flag": "owns_old_car",
+      "description": "Upgrade to newer car €20k-40k (every 8-12 years)"
     },
     {
-      "name": "change_career",
-      "probability": 0.05,
+      "name": "start_retirement_savings",
+      "probability": 0.010,
       "flag": 0,
-      "description": "Further education/career change"
+      "description": "Start private pension/ETF savings €100-500/month (12% annually)"
     }
   ],
   "num_layers": 30,
