@@ -2,13 +2,14 @@
   {
     "current_income": 80000,
     "current_loan": 208000.0,
+    "cash": 50000.0,
     "family_status": "single",
     "children": 0,
     "health_status": "healthy",
     "career_length": 8,
     "metadata": {
       "global_extras": {"inflation": 0.02},
-      "user_extras": {"family_status": "single"},
+      "user_extras": {"family_status": "single", "starting_cash": 50000},
       "loan_history": [{"layer": 0, "base_amount": 200000, "effective_amount": 208000.0}]
     },
     "trajectory_events": ["take_loan_layer_0", "income_increase", "kid_not_happened"]
@@ -16,6 +17,7 @@
   {
     "current_income": 92000,
     "current_loan": 0.0,
+    "cash": 12000.0,
     "family_status": "married",
     "children": 1,
     "health_status": "healthy",

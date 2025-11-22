@@ -18,9 +18,11 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig) -> Worl
     initial_children = int(user_cfg.extras.get("children", 0))
     initial_health = user_cfg.extras.get("health_status", "healthy")
     initial_career = int(user_cfg.extras.get("career_length", max(0, user_cfg.age - 18)))
+    starting_cash = float(user_cfg.extras.get("starting_cash", 0.0))
     return WorldState(
         current_income=user_cfg.income,
         current_loan=0.0,
+        cash=starting_cash,
         family_status=str(initial_family),
         children=initial_children,
         health_status=str(initial_health),
@@ -40,6 +42,7 @@ def apply_take_loan(world: WorldState, layer_index: int, global_cfg: GlobalConfi
     new_trajectory = world.trajectory_events + [f"take_loan_layer_{layer_index}"]
     return world.copy_with_updates(
         current_loan=world.current_loan + effective_amount,
+        cash=world.cash + effective_amount,
         metadata=new_metadata,
         trajectory_events=new_trajectory,
     )

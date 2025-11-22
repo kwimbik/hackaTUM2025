@@ -68,23 +68,41 @@ def _sickness(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
 
 def _layoff(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
     new_income = world.current_income * 0.50
-    return _with_history(world, "layoff", current_income=new_income, metadata={**world.metadata, "employment": "unemployed"})
+    return _with_history(
+        world,
+        "layoff",
+        current_income=new_income,
+        metadata={**world.metadata, "employment": "unemployed"},
+    )
 
 
 def _new_job(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
     new_income = world.current_income * 1.20
-    return _with_history(world, "new_job", current_income=new_income, metadata={**world.metadata, "employment": "employed"})
+    return _with_history(
+        world,
+        "new_job",
+        current_income=new_income,
+        metadata={**world.metadata, "employment": "employed"},
+    )
 
 
 def _go_on_vacation(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
     new_income = world.current_income * 0.95
+    new_cash = max(0.0, world.cash - 2_000)
     new_meta = {**world.metadata, "recent_vacation": True}
-    return _with_history(world, "go_on_vacation", current_income=new_income, metadata=new_meta)
+    return _with_history(
+        world,
+        "go_on_vacation",
+        current_income=new_income,
+        cash=new_cash,
+        metadata=new_meta,
+    )
 
 
 def _buy_insurance(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    new_cash = max(0.0, world.cash - 500)
     new_meta = {**world.metadata, "has_insurance": True}
-    return _with_history(world, "buy_insurance", metadata=new_meta)
+    return _with_history(world, "buy_insurance", cash=new_cash, metadata=new_meta)
 
 
 EVENT_REGISTRY: Dict[str, Event] = {

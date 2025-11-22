@@ -12,6 +12,7 @@ class WorldState:
 
     current_income: float
     current_loan: float
+    cash: float
     family_status: str
     children: int
     health_status: str
