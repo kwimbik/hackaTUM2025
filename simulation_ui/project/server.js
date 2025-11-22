@@ -7,6 +7,9 @@ const app = express();
 const PORT = 3000;
 const BRIDGE_PORT = 5000;
 
+// TTS control flag
+const DISABLE_TTS = process.env.DISABLE_TTS === 'true';
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -33,24 +36,28 @@ app.post('/api/event', async (req, res) => {
   let ttsAudioId = null;
   let ttsDuration = 0;
 
-  try {
-    console.log('Generating TTS for event...');
-    const ttsResponse = await fetch('http://localhost:5000/generate_tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text })
-    });
+  if (DISABLE_TTS) {
+    console.log('TTS disabled - skipping generation');
+  } else {
+    try {
+      console.log('Generating TTS for event...');
+      const ttsResponse = await fetch('http://localhost:5000/generate_tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
 
-    if (ttsResponse.ok) {
-      const ttsData = await ttsResponse.json();
-      ttsAudioId = ttsData.audioId;
-      ttsDuration = ttsData.duration;
-      console.log(`TTS ready: ${ttsAudioId} (${ttsDuration.toFixed(2)}s)`);
-    } else {
-      console.warn('TTS generation failed:', ttsResponse.statusText);
+      if (ttsResponse.ok) {
+        const ttsData = await ttsResponse.json();
+        ttsAudioId = ttsData.audioId;
+        ttsDuration = ttsData.duration;
+        console.log(`TTS ready: ${ttsAudioId} (${ttsDuration.toFixed(2)}s)`);
+      } else {
+        console.warn('TTS generation failed:', ttsResponse.statusText);
+      }
+    } catch (error) {
+      console.warn('Could not connect to audio service:', error.message);
     }
-  } catch (error) {
-    console.warn('Could not connect to audio service:', error.message);
   }
 
   // Only add to queue AFTER TTS is ready (or failed)
@@ -130,9 +137,10 @@ function startBridgeServer() {
 }
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 Timeline API Server running on http://localhost:${PORT}`);
-  console.log(`📊 Frontend: http://localhost:${PORT}`);
-  console.log(`📮 POST events to: http://localhost:${PORT}/api/event`);
+  console.log(`\nTimeline API Server running on http://localhost:${PORT}`);
+  console.log(`Frontend: http://localhost:${PORT}`);
+  console.log(`POST events to: http://localhost:${PORT}/api/event`);
+  console.log(`TTS: ${DISABLE_TTS ? 'DISABLED' : 'ENABLED'}`);
   console.log(`\nExample curl command:`);
   console.log(`curl -X POST http://localhost:${PORT}/api/event \\`);
   console.log(`  -H "Content-Type: application/json" \\`);
