@@ -2,11 +2,11 @@
   "timestamp": 1,
   "worlds": [
     {
-      "name": "Bob",
-      "current_income": 71250.0,
-      "current_loan": 166898.75,
+      "name": "Alice",
+      "current_income": 82500.0,
+      "current_loan": 166605.0,
       "stock_value": 0.0,
-      "cash": 177086.25,
+      "cash": 179730.0,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -14,48 +14,7 @@
       "property_type": "apartment",
       "property_rooms": 3,
       "property_price": 400000.0,
-      "metadata": {
-        "global_extras": {
-          "inflation": 0.02,
-          "monthly_rent_payment": 1500.0
-        },
-        "user_extras": {
-          "family_status": "single",
-          "career_length": 7,
-          "property": {
-            "type": "apartment",
-            "rooms": 3,
-            "price": 400000
-          }
-        },
-        "loan_history": [
-          {
-            "layer": 0,
-            "base_amount": 200000.0,
-            "effective_amount": 208000.0
-          }
-        ],
-        "recent_vacation": true
-      },
-      "trajectory_events": [
-        "take_loan_layer_0",
-        "go_on_vacation",
-        "new_job_skipped"
-      ]
-    },
-    {
-      "name": "Charlie",
-      "current_income": 75000.0,
-      "current_loan": 166667.5,
-      "stock_value": 0.0,
-      "cash": 179167.5,
-      "family_status": "single",
-      "children": 0,
-      "health_status": "healthy",
-      "career_length": 7,
-      "property_type": "apartment",
-      "property_rooms": 3,
-      "property_price": 400000.0,
+      "bankrupt": false,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -80,7 +39,7 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation_not_chosen",
+        "income_increase",
         "new_job_skipped"
       ]
     }

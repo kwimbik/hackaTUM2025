@@ -304,7 +304,8 @@ def apply_loan_repayment(world: WorldState, global_cfg: GlobalConfig) -> WorldSt
         new_loan = world.current_loan
 
     new_cash = cash_after_income - actual_payment
-    return world.copy_with_updates(current_loan=new_loan, cash=new_cash)
+    went_bankrupt = actual_payment > cash_after_income - 1e-9 and actual_payment < target_payment and new_loan > 0
+    return world.copy_with_updates(current_loan=new_loan, cash=new_cash, bankrupt=world.bankrupt or went_bankrupt)
 
 
 def apply_take_loan(world: WorldState, layer_index: int, global_cfg: GlobalConfig, amount: float = 200_000.0) -> WorldState:

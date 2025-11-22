@@ -4,9 +4,9 @@
     {
       "name": "Bob",
       "current_income": 78375.0,
-      "current_loan": 131530.4875,
+      "current_loan": 130696.925,
       "stock_value": 0.0,
-      "cash": 153592.9875,
+      "cash": 155228.175,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -14,6 +14,7 @@
       "property_type": "apartment",
       "property_rooms": 3,
       "property_price": 400000.0,
+      "bankrupt": false,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -39,18 +40,18 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation",
+        "income_increase",
         "new_job_skipped",
-        "sickness_skipped",
-        "income_increase"
+        "go_on_vacation",
+        "income_increase_skipped"
       ]
     },
     {
       "name": "Charlie",
       "current_income": 82500.0,
-      "current_loan": 130813.175,
+      "current_loan": 130462.55,
       "stock_value": 0.0,
-      "cash": 155813.175,
+      "cash": 157337.55,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -58,6 +59,7 @@
       "property_type": "apartment",
       "property_rooms": 3,
       "property_price": 400000.0,
+      "bankrupt": false,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -82,10 +84,10 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation_not_chosen",
+        "income_increase",
         "new_job_skipped",
-        "sickness_skipped",
-        "income_increase"
+        "go_on_vacation_not_chosen",
+        "income_increase_skipped"
       ]
     }
   ]

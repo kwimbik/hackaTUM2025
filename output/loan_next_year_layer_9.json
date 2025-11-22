@@ -2,11 +2,11 @@
   "timestamp": 9,
   "worlds": [
     {
-      "name": "Ethan",
-      "current_income": 85500.0,
-      "current_loan": 55668.80652849999,
+      "name": "Ian",
+      "current_income": 112860.0,
+      "current_loan": 51418.71091674997,
       "stock_value": 0.0,
-      "cash": 117668.80652849999,
+      "cash": 129337.46091675003,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -14,6 +14,7 @@
       "property_type": "apartment",
       "property_rooms": 3,
       "property_price": 400000.0,
+      "bankrupt": false,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -28,6 +29,7 @@
             "price": 400000
           }
         },
+        "recent_vacation": true,
         "loan_history": [
           {
             "layer": 1,
@@ -35,29 +37,28 @@
             "effective_amount": 208000.0
           }
         ],
-        "employment": "employed",
-        "recent_vacation": true
+        "employment": "employed"
       },
       "trajectory_events": [
-        "layoff_skipped",
+        "go_on_vacation",
         "take_loan_layer_1",
-        "new_job_skipped",
-        "income_decrease_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
+        "income_increase",
+        "new_job",
         "income_increase_skipped",
         "new_job",
-        "go_on_vacation",
-        "nothing",
-        "nothing"
+        "income_increase_skipped",
+        "nothing_skipped",
+        "income_increase_skipped",
+        "income_increase_skipped",
+        "income_increase_skipped"
       ]
     },
     {
-      "name": "Fiona",
-      "current_income": 90000.0,
-      "current_loan": 55180.05652849999,
+      "name": "Julia",
+      "current_income": 131769.00000000003,
+      "current_loan": 50586.00433475001,
       "stock_value": 0.0,
-      "cash": 119930.0565285,
+      "cash": 128768.50433474997,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -65,6 +66,7 @@
       "property_type": "apartment",
       "property_rooms": 3,
       "property_price": 400000.0,
+      "bankrupt": false,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -89,17 +91,17 @@
         "employment": "employed"
       },
       "trajectory_events": [
-        "layoff_skipped",
-        "take_loan_layer_1",
-        "new_job_skipped",
-        "income_decrease_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "new_job",
         "go_on_vacation_not_chosen",
-        "nothing_skipped",
-        "nothing"
+        "take_loan_layer_1",
+        "income_increase",
+        "new_job",
+        "income_increase_skipped",
+        "new_job_skipped",
+        "income_increase_skipped",
+        "nothing",
+        "income_increase",
+        "income_increase",
+        "income_increase"
       ]
     }
   ]
