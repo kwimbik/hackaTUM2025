@@ -19,6 +19,9 @@ class WorldState:
     children: int
     health_status: str
     career_length: int
+    property_type: str
+    property_rooms: int
+    property_price: float
     metadata: Dict[str, Any] = field(default_factory=dict)
     trajectory_events: List[str] = field(default_factory=list)
 

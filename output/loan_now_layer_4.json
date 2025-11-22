@@ -3,14 +3,17 @@
   "worlds": [
     {
       "name": "Bob",
-      "current_income": 78375.0,
-      "current_loan": 115244.34499999999,
+      "current_income": 86212.5,
+      "current_loan": 115518.06374999999,
       "stock_value": 0.0,
-      "cash": 145025.595,
+      "cash": 144111.81375,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -18,7 +21,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -32,22 +40,25 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation",
+        "new_job_skipped",
+        "sickness_skipped",
         "income_increase",
-        "nothing",
-        "income_increase_skipped",
-        "income_increase_skipped"
+        "income_increase"
       ]
     },
     {
       "name": "Charlie",
       "current_income": 82500.0,
-      "current_loan": 114606.8575,
+      "current_loan": 114544.3575,
       "stock_value": 0.0,
-      "cash": 145856.85749999998,
+      "cash": 146419.35749999998,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -55,7 +66,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -68,10 +84,10 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation_not_chosen",
-        "income_increase_skipped",
-        "nothing",
-        "income_increase_skipped",
-        "income_increase"
+        "new_job_skipped",
+        "sickness_skipped",
+        "income_increase",
+        "income_increase_skipped"
       ]
     }
   ]

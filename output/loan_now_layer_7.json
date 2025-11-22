@@ -3,14 +3,17 @@
   "worlds": [
     {
       "name": "Bob",
-      "current_income": 86212.5,
-      "current_loan": 72213.06500499998,
+      "current_income": 85350.375,
+      "current_loan": 72577.01534874999,
       "stock_value": 0.0,
-      "cash": 122241.19000499998,
+      "cash": 121933.60909874999,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -18,7 +21,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -32,25 +40,28 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation",
+        "new_job_skipped",
+        "sickness_skipped",
         "income_increase",
-        "nothing",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
         "income_increase",
-        "income_increase_skipped"
+        "income_decrease",
+        "income_increase",
+        "divorce_skipped"
       ]
     },
     {
       "name": "Charlie",
-      "current_income": 82500.0,
-      "current_loan": 71222.77411749998,
+      "current_income": 74250.0,
+      "current_loan": 71207.21161749998,
       "stock_value": 0.0,
-      "cash": 123097.77411749998,
+      "cash": 122332.21161749998,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -58,7 +69,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -71,13 +87,13 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation_not_chosen",
-        "income_increase_skipped",
-        "nothing",
-        "income_increase_skipped",
+        "new_job_skipped",
+        "sickness_skipped",
         "income_increase",
         "income_increase_skipped",
+        "income_decrease",
         "income_increase_skipped",
-        "income_increase_skipped"
+        "divorce_skipped"
       ]
     }
   ]

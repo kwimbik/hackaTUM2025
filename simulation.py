@@ -247,6 +247,10 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig, *, name
     initial_career = int(user_cfg.extras.get("career_length", max(0, user_cfg.age - 18)))
     starting_cash = float(user_cfg.extras.get("starting_cash", 0.0))
     starting_stock = float(user_cfg.extras.get("starting_stock", 0.0))
+    property_data = user_cfg.extras.get("property", {})
+    property_type = str(property_data.get("type", "apartment"))
+    property_rooms = int(property_data.get("rooms", 0))
+    property_price = float(property_data.get("price", 0.0))
     return WorldState(
         name=name,
         current_income=user_cfg.income,
@@ -257,6 +261,9 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig, *, name
         children=initial_children,
         health_status=str(initial_health),
         career_length=initial_career,
+        property_type=property_type,
+        property_rooms=property_rooms,
+        property_price=property_price,
         metadata={"global_extras": global_cfg.extras, "user_extras": user_cfg.extras},
         trajectory_events=[],
     )

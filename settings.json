@@ -11,7 +11,12 @@
     "age": 30,
     "education": "bachelor",
     "family_status": "single",
-    "career_length": 7
+    "career_length": 7,
+    "property": {
+      "type": "apartment",
+      "rooms": 3,
+      "price": 400000
+    }
   },
   "events": [
     {

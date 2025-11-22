@@ -2,15 +2,18 @@
   "timestamp": 9,
   "worlds": [
     {
-      "name": "Diana",
-      "current_income": 81901.875,
-      "current_loan": 47139.692029049984,
+      "name": "Bob",
+      "current_income": 85350.375,
+      "current_loan": 47346.99555748749,
       "stock_value": 0.0,
-      "cash": 109177.34827904998,
+      "cash": 110928.65180748749,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -18,7 +21,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -32,27 +40,30 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation",
+        "new_job_skipped",
+        "sickness_skipped",
         "income_increase",
-        "nothing",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
         "income_increase",
-        "income_increase_skipped",
-        "go_on_vacation",
+        "income_decrease",
+        "income_increase",
+        "divorce_skipped",
+        "new_job_skipped",
         "income_increase_skipped"
       ]
     },
     {
-      "name": "Ethan",
-      "current_income": 86212.5,
-      "current_loan": 46903.770154049984,
+      "name": "Charlie",
+      "current_income": 89100.0,
+      "current_loan": 46045.96641017498,
       "stock_value": 0.0,
-      "cash": 111300.64515404998,
+      "cash": 110783.46641017498,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -60,7 +71,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -69,102 +85,19 @@
             "effective_amount": 208000.0
           }
         ],
-        "recent_vacation": true
-      },
-      "trajectory_events": [
-        "take_loan_layer_0",
-        "go_on_vacation",
-        "income_increase",
-        "nothing",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "income_increase",
-        "income_increase_skipped",
-        "go_on_vacation_not_chosen",
-        "income_increase_skipped"
-      ]
-    },
-    {
-      "name": "Fiona",
-      "current_income": 86212.5,
-      "current_loan": 46074.822035174984,
-      "stock_value": 0.0,
-      "cash": 109356.07203517499,
-      "family_status": "single",
-      "children": 0,
-      "health_status": "healthy",
-      "career_length": 7,
-      "metadata": {
-        "global_extras": {
-          "inflation": 0.02,
-          "monthly_rent_payment": 1500.0
-        },
-        "user_extras": {
-          "family_status": "single",
-          "career_length": 7
-        },
-        "loan_history": [
-          {
-            "layer": 0,
-            "base_amount": 200000.0,
-            "effective_amount": 208000.0
-          }
-        ],
-        "recent_vacation": true
+        "employment": "employed"
       },
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation_not_chosen",
-        "income_increase_skipped",
-        "nothing",
-        "income_increase_skipped",
+        "new_job_skipped",
+        "sickness_skipped",
         "income_increase",
         "income_increase_skipped",
+        "income_decrease",
         "income_increase_skipped",
-        "income_increase_skipped",
-        "go_on_vacation",
-        "income_increase"
-      ]
-    },
-    {
-      "name": "George",
-      "current_income": 82500.0,
-      "current_loan": 45840.447035174984,
-      "stock_value": 0.0,
-      "cash": 111465.44703517499,
-      "family_status": "single",
-      "children": 0,
-      "health_status": "healthy",
-      "career_length": 7,
-      "metadata": {
-        "global_extras": {
-          "inflation": 0.02,
-          "monthly_rent_payment": 1500.0
-        },
-        "user_extras": {
-          "family_status": "single",
-          "career_length": 7
-        },
-        "loan_history": [
-          {
-            "layer": 0,
-            "base_amount": 200000.0,
-            "effective_amount": 208000.0
-          }
-        ]
-      },
-      "trajectory_events": [
-        "take_loan_layer_0",
-        "go_on_vacation_not_chosen",
-        "income_increase_skipped",
-        "nothing",
-        "income_increase_skipped",
-        "income_increase",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "income_increase_skipped",
-        "go_on_vacation_not_chosen",
+        "divorce_skipped",
+        "new_job",
         "income_increase_skipped"
       ]
     }

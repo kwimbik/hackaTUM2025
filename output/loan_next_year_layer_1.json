@@ -2,7 +2,7 @@
   "timestamp": 1,
   "worlds": [
     {
-      "name": "Hannah",
+      "name": "Diana",
       "current_income": 75000.0,
       "current_loan": 186100.0,
       "stock_value": 0.0,
@@ -11,6 +11,9 @@
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -18,7 +21,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -29,9 +37,9 @@
         ]
       },
       "trajectory_events": [
-        "nothing",
+        "layoff_skipped",
         "take_loan_layer_1",
-        "nothing_skipped"
+        "new_job_skipped"
       ]
     }
   ]

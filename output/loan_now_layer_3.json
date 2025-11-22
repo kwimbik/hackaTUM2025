@@ -4,13 +4,16 @@
     {
       "name": "Bob",
       "current_income": 78375.0,
-      "current_loan": 131358.3,
+      "current_loan": 131530.4875,
       "stock_value": 0.0,
-      "cash": 154608.3,
+      "cash": 153592.9875,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -18,7 +21,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -32,14 +40,14 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation",
-        "income_increase",
-        "nothing",
-        "income_increase_skipped"
+        "new_job_skipped",
+        "sickness_skipped",
+        "income_increase"
       ]
     },
     {
       "name": "Charlie",
-      "current_income": 75000.0,
+      "current_income": 82500.0,
       "current_loan": 130813.175,
       "stock_value": 0.0,
       "cash": 155813.175,
@@ -47,6 +55,9 @@
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
+      "property_type": "apartment",
+      "property_rooms": 3,
+      "property_price": 400000.0,
       "metadata": {
         "global_extras": {
           "inflation": 0.02,
@@ -54,7 +65,12 @@
         },
         "user_extras": {
           "family_status": "single",
-          "career_length": 7
+          "career_length": 7,
+          "property": {
+            "type": "apartment",
+            "rooms": 3,
+            "price": 400000
+          }
         },
         "loan_history": [
           {
@@ -67,9 +83,9 @@
       "trajectory_events": [
         "take_loan_layer_0",
         "go_on_vacation_not_chosen",
-        "income_increase_skipped",
-        "nothing",
-        "income_increase_skipped"
+        "new_job_skipped",
+        "sickness_skipped",
+        "income_increase"
       ]
     }
   ]
