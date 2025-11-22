@@ -40,6 +40,26 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig) -> Worl
     )
 
 
+def adjust_global_parameters(global_cfg: GlobalConfig, layer_index: int) -> GlobalConfig:
+    """
+    Adjust global parameters for the layer.
+
+    TODO: Implement dynamic changes (e.g., interest rate shifts) based on layer.
+    """
+    _ = layer_index
+    return global_cfg
+
+
+def apply_loan_repayment(world: WorldState, global_cfg: GlobalConfig) -> WorldState:
+    """
+    Allow a world to repay part of its loan using available cash.
+
+    TODO: Implement repayment strategy based on cash-on-hand and loan terms.
+    """
+    _ = global_cfg
+    return world
+
+
 def apply_take_loan(world: WorldState, layer_index: int, global_cfg: GlobalConfig, amount: float = 200_000.0) -> WorldState:
     """Attach a loan to the world at the given layer."""
     effective_amount = amount * (1 + global_cfg.mortgage_rate)
@@ -123,6 +143,8 @@ def simulate_layers(
     scenario_label = scenario_name or "simulation"
 
     for layer_idx in range(num_layers):
+        global_cfg = adjust_global_parameters(global_cfg, layer_idx)
+        active_worlds = [apply_loan_repayment(world, global_cfg) for world in active_worlds]
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
@@ -157,8 +179,10 @@ def run_scenario(
     scenario_label = scenario_name or "scenario"
 
     for layer_idx in range(num_layers):
+        global_cfg = adjust_global_parameters(global_cfg, layer_idx)
         if layer_idx == take_loan_at_layer:
             current_worlds = [apply_take_loan(w, layer_idx, global_cfg, amount=loan_amount) for w in current_worlds]
+        current_worlds = [apply_loan_repayment(world, global_cfg) for world in current_worlds]
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in current_worlds:

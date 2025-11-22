@@ -27,8 +27,6 @@ DEFAULT_USER_CONFIG: Dict[str, Any] = {
 }
 
 DEFAULT_SETTINGS: Dict[str, Any] = {
-    "global_config": DEFAULT_GLOBAL_CONFIG,
-    "user_config": DEFAULT_USER_CONFIG,
     "events": [
         {"name": "nothing", "probability": 0.5, "flag": 0},
         {"name": "divorce", "probability": 0.5, "flag": 0},
@@ -90,21 +88,21 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
+    if args.global_config and args.global_config.exists():
+        global_data = _load_json(args.global_config)
+    else:
+        global_data = DEFAULT_GLOBAL_CONFIG
+
+    if args.user_config and args.user_config.exists():
+        user_data = _load_json(args.user_config)
+    else:
+        user_data = DEFAULT_USER_CONFIG
+
     if args.settings and args.settings.exists():
         settings_data = _load_json(args.settings)
     else:
         default_settings_path = Path(__file__).parent / "settings.json"
         settings_data = _load_json(default_settings_path) if default_settings_path.exists() else DEFAULT_SETTINGS
-
-    if args.global_config and args.global_config.exists():
-        global_data = _load_json(args.global_config)
-    else:
-        global_data = settings_data.get("global_config", DEFAULT_GLOBAL_CONFIG)
-
-    if args.user_config and args.user_config.exists():
-        user_data = _load_json(args.user_config)
-    else:
-        user_data = settings_data.get("user_config", DEFAULT_USER_CONFIG)
 
     global_cfg = GlobalConfig.from_dict(global_data)
     user_cfg = UserConfig.from_dict(user_data)

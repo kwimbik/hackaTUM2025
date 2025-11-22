@@ -1,89 +1,8 @@
 [
   {
-    "current_income": 23085.0,
+    "current_income": 40095.0,
     "current_loan": 208000.0,
-    "cash": 205500.0,
-    "family_status": "single",
-    "children": 1,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "employed",
-      "has_insurance": true,
-      "recent_vacation": true
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
-      "income_decrease",
-      "buy_insurance",
-      "kid",
-      "layoff",
-      "go_on_vacation",
-      "new_job",
-      "new_job",
-      "nothing"
-    ],
-    "timestamp": 8
-  },
-  {
-    "current_income": 24300.0,
-    "current_loan": 208000.0,
-    "cash": 207500.0,
-    "family_status": "single",
-    "children": 1,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "employed",
-      "has_insurance": true
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
-      "income_decrease",
-      "buy_insurance",
-      "kid",
-      "layoff",
-      "go_on_vacation_not_chosen",
-      "new_job",
-      "new_job",
-      "nothing"
-    ],
-    "timestamp": 8
-  },
-  {
-    "current_income": 23085.0,
-    "current_loan": 208000.0,
-    "cash": 205500.0,
+    "cash": 207000.0,
     "family_status": "single",
     "children": 0,
     "health_status": "healthy",
@@ -103,26 +22,25 @@
           "effective_amount": 208000.0
         }
       ],
-      "employment": "employed",
       "has_insurance": true,
-      "recent_vacation": true
+      "employment": "unemployed"
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "layoff",
+      "nothing",
       "income_decrease",
       "buy_insurance",
-      "kid_not_chosen",
+      "income_decrease",
+      "new_job",
+      "income_increase",
+      "nothing",
       "layoff",
-      "go_on_vacation",
-      "new_job",
-      "new_job",
-      "nothing"
+      "buy_insurance"
     ],
     "timestamp": 8
   },
   {
-    "current_income": 24300.0,
+    "current_income": 40095.0,
     "current_loan": 208000.0,
     "cash": 207500.0,
     "family_status": "single",
@@ -144,144 +62,65 @@
           "effective_amount": 208000.0
         }
       ],
-      "employment": "employed",
+      "has_insurance": true,
+      "employment": "unemployed"
+    },
+    "trajectory_events": [
+      "take_loan_layer_0",
+      "nothing",
+      "income_decrease",
+      "buy_insurance",
+      "income_decrease",
+      "new_job",
+      "income_increase",
+      "nothing",
+      "layoff",
+      "buy_insurance_not_chosen"
+    ],
+    "timestamp": 8
+  },
+  {
+    "current_income": 40095.0,
+    "current_loan": 208000.0,
+    "cash": 207500.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "healthy",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "loan_history": [
+        {
+          "layer": 0,
+          "base_amount": 200000.0,
+          "effective_amount": 208000.0
+        }
+      ],
+      "employment": "unemployed",
       "has_insurance": true
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "layoff",
-      "income_decrease",
-      "buy_insurance",
-      "kid_not_chosen",
-      "layoff",
-      "go_on_vacation_not_chosen",
-      "new_job",
-      "new_job",
-      "nothing"
-    ],
-    "timestamp": 8
-  },
-  {
-    "current_income": 23085.0,
-    "current_loan": 208000.0,
-    "cash": 206000.0,
-    "family_status": "single",
-    "children": 1,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "employed",
-      "recent_vacation": true
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
+      "nothing",
       "income_decrease",
       "buy_insurance_not_chosen",
-      "kid",
-      "layoff",
-      "go_on_vacation",
-      "new_job",
-      "new_job",
-      "nothing"
-    ],
-    "timestamp": 8
-  },
-  {
-    "current_income": 24300.0,
-    "current_loan": 208000.0,
-    "cash": 208000.0,
-    "family_status": "single",
-    "children": 1,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "employed"
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
       "income_decrease",
-      "buy_insurance_not_chosen",
-      "kid",
+      "new_job",
+      "income_increase",
+      "nothing",
       "layoff",
-      "go_on_vacation_not_chosen",
-      "new_job",
-      "new_job",
-      "nothing"
+      "buy_insurance"
     ],
     "timestamp": 8
   },
   {
-    "current_income": 23085.0,
-    "current_loan": 208000.0,
-    "cash": 206000.0,
-    "family_status": "single",
-    "children": 0,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "employed",
-      "recent_vacation": true
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
-      "income_decrease",
-      "buy_insurance_not_chosen",
-      "kid_not_chosen",
-      "layoff",
-      "go_on_vacation",
-      "new_job",
-      "new_job",
-      "nothing"
-    ],
-    "timestamp": 8
-  },
-  {
-    "current_income": 24300.0,
+    "current_income": 40095.0,
     "current_loan": 208000.0,
     "cash": 208000.0,
     "family_status": "single",
@@ -303,19 +142,19 @@
           "effective_amount": 208000.0
         }
       ],
-      "employment": "employed"
+      "employment": "unemployed"
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "layoff",
+      "nothing",
       "income_decrease",
       "buy_insurance_not_chosen",
-      "kid_not_chosen",
+      "income_decrease",
+      "new_job",
+      "income_increase",
+      "nothing",
       "layoff",
-      "go_on_vacation_not_chosen",
-      "new_job",
-      "new_job",
-      "nothing"
+      "buy_insurance_not_chosen"
     ],
     "timestamp": 8
   }

@@ -1,42 +1,6 @@
 [
   {
-    "current_income": 16875.0,
-    "current_loan": 208000.0,
-    "cash": 207500.0,
-    "family_status": "single",
-    "children": 1,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "unemployed",
-      "has_insurance": true
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
-      "income_decrease",
-      "buy_insurance",
-      "kid",
-      "layoff"
-    ],
-    "timestamp": 4
-  },
-  {
-    "current_income": 16875.0,
+    "current_income": 72900.0,
     "current_loan": 208000.0,
     "cash": 207500.0,
     "family_status": "single",
@@ -58,56 +22,21 @@
           "effective_amount": 208000.0
         }
       ],
-      "employment": "unemployed",
-      "has_insurance": true
+      "has_insurance": true,
+      "employment": "employed"
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "layoff",
+      "nothing",
       "income_decrease",
       "buy_insurance",
-      "kid_not_chosen",
-      "layoff"
-    ],
-    "timestamp": 4
-  },
-  {
-    "current_income": 16875.0,
-    "current_loan": 208000.0,
-    "cash": 208000.0,
-    "family_status": "single",
-    "children": 1,
-    "health_status": "healthy",
-    "career_length": 7,
-    "metadata": {
-      "global_extras": {
-        "inflation": 0.02
-      },
-      "user_extras": {
-        "family_status": "single",
-        "career_length": 7
-      },
-      "loan_history": [
-        {
-          "layer": 0,
-          "base_amount": 200000.0,
-          "effective_amount": 208000.0
-        }
-      ],
-      "employment": "unemployed"
-    },
-    "trajectory_events": [
-      "take_loan_layer_0",
-      "layoff",
       "income_decrease",
-      "buy_insurance_not_chosen",
-      "kid",
-      "layoff"
+      "new_job"
     ],
     "timestamp": 4
   },
   {
-    "current_income": 16875.0,
+    "current_income": 72900.0,
     "current_loan": 208000.0,
     "cash": 208000.0,
     "family_status": "single",
@@ -129,15 +58,15 @@
           "effective_amount": 208000.0
         }
       ],
-      "employment": "unemployed"
+      "employment": "employed"
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "layoff",
+      "nothing",
       "income_decrease",
       "buy_insurance_not_chosen",
-      "kid_not_chosen",
-      "layoff"
+      "income_decrease",
+      "new_job"
     ],
     "timestamp": 4
   }
