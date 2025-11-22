@@ -1,3 +1,5 @@
+"""Configuration models for simulation input."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -15,9 +17,9 @@ class GlobalConfig:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "GlobalConfig":
-        """Construct GlobalConfig, capturing unknown fields into extras."""
-        known_fields = {"mortgage_rate", "interest_rate", "risk_factor"}
-        extras = {k: v for k, v in data.items() if k not in known_fields}
+        """Create an instance while stashing unknown fields in extras."""
+        known = {"mortgage_rate", "interest_rate", "risk_factor"}
+        extras = {k: v for k, v in data.items() if k not in known}
         return cls(
             mortgage_rate=float(data.get("mortgage_rate", 0.0)),
             interest_rate=float(data.get("interest_rate", 0.0)),
@@ -37,9 +39,9 @@ class UserConfig:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "UserConfig":
-        """Construct UserConfig, capturing unknown fields into extras."""
-        known_fields = {"income", "age", "education"}
-        extras = {k: v for k, v in data.items() if k not in known_fields}
+        """Create an instance while stashing unknown fields in extras."""
+        known = {"income", "age", "education"}
+        extras = {k: v for k, v in data.items() if k not in known}
         return cls(
             income=float(data.get("income", 0.0)),
             age=int(data.get("age", 0)),
