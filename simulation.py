@@ -423,9 +423,18 @@ def _branch_worlds_on_event(
     if len(results) > 1:
         if name_allocator is None or id_allocator is None:
             raise ValueError("name_allocator and id_allocator are required when branching worlds.")
-        renamed = [
-            world.copy_with_updates(name=name_allocator.next_name(), id=id_allocator.next_id()) for world in results
-        ]
+        renamed: List[WorldState] = []
+        # Preserve the original world's identity on the first branch
+        primary = results[0].copy_with_updates(name=results[0].name, id=world.id)
+        renamed.append(primary)
+        # Assign fresh IDs/names to additional branches
+        for branch_world in results[1:]:
+            renamed.append(
+                branch_world.copy_with_updates(
+                    name=name_allocator.next_name(),
+                    id=id_allocator.next_id(),
+                )
+            )
         return renamed
     return results
 
