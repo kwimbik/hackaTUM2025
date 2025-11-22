@@ -170,7 +170,31 @@ function startRevealAnimation() {
   tick();
 }
 
-ctaBtn?.addEventListener("click", startRevealAnimation);
+async function triggerBackendRun() {
+  try {
+    const response = await fetch("http://localhost:3000/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) {
+      console.warn(`Backend run failed: ${response.status}`);
+    } else {
+      const data = await response.json();
+      console.log("Backend simulation run result:", data);
+    }
+  } catch (err) {
+    console.warn("Unable to trigger backend run from UI:", err);
+  }
+}
+
+async function handleCtaClick() {
+  if (revealStarted) return;
+  // Fire-and-forget backend run; do not block the countdown
+  triggerBackendRun();
+  startRevealAnimation();
+}
+
+ctaBtn?.addEventListener("click", handleCtaClick);
 
 // Auto-pause when stickmen are off-screen
 function checkAutoPause() {
