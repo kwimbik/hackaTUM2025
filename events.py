@@ -169,6 +169,31 @@ def _stock_market_crash(world: WorldState, _: GlobalConfig, __: UserConfig) -> W
     return _with_history(world, "stock_market_crash", stock_value=new_stock)
 
 
+def _get_loan(world: WorldState, global_cfg: GlobalConfig, _: UserConfig) -> WorldState:
+    if world.property_price > 0:
+        return _with_history(world, "get_loan_skipped_has_property")
+    # TODO: derive affordable property based on income, savings, and risk profile.
+    placeholder_price = 400_000.0
+    effective_amount = placeholder_price * (1 + global_cfg.mortgage_rate)
+    monthly_payment = float(global_cfg.extras.get("monthly_loan_payment", 0.0))
+    new_metadata = {**world.metadata, "monthly_payment_override": monthly_payment}
+    loan_history = list(new_metadata.get("loan_history", []))
+    loan_history.append(
+        {"event": "get_loan", "base_amount": placeholder_price, "effective_amount": effective_amount, "tag": "get_loan"}
+    )
+    new_metadata["loan_history"] = loan_history
+    return _with_history(
+        world,
+        "get_loan",
+        current_loan=world.current_loan + effective_amount,
+        cash=world.cash + effective_amount,
+        metadata=new_metadata,
+        property_type="house",
+        property_rooms=3,
+        property_price=placeholder_price,
+    )
+
+
 EVENT_REGISTRY: Dict[str, Event] = {
     "nothing": Event("nothing", _nothing, description="No change this layer.", is_choice=False),
     "marry": Event("marry", _marry, description="Get married if currently single.", is_choice=True),
@@ -187,6 +212,7 @@ EVENT_REGISTRY: Dict[str, Event] = {
     "death": Event("death", _death, description="Terminal life event removing income.", is_choice=False),
     "stock_market_increase": Event("stock_market_increase", _stock_market_increase, description="Portfolio gains 15%.", is_choice=False),
     "stock_market_crash": Event("stock_market_crash", _stock_market_crash, description="Portfolio loses 30%.", is_choice=False),
+    "get_loan": Event("get_loan", _get_loan, description="Take a mortgage to buy a property.", is_choice=False),
 }
 
 # Defaults used for sampling during simulation.

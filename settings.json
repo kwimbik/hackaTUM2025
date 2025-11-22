@@ -4,7 +4,7 @@
     "interest_rate": 0.03,
     "risk_factor": 0.3,
     "inflation": 0.02,
-    "monthly_rent_payment": 1500.0
+    "monthly_loan_payment": 1500.0
   },
   "user_config": {
     "income": 75000,
@@ -42,6 +42,12 @@
       "probability": 0.50,
       "flag": 0,
       "description": "Year-end bonus received"
+    },
+    {
+      "name": "get_loan",
+      "probability": 0.02,
+      "flag": 0,
+      "description": "You can get loan"
     },
     {
       "name": "layoff",

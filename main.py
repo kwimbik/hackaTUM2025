@@ -9,7 +9,13 @@ from pathlib import Path
 from typing import Any, Dict
 
 from config_models import GlobalConfig, UserConfig
-from simulation import NameAllocator, run_scenario, summarize_worlds
+from simulation import (
+    NameAllocator,
+    apply_take_loan,
+    create_initial_world,
+    summarize_worlds,
+    simulate_layers,
+)
 
 
 def _load_json(path: Path) -> Dict[str, Any]:
@@ -102,41 +108,40 @@ def main() -> None:
     loan_amount = float(loan_amount_setting)
 
     name_provider = NameAllocator()
+    base_world = create_initial_world(global_cfg, user_cfg, name=name_provider.next_name())
+    loan_now_world = apply_take_loan(
+        base_world,
+        layer_index=0,
+        global_cfg=global_cfg,
+        amount=loan_amount,
+        monthly_payment=float(global_cfg.extras.get("monthly_loan_payment", 0.0)),
+        tag="initial_loan",
+    )
+    no_loan_world = base_world.copy_with_updates(
+        name=name_provider.next_name(),
+        metadata={**base_world.metadata, "monthly_payment_override": 0.0},
+        trajectory_events=base_world.trajectory_events + ["no_initial_loan"],
+        property_type="none",
+        property_rooms=0,
+        property_price=0.0,
+    )
 
-    loan_now_worlds = run_scenario(
+    combined_worlds = simulate_layers(
         global_cfg,
         user_cfg,
-        take_loan_at_layer=0,
+        initial_worlds=[loan_now_world, no_loan_world],
         num_layers=num_layers,
         event_names=event_names,
         choice_names=choice_names,
         event_probabilities=event_probabilities,
         choice_probabilities=choice_probabilities,
-        loan_amount=loan_amount,
         output_dir=args.output_dir,
-        scenario_name="loan_now",
-        name_allocator=name_provider,
-    )
-    loan_next_year_worlds = run_scenario(
-        global_cfg,
-        user_cfg,
-        take_loan_at_layer=1,
-        num_layers=num_layers,
-        event_names=event_names,
-        choice_names=choice_names,
-        event_probabilities=event_probabilities,
-        choice_probabilities=choice_probabilities,
-        loan_amount=loan_amount,
-        output_dir=args.output_dir,
-        scenario_name="loan_next_year",
+        scenario_name="combined",
         name_allocator=name_provider,
     )
 
-    print("=== Final worlds: take loan now ===")
-    print(json.dumps(summarize_worlds(loan_now_worlds, timestamp=num_layers), indent=2))
-
-    print("\n=== Final worlds: take loan next year ===")
-    print(json.dumps(summarize_worlds(loan_next_year_worlds, timestamp=num_layers), indent=2))
+    print("=== Final worlds: combined scenario ===")
+    print(json.dumps(summarize_worlds(combined_worlds, timestamp=num_layers), indent=2))
 
 
 if __name__ == "__main__":

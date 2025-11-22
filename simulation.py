@@ -285,14 +285,17 @@ def apply_loan_repayment(world: WorldState, global_cfg: GlobalConfig) -> WorldSt
 
     Each layer represents a month:
     - Add monthly income to cash.
-    - Spend the larger of the configured monthly rent payment or 10% of current
+    - Spend the larger of the configured monthly loan payment or 10% of current
       cash.
     - Any portion of that payment that exceeds the remaining loan is treated as
       general expenses.
     """
-    monthly_income = world.current_income / 12.0
+    monthly_income = world.current_income  # settings values are monthly
     cash_after_income = world.cash + monthly_income
-    monthly_payment = float(global_cfg.extras.get("monthly_rent_payment", 0.0))
+    monthly_override = world.metadata.get("monthly_payment_override")
+    monthly_payment = float(monthly_override) if monthly_override is not None else float(
+        global_cfg.extras.get("monthly_loan_payment", 0.0)
+    )
     ten_percent_cash = cash_after_income * 0.10
     target_payment = max(monthly_payment, ten_percent_cash)
     actual_payment = min(target_payment, cash_after_income)
@@ -308,14 +311,25 @@ def apply_loan_repayment(world: WorldState, global_cfg: GlobalConfig) -> WorldSt
     return world.copy_with_updates(current_loan=new_loan, cash=new_cash, bankrupt=world.bankrupt or went_bankrupt)
 
 
-def apply_take_loan(world: WorldState, layer_index: int, global_cfg: GlobalConfig, amount: float = 200_000.0) -> WorldState:
-    """Attach a loan to the world at the given layer."""
+def apply_take_loan(
+    world: WorldState,
+    layer_index: int | None,
+    global_cfg: GlobalConfig,
+    amount: float = 200_000.0,
+    monthly_payment: float | None = None,
+    tag: str | None = None,
+) -> WorldState:
+    """Attach a loan to the world."""
     effective_amount = amount * (1 + global_cfg.mortgage_rate)
-    new_metadata = {**world.metadata}
+    payment_override = monthly_payment
+    if payment_override is None:
+        payment_override = float(global_cfg.extras.get("monthly_loan_payment", 0.0))
+    new_metadata = {**world.metadata, "monthly_payment_override": payment_override}
     loan_history = list(new_metadata.get("loan_history", []))
-    loan_history.append({"layer": layer_index, "base_amount": amount, "effective_amount": effective_amount})
+    loan_history.append({"layer": layer_index, "base_amount": amount, "effective_amount": effective_amount, "tag": tag})
     new_metadata["loan_history"] = loan_history
-    new_trajectory = world.trajectory_events + [f"take_loan_layer_{layer_index}"]
+    tag_label = tag or (f"take_loan_layer_{layer_index}" if layer_index is not None else "take_loan")
+    new_trajectory = world.trajectory_events + [tag_label]
     return world.copy_with_updates(
         current_loan=world.current_loan + effective_amount,
         cash=world.cash + effective_amount,
