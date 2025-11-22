@@ -1,6 +1,39 @@
 [
   {
-    "current_income": 99000.00000000001,
+    "current_income": 71250.0,
+    "current_loan": 208000.0,
+    "stock_value": 0.0,
+    "cash": 206000.0,
+    "family_status": "single",
+    "children": 0,
+    "health_status": "healthy",
+    "career_length": 7,
+    "metadata": {
+      "global_extras": {
+        "inflation": 0.02
+      },
+      "user_extras": {
+        "family_status": "single",
+        "career_length": 7
+      },
+      "loan_history": [
+        {
+          "layer": 0,
+          "base_amount": 200000.0,
+          "effective_amount": 208000.0
+        }
+      ],
+      "recent_vacation": true
+    },
+    "trajectory_events": [
+      "take_loan_layer_0",
+      "nothing_skipped",
+      "go_on_vacation"
+    ],
+    "timestamp": 1
+  },
+  {
+    "current_income": 75000.0,
     "current_loan": 208000.0,
     "stock_value": 0.0,
     "cash": 208000.0,
@@ -22,13 +55,12 @@
           "base_amount": 200000.0,
           "effective_amount": 208000.0
         }
-      ],
-      "employment": "employed"
+      ]
     },
     "trajectory_events": [
       "take_loan_layer_0",
-      "new_job",
-      "income_increase"
+      "nothing_skipped",
+      "go_on_vacation_not_chosen"
     ],
     "timestamp": 1
   }

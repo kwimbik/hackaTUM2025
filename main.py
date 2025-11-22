@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 from pathlib import Path
 from typing import Any, Dict
 
@@ -56,6 +57,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+
+    if args.output_dir:
+        if args.output_dir.exists():
+            shutil.rmtree(args.output_dir)
+        args.output_dir.mkdir(parents=True, exist_ok=True)
 
     if not args.settings.exists():
         raise FileNotFoundError(f"Settings file not found: {args.settings}")

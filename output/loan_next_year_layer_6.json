@@ -1,6 +1,6 @@
 [
   {
-    "current_income": 125180.55000000005,
+    "current_income": 102600.0,
     "current_loan": 208000.0,
     "stock_value": 0.0,
     "cash": 206000.0,
@@ -29,17 +29,17 @@
     "trajectory_events": [
       "new_job",
       "take_loan_layer_1",
-      "income_increase",
-      "income_increase",
-      "income_increase",
-      "income_increase",
-      "go_on_vacation",
-      "nothing"
+      "new_job",
+      "income_increase_skipped",
+      "nothing",
+      "nothing_skipped",
+      "nothing",
+      "go_on_vacation"
     ],
     "timestamp": 6
   },
   {
-    "current_income": 131769.00000000006,
+    "current_income": 108000.0,
     "current_loan": 208000.0,
     "stock_value": 0.0,
     "cash": 208000.0,
@@ -67,12 +67,12 @@
     "trajectory_events": [
       "new_job",
       "take_loan_layer_1",
-      "income_increase",
-      "income_increase",
-      "income_increase",
-      "income_increase",
-      "go_on_vacation_not_chosen",
-      "nothing"
+      "new_job",
+      "income_increase_skipped",
+      "nothing",
+      "nothing_skipped",
+      "nothing",
+      "go_on_vacation_not_chosen"
     ],
     "timestamp": 6
   }

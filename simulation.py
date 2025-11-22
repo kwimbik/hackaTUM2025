@@ -83,6 +83,7 @@ def _branch_worlds_on_event(
     event: Event,
     global_cfg: GlobalConfig,
     user_cfg: UserConfig,
+    rng: random.Random | None = None,
 ) -> List[WorldState]:
     """
     Apply an event or choice.
@@ -90,16 +91,30 @@ def _branch_worlds_on_event(
     - For choices: branch into yes/no worlds.
     - For events: apply directly without branching (future logic may add reactions).
     """
-    _ = event_probability(event, world, global_cfg, user_cfg)  # TODO: use when probability model is added.
+    probability = float(event_probability(event, world, global_cfg, user_cfg))
+    if probability <= 0.0:
+        probability = 0.0
+    elif probability >= 1.0:
+        probability = 1.0
 
     if event.is_choice:
         happens_world = event.apply(world, global_cfg, user_cfg)
         not_happens_history = world.trajectory_events + [f"{event.name}_not_chosen"]
         not_happens_world = world.copy_with_updates(trajectory_events=not_happens_history)
+        if probability <= 0.0:
+            return [not_happens_world]
+        if probability >= 1.0:
+            return [happens_world]
         return [happens_world, not_happens_world]
 
-    # Events are applied directly (no split for now).
-    return [event.apply(world, global_cfg, user_cfg)]
+    if probability <= 0.0:
+        skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
+        return [world.copy_with_updates(trajectory_events=skipped_history)]
+    random_fn = rng.random if rng is not None else random.random
+    if probability >= 1.0 or random_fn() < probability:
+        return [event.apply(world, global_cfg, user_cfg)]
+    skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
+    return [world.copy_with_updates(trajectory_events=skipped_history)]
 
 
 def _build_weighted(
@@ -150,7 +165,7 @@ def simulate_layers(
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
-            next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
+            next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg, rng=random_gen))
         active_worlds = next_worlds
         if output_dir is not None:
             _write_layer_output(output_dir, scenario_label, layer_idx, active_worlds)
@@ -188,7 +203,7 @@ def run_scenario(
         sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in current_worlds:
-            next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
+            next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg, rng=random_gen))
         current_worlds = next_worlds
         if output_dir is not None:
             _write_layer_output(output_dir, scenario_label, layer_idx, current_worlds)

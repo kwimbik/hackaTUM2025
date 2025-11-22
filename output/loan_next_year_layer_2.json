@@ -1,6 +1,6 @@
 [
   {
-    "current_income": 108900.00000000003,
+    "current_income": 108000.0,
     "current_loan": 208000.0,
     "stock_value": 0.0,
     "cash": 208000.0,
@@ -28,8 +28,8 @@
     "trajectory_events": [
       "new_job",
       "take_loan_layer_1",
-      "income_increase",
-      "income_increase"
+      "new_job",
+      "income_increase_skipped"
     ],
     "timestamp": 2
   }
