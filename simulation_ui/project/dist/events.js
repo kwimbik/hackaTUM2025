@@ -7,6 +7,30 @@ export const markerSpacing = 400;
 export const reactionDuration = markerSpacing * 1.5;
 // Store event definitions with generated events for later modification
 const eventDefinitionMap = new Map();
+let eventQueue = [];
+// Check and apply queued events for a newly created branch
+export function applyQueuedEvents(branchId, timelineOffset) {
+    const queuedForThisBranch = eventQueue.filter(e => e.branchId === branchId);
+    if (queuedForThisBranch.length === 0) {
+        console.log(`  No queued events for branch #${branchId}`);
+        return;
+    }
+    console.log(`📦 Applying ${queuedForThisBranch.length} queued event(s) for branch #${branchId}:`);
+    for (const queued of queuedForThisBranch) {
+        console.log(`  - Event: ${queued.eventName} at ${queued.year}-${queued.month}`);
+        const result = generateEventFromAPI(queued.eventName, queued.year, queued.month, queued.branchId, // This is the correct branchId from the queued event
+        timelineOffset, queued.apiData);
+        if (result) {
+            console.log(`    ✓ Event created on branch #${queued.branchId}`);
+        }
+        else {
+            console.log(`    ✗ Event creation failed (may be in past)`);
+        }
+    }
+    // Remove applied events from queue
+    eventQueue = eventQueue.filter(e => e.branchId !== branchId);
+    console.log(`✓ Queue cleared for branch #${branchId}, ${eventQueue.length} events remaining in queue`);
+}
 // Generate a random event from the event definitions
 export function generateRandomEvent(timelineOffset) {
     if (branches.length === 0)
@@ -85,6 +109,22 @@ export function generateEventFromAPI(eventName, year, month, branchId, timelineO
         console.warn(`Event "${eventName}" not found in EVENT_DEFINITIONS`);
         return null;
     }
+    // Check if target branch exists
+    const targetBranch = branches.find(b => b.id === branchId);
+    if (!targetBranch) {
+        // Branch doesn't exist yet - queue the event for when it's created
+        console.log(`⏳ Branch #${branchId} doesn't exist yet - queueing event "${eventName}"`);
+        eventQueue.push({
+            branchId,
+            eventName,
+            year,
+            month,
+            apiData
+        });
+        console.log(`  - Event will be applied when branch #${branchId} is created`);
+        console.log(`  - Queue size: ${eventQueue.length}`);
+        return null;
+    }
     // Calculate the month index based on year and month
     // Starting from Jan 2025 (month 0)
     const startYear = 2025;
@@ -141,7 +181,19 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
             if (event.causesSplit) {
                 console.log(`Life-altering event! Splitting branch #${event.branchId}`);
                 const originalBranchId = event.branchId; // Remember original ID
+                // Track branch IDs before split
+                const branchIdsBefore = branches.map(b => b.id);
+                // Perform the split
                 splitSpecificBranch(event.branchId, timelineOffset);
+                // Find which branch IDs are NEW after the split
+                const branchIdsAfter = branches.map(b => b.id);
+                const newBranchIds = branchIdsAfter.filter(id => branchIdsBefore.indexOf(id) === -1);
+                console.log(`  Split created ${newBranchIds.length} new branch(es): #${newBranchIds.join(', #')}`);
+                // Apply queued events for the original branch and all newly created branches
+                applyQueuedEvents(originalBranchId, timelineOffset);
+                for (const newId of newBranchIds) {
+                    applyQueuedEvents(newId, timelineOffset);
+                }
                 // Now modify ONLY the branch that kept the original ID (not the alternate)
                 const originalBranch = branches.find(b => b.id === originalBranchId);
                 if (originalBranch) {

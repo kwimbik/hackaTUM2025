@@ -1,5 +1,5 @@
-import { branches, initBranches, resetBranches, splitAllBranches, splitSpecificBranch, addMonthlyWage } from './branches.js';
-import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, generateEventFromAPI } from './events.js';
+import { branches, initBranches, resetBranches, splitAllBranches, splitSpecificBranch, addMonthlyWage, setOnboardingData } from './branches.js';
+import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, generateEventFromAPI, applyQueuedEvents } from './events.js';
 import { setupCameraControls, areStickmenVisible, resetCamera, isDragging } from './camera.js';
 import { updateStatsTable } from './ui.js';
 import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBranchNumbers, updateStickmanPositions } from './rendering.js';
@@ -54,13 +54,25 @@ resumeBtn.addEventListener("click", () => {
 // Button handlers
 splitAllBtn.addEventListener("click", () => {
     splitAllBranches(timelineOffset);
+    // Apply queued events for all branches
+    for (const branch of branches) {
+        applyQueuedEvents(branch.id, timelineOffset);
+    }
     updateStatsTable();
 });
 splitOneBtn.addEventListener("click", () => {
     if (branches.length === 0)
         return;
     const randomBranch = branches[Math.floor(Math.random() * branches.length)];
+    const branchIdsBefore = branches.map(b => b.id);
     splitSpecificBranch(randomBranch.id, timelineOffset);
+    // Apply queued events for newly created branches
+    const newBranches = branches.filter(b => branchIdsBefore.indexOf(b.id) === -1);
+    for (const branch of newBranches) {
+        applyQueuedEvents(branch.id, timelineOffset);
+    }
+    // Also check the original branch
+    applyQueuedEvents(randomBranch.id, timelineOffset);
     updateStatsTable();
 });
 generateEventBtn.addEventListener("click", () => {
@@ -107,6 +119,21 @@ function startRevealAnimation() {
     paused = true;
     if (ctaBtn) {
         ctaBtn.disabled = true;
+    }
+    // Capture form data before hiding pre-screen
+    const form = document.querySelector('.hero-form');
+    if (form) {
+        const formData = new FormData(form);
+        const onboardingData = {
+            loanType: formData.get('loanType') || 'fixed',
+            loanYears: parseInt(formData.get('loanYears') || '25'),
+            age: parseInt(formData.get('age') || '30'),
+            education: formData.get('education') || 'bachelor',
+            familyStatus: formData.get('familyStatus') || 'single',
+            careerLength: parseInt(formData.get('careerLength') || '5')
+        };
+        console.log('📋 Captured onboarding data:', onboardingData);
+        setOnboardingData(onboardingData);
     }
     if (preScreen) {
         preScreen.style.display = "none";
@@ -199,8 +226,11 @@ function handleExternalEvent(event) {
     console.log(`  - Monthly Wage: ${apiData.monthlyWage}`);
     console.log(`  - Marital Status: ${apiData.maritalStatus}`);
     console.log(`  - Children: ${apiData.childCount}`);
+    // Determine target branch (default to 0 if not specified)
+    const targetBranchId = data.branchId !== undefined ? data.branchId : 0;
+    console.log(`  - Target Branch: #${targetBranchId}`);
     // Generate the event on the timeline with API data
-    const eventGenerated = generateEventFromAPI(data.recent_event, data.year, data.month, 0, // Apply to branch 0
+    const eventGenerated = generateEventFromAPI(data.recent_event, data.year, data.month, targetBranchId, // Use branchId from API request
     timelineOffset, apiData // Pass data to be applied when event triggers
     );
     if (eventGenerated) {

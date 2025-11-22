@@ -1,5 +1,5 @@
-import { branches, initBranches, resetBranches, splitAllBranches, splitSpecificBranch, addMonthlyWage } from './branches.js';
-import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, getEventDefinition, generateEventFromAPI } from './events.js';
+import { branches, initBranches, resetBranches, splitAllBranches, splitSpecificBranch, addMonthlyWage, setOnboardingData, OnboardingData } from './branches.js';
+import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, getEventDefinition, generateEventFromAPI, applyQueuedEvents } from './events.js';
 import { setupCameraControls, areStickmenVisible, resetCamera, isDragging } from './camera.js';
 import { updateStatsTable } from './ui.js';
 import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBranchNumbers, updateStickmanPositions } from './rendering.js';
@@ -62,13 +62,25 @@ resumeBtn.addEventListener("click", () => {
 // Button handlers
 splitAllBtn.addEventListener("click", () => {
   splitAllBranches(timelineOffset);
+  // Apply queued events for all branches
+  for (const branch of branches) {
+    applyQueuedEvents(branch.id, timelineOffset);
+  }
   updateStatsTable();
 });
 
 splitOneBtn.addEventListener("click", () => {
   if (branches.length === 0) return;
   const randomBranch = branches[Math.floor(Math.random() * branches.length)];
+  const branchIdsBefore = branches.map(b => b.id);
   splitSpecificBranch(randomBranch.id, timelineOffset);
+  // Apply queued events for newly created branches
+  const newBranches = branches.filter(b => branchIdsBefore.indexOf(b.id) === -1);
+  for (const branch of newBranches) {
+    applyQueuedEvents(branch.id, timelineOffset);
+  }
+  // Also check the original branch
+  applyQueuedEvents(randomBranch.id, timelineOffset);
   updateStatsTable();
 });
 
@@ -120,6 +132,24 @@ function startRevealAnimation() {
   if (ctaBtn) {
     ctaBtn.disabled = true;
   }
+  
+  // Capture form data before hiding pre-screen
+  const form = document.querySelector('.hero-form') as HTMLFormElement;
+  if (form) {
+    const formData = new FormData(form);
+    const onboardingData: OnboardingData = {
+      loanType: formData.get('loanType') as string || 'fixed',
+      loanYears: parseInt(formData.get('loanYears') as string || '25'),
+      age: parseInt(formData.get('age') as string || '30'),
+      education: formData.get('education') as string || 'bachelor',
+      familyStatus: formData.get('familyStatus') as string || 'single',
+      careerLength: parseInt(formData.get('careerLength') as string || '5')
+    };
+    
+    console.log('📋 Captured onboarding data:', onboardingData);
+    setOnboardingData(onboardingData);
+  }
+  
   if (preScreen) {
     preScreen.style.display = "none";
   }
@@ -227,12 +257,16 @@ function handleExternalEvent(event: ExternalEvent) {
   console.log(`  - Marital Status: ${apiData.maritalStatus}`);
   console.log(`  - Children: ${apiData.childCount}`);
   
+  // Determine target branch (default to 0 if not specified)
+  const targetBranchId = data.branchId !== undefined ? data.branchId : 0;
+  console.log(`  - Target Branch: #${targetBranchId}`);
+  
   // Generate the event on the timeline with API data
   const eventGenerated = generateEventFromAPI(
     data.recent_event,
     data.year,
     data.month,
-    0, // Apply to branch 0
+    targetBranchId, // Use branchId from API request
     timelineOffset,
     apiData // Pass data to be applied when event triggers
   );

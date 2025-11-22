@@ -2,20 +2,64 @@ export let branches = [];
 // Constants
 export const branchSpacing = 80;
 export const branchTransitionDistance = 200;
-// Generate random stats for a branch
-export function generateRandomStats() {
+let onboardingData = null;
+export function setOnboardingData(data) {
+    onboardingData = data;
+    console.log('✓ Onboarding data stored:', data);
+}
+// Calculate initial stats based on onboarding data (deterministic, no randomness)
+function calculateInitialStats() {
+    if (!onboardingData) {
+        // Fallback if no onboarding data
+        return {
+            money: 50000,
+            monthlyWage: 3500,
+            maritalStatus: 'Single',
+            childCount: 0
+        };
+    }
+    // Base salary calculation from education and career length
+    let baseSalary = 30000; // Starting point
+    // Education multiplier
+    const educationMultiplier = {
+        'highschool': 1.0,
+        'bachelor': 1.3,
+        'master': 1.6,
+        'doctorate': 2.0
+    };
+    baseSalary *= educationMultiplier[onboardingData.education] || 1.0;
+    // Career length adds experience bonus (5% per year, capped at 50%)
+    const experienceMultiplier = 1 + Math.min(onboardingData.careerLength * 0.05, 0.5);
+    baseSalary *= experienceMultiplier;
+    // Age adjustment (peak earnings 35-50)
+    if (onboardingData.age >= 35 && onboardingData.age <= 50) {
+        baseSalary *= 1.2;
+    }
+    else if (onboardingData.age < 25) {
+        baseSalary *= 0.8;
+    }
+    const annualSalary = Math.floor(baseSalary);
+    const monthlyWage = Math.floor(annualSalary / 12);
+    // Initial savings based on age and career length
+    // Assume saving 15% of income per year of career
+    const yearlySavings = annualSalary * 0.15;
+    const totalSavings = Math.floor(yearlySavings * onboardingData.careerLength);
     return {
-        money: Math.floor(Math.random() * 100000) + 20000,
-        monthlyWage: Math.floor(Math.random() * 5000) + 2000,
-        maritalStatus: 'Single',
+        money: totalSavings,
+        monthlyWage: monthlyWage,
+        maritalStatus: onboardingData.familyStatus === 'married' ? 'Married' : 'Single',
         childCount: 0
     };
 }
-// Inherit stats from parent with small variations
+// Generate stats for initial branch (deterministic based on onboarding)
+export function generateRandomStats() {
+    return calculateInitialStats();
+}
+// Inherit stats from parent WITHOUT random variations (deterministic)
 export function inheritStats(parent) {
     return {
-        money: parent.money + Math.floor((Math.random() - 0.5) * 10000), // ±5k variation
-        monthlyWage: parent.monthlyWage + Math.floor((Math.random() - 0.5) * 1000), // ±500 variation
+        money: parent.money,
+        monthlyWage: parent.monthlyWage,
         maritalStatus: parent.maritalStatus,
         childCount: parent.childCount
     };

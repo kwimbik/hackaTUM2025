@@ -9,6 +9,7 @@ export interface ExternalEventData {
   recent_event: string;
   year: number;
   month: number;
+  branchId?: number; // Optional: which branch to apply event to (defaults to 0)
 }
 
 export interface ExternalEvent {
