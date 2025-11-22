@@ -1,14 +1,5 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { branches, initBranches, resetBranches, splitAllBranches, splitSpecificBranch, addMonthlyWage, setOnboardingData } from './branches.js';
-import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, generateEventFromAPI, applyQueuedEvents } from './events.js';
+import { generateRandomEvent, generateLifeAlteringEvent, checkEventTriggers, clearEvents, markerSpacing, generateEventFromAPI, processQueuedEvents } from './events.js';
 import { setupCameraControls, areStickmenVisible, resetCamera, isDragging } from './camera.js';
 import { updateStatsTable } from './ui.js';
 import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBranchNumbers, updateStickmanPositions } from './rendering.js';
@@ -63,25 +54,15 @@ resumeBtn.addEventListener("click", () => {
 // Button handlers
 splitAllBtn.addEventListener("click", () => {
     splitAllBranches(timelineOffset);
-    // Apply queued events for all branches
-    for (const branch of branches) {
-        applyQueuedEvents(branch.id, timelineOffset);
-    }
+    // Queued events will be processed automatically in render loop
     updateStatsTable();
 });
 splitOneBtn.addEventListener("click", () => {
     if (branches.length === 0)
         return;
     const randomBranch = branches[Math.floor(Math.random() * branches.length)];
-    const branchIdsBefore = branches.map(b => b.id);
     splitSpecificBranch(randomBranch.id, timelineOffset);
-    // Apply queued events for newly created branches
-    const newBranches = branches.filter(b => branchIdsBefore.indexOf(b.id) === -1);
-    for (const branch of newBranches) {
-        applyQueuedEvents(branch.id, timelineOffset);
-    }
-    // Also check the original branch
-    applyQueuedEvents(randomBranch.id, timelineOffset);
+    // Queued events will be processed automatically in render loop
     updateStatsTable();
 });
 generateEventBtn.addEventListener("click", () => {
@@ -172,35 +153,7 @@ function startRevealAnimation() {
     };
     tick();
 }
-function triggerBackendRun() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const response = yield fetch("http://localhost:5000/run", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (!response.ok) {
-                console.warn(`Backend run failed: ${response.status}`);
-                return;
-            }
-            const data = yield response.json();
-            console.log("Backend simulation run result:", data);
-        }
-        catch (err) {
-            console.warn("Unable to trigger backend run from UI:", err);
-        }
-    });
-}
-function handleCtaClick() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (revealStarted)
-            return;
-        // Fire-and-forget: start backend run but do not block UI countdown
-        triggerBackendRun();
-        startRevealAnimation();
-    });
-}
-ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.addEventListener("click", handleCtaClick);
+ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.addEventListener("click", startRevealAnimation);
 // Auto-pause when stickmen are off-screen
 function checkAutoPause() {
     if (paused)
@@ -238,6 +191,8 @@ function loop() {
     if (!isDragging) {
         checkAutoPause();
     }
+    // Process queued events that are now on-camera
+    processQueuedEvents(timelineOffset, canvas.width);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawTimelineLines(ctx, canvas, timelineOffset);
     drawMarkers(ctx, canvas, timelineOffset);
@@ -267,14 +222,15 @@ function handleExternalEvent(event) {
     const targetBranchId = data.branchId !== undefined ? data.branchId : 0;
     console.log(`  - Target Branch: #${targetBranchId}`);
     // Generate the event on the timeline with API data
-    const eventGenerated = generateEventFromAPI(data.recent_event, data.year, data.month, targetBranchId, // Use branchId from API request
+    const eventQueued = generateEventFromAPI(data.recent_event, data.year, data.month, targetBranchId, // Use branchId from API request
     timelineOffset, apiData // Pass data to be applied when event triggers
     );
-    if (eventGenerated) {
-        console.log(`✓ Event "${data.recent_event}" added to timeline at ${data.year}-${data.month}`);
+    if (eventQueued) {
+        console.log(`✓ Event "${data.recent_event}" queued for ${data.year}-${data.month}`);
+        console.log(`  - Will be materialized when on-camera and branch exists`);
     }
     else {
-        console.warn(`Failed to generate event "${data.recent_event}" - may be in the past or invalid`);
+        console.warn(`Failed to queue event "${data.recent_event}" - invalid event name`);
     }
 }
 // Start polling for external events from API

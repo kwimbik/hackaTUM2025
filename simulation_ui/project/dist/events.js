@@ -8,29 +8,71 @@ export const reactionDuration = markerSpacing * 1.5;
 // Store event definitions with generated events for later modification
 const eventDefinitionMap = new Map();
 let eventQueue = [];
-// Check and apply queued events for a newly created branch
-export function applyQueuedEvents(branchId, timelineOffset) {
-    const queuedForThisBranch = eventQueue.filter(e => e.branchId === branchId);
-    if (queuedForThisBranch.length === 0) {
-        console.log(`  No queued events for branch #${branchId}`);
+// Process queued events that are now on-camera and whose branches exist
+export function processQueuedEvents(timelineOffset, canvasWidth) {
+    if (eventQueue.length === 0)
         return;
+    // Calculate visible range (add buffer for off-screen markers)
+    const visibleStart = -timelineOffset - 800;
+    const visibleEnd = -timelineOffset + canvasWidth + 1000;
+    const eventsToProcess = [];
+    for (const queued of eventQueue) {
+        // Calculate world position of this event
+        const startYear = 2025;
+        const monthIndex = (queued.year - startYear) * 12 + (queued.month - 1);
+        const eventWorldX = monthIndex * markerSpacing;
+        // Check if event is in visible range
+        if (eventWorldX >= visibleStart && eventWorldX <= visibleEnd) {
+            // Check if branch exists now
+            const branchExists = branches.find(b => b.id === queued.branchId);
+            if (branchExists) {
+                eventsToProcess.push(queued);
+            }
+        }
     }
-    console.log(`📦 Applying ${queuedForThisBranch.length} queued event(s) for branch #${branchId}:`);
-    for (const queued of queuedForThisBranch) {
-        console.log(`  - Event: ${queued.eventName} at ${queued.year}-${queued.month}`);
-        const result = generateEventFromAPI(queued.eventName, queued.year, queued.month, queued.branchId, // This is the correct branchId from the queued event
-        timelineOffset, queued.apiData);
-        if (result) {
-            console.log(`    ✓ Event created on branch #${queued.branchId}`);
+    // Create actual GameEvents for the queued events that are ready
+    for (const queued of eventsToProcess) {
+        console.log(`🎬 Materializing queued event "${queued.eventName}" for branch #${queued.branchId} (now on-camera)`);
+        // Create the actual event
+        const eventDef = EVENT_DEFINITIONS.find(e => e.name === queued.eventName);
+        if (!eventDef)
+            continue;
+        const startYear = 2025;
+        const monthIndex = (queued.year - startYear) * 12 + (queued.month - 1);
+        // Check if event is in the past
+        const stickmanWorldX = 200;
+        const currentMonthIndex = Math.floor((stickmanWorldX - timelineOffset) / markerSpacing);
+        if (monthIndex > currentMonthIndex) {
+            const eventId = nextEventId++;
+            const newEvent = {
+                id: eventId,
+                branchId: queued.branchId,
+                monthIndex: monthIndex,
+                eventName: eventDef.name,
+                description: eventDef.description,
+                triggered: false,
+                causesSplit: eventDef.causesSplit || false,
+                reactionType: eventDef.reactionType,
+                reactionContent: eventDef.reactionContent,
+                apiData: queued.apiData
+            };
+            eventDefinitionMap.set(eventId, eventDef);
+            gameEvents.push(newEvent);
+            const monthStr = queued.month < 10 ? `0${queued.month}` : `${queued.month}`;
+            console.log(`  ✓ Created GameEvent for branch #${queued.branchId} at ${queued.year}-${monthStr}`);
         }
         else {
-            console.log(`    ✗ Event creation failed (may be in past)`);
+            console.log(`  ✗ Event "${queued.eventName}" is in the past - skipping`);
         }
+        // Remove from queue
+        eventQueue = eventQueue.filter(e => e !== queued);
     }
-    // Remove applied events from queue
-    eventQueue = eventQueue.filter(e => e.branchId !== branchId);
-    console.log(`✓ Queue cleared for branch #${branchId}, ${eventQueue.length} events remaining in queue`);
+    if (eventsToProcess.length > 0) {
+        console.log(`✓ Processed ${eventsToProcess.length} queued event(s), ${eventQueue.length} remaining in queue`);
+    }
 }
+// Remove old function - no longer needed
+// applyQueuedEvents is replaced by processQueuedEvents
 // Generate a random event from the event definitions
 export function generateRandomEvent(timelineOffset) {
     if (branches.length === 0)
@@ -102,62 +144,27 @@ export function getEventDefinition(eventId) {
     return eventDefinitionMap.get(eventId);
 }
 // Generate an event from external API data
+// All events are queued and only materialized when on-camera
 export function generateEventFromAPI(eventName, year, month, branchId, timelineOffset, apiData) {
     // Find the event definition
     const eventDef = EVENT_DEFINITIONS.find(e => e.name === eventName);
     if (!eventDef) {
         console.warn(`Event "${eventName}" not found in EVENT_DEFINITIONS`);
-        return null;
+        return false;
     }
-    // Check if target branch exists
-    const targetBranch = branches.find(b => b.id === branchId);
-    if (!targetBranch) {
-        // Branch doesn't exist yet - queue the event for when it's created
-        console.log(`⏳ Branch #${branchId} doesn't exist yet - queueing event "${eventName}"`);
-        eventQueue.push({
-            branchId,
-            eventName,
-            year,
-            month,
-            apiData
-        });
-        console.log(`  - Event will be applied when branch #${branchId} is created`);
-        console.log(`  - Queue size: ${eventQueue.length}`);
-        return null;
-    }
-    // Calculate the month index based on year and month
-    // Starting from Jan 2025 (month 0)
-    const startYear = 2025;
-    const monthIndex = (year - startYear) * 12 + (month - 1);
-    // Check if event is in the past (stickman already passed it)
-    const stickmanWorldX = 200;
-    const currentMonthIndex = Math.floor((stickmanWorldX - timelineOffset) / markerSpacing);
-    if (monthIndex <= currentMonthIndex) {
-        console.warn(`Event "${eventName}" is in the past (month ${monthIndex} vs current ${currentMonthIndex}) - ignoring`);
-        return null;
-    }
-    const eventId = nextEventId++;
-    const newEvent = {
-        id: eventId,
-        branchId: branchId,
-        monthIndex: monthIndex,
-        eventName: eventDef.name,
-        description: eventDef.description,
-        triggered: false,
-        causesSplit: eventDef.causesSplit || false,
-        reactionType: eventDef.reactionType,
-        reactionContent: eventDef.reactionContent,
-        apiData: apiData // Store API data to apply when event triggers
-    };
-    // Store the event definition for later branch modification
-    eventDefinitionMap.set(eventId, eventDef);
-    gameEvents.push(newEvent);
-    const monthStr = month < 10 ? `0${month}` : `${month}`;
-    console.log(`✓ Generated API event "${eventDef.name}" for branch #${branchId} at ${year}-${monthStr}`);
-    if (apiData) {
-        console.log(`  - Will apply API data when event triggers`);
-    }
-    return newEvent;
+    // Always queue the event (regardless of branch existence)
+    console.log(`📥 Queueing event "${eventName}" for branch #${branchId} at ${year}-${month}`);
+    eventQueue.push({
+        branchId,
+        eventName,
+        year,
+        month,
+        apiData,
+        queuedAt: timelineOffset
+    });
+    console.log(`  - Queue size: ${eventQueue.length}`);
+    console.log(`  - Event will be materialized when on-camera and branch exists`);
+    return true;
 }
 // Check if stickman has passed events and trigger reactions
 export function checkEventTriggers(timelineOffset, onBranchModified) {
@@ -181,19 +188,10 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
             if (event.causesSplit) {
                 console.log(`Life-altering event! Splitting branch #${event.branchId}`);
                 const originalBranchId = event.branchId; // Remember original ID
-                // Track branch IDs before split
-                const branchIdsBefore = branches.map(b => b.id);
                 // Perform the split
                 splitSpecificBranch(event.branchId, timelineOffset);
-                // Find which branch IDs are NEW after the split
-                const branchIdsAfter = branches.map(b => b.id);
-                const newBranchIds = branchIdsAfter.filter(id => branchIdsBefore.indexOf(id) === -1);
-                console.log(`  Split created ${newBranchIds.length} new branch(es): #${newBranchIds.join(', #')}`);
-                // Apply queued events for the original branch and all newly created branches
-                applyQueuedEvents(originalBranchId, timelineOffset);
-                for (const newId of newBranchIds) {
-                    applyQueuedEvents(newId, timelineOffset);
-                }
+                // Queued events will be processed automatically in the render loop
+                // when they come on-camera and their branches exist
                 // Now modify ONLY the branch that kept the original ID (not the alternate)
                 const originalBranch = branches.find(b => b.id === originalBranchId);
                 if (originalBranch) {
