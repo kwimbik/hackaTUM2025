@@ -106,6 +106,69 @@ def _buy_insurance(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldS
     return _with_history(world, "buy_insurance", cash=new_cash, metadata=new_meta)
 
 
+def _invest_in_stock(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    if world.cash <= 0:
+        return _with_history(world, "invest_in_stock_no_cash")
+    investment = world.cash * 0.2
+    new_cash = world.cash - investment
+    new_stock = world.stock_value + investment
+    new_meta = {**world.metadata, "invested_in_stock": True}
+    return _with_history(
+        world,
+        "invest_in_stock",
+        cash=new_cash,
+        stock_value=new_stock,
+        metadata=new_meta,
+    )
+
+
+def _unexpected_expense(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    reduction = world.cash * 0.2
+    new_cash = max(0.0, world.cash - reduction)
+    new_meta = {**world.metadata, "unexpected_expense": reduction}
+    return _with_history(world, "unexpected_expense", cash=new_cash, metadata=new_meta)
+
+
+def _natural_disaster(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    new_cash = max(0.0, world.cash * 0.7)
+    new_income = world.current_income * 0.9
+    new_meta = {**world.metadata, "natural_disaster": True}
+    return _with_history(
+        world,
+        "natural_disaster",
+        cash=new_cash,
+        current_income=new_income,
+        metadata=new_meta,
+    )
+
+
+def _death(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    new_meta = {**world.metadata, "world_status": "terminated"}
+    return _with_history(
+        world,
+        "death",
+        current_income=0.0,
+        health_status="deceased",
+        metadata=new_meta,
+    )
+
+
+def _stock_market_increase(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    if world.stock_value <= 0:
+        return _with_history(world, "stock_market_increase_no_position")
+    gain = world.stock_value * 0.15
+    new_stock = world.stock_value + gain
+    return _with_history(world, "stock_market_increase", stock_value=new_stock)
+
+
+def _stock_market_crash(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    if world.stock_value <= 0:
+        return _with_history(world, "stock_market_crash_no_position")
+    loss = world.stock_value * 0.3
+    new_stock = max(0.0, world.stock_value - loss)
+    return _with_history(world, "stock_market_crash", stock_value=new_stock)
+
+
 EVENT_REGISTRY: Dict[str, Event] = {
     "nothing": Event("nothing", _nothing, description="No change this layer.", is_choice=False),
     "marry": Event("marry", _marry, description="Get married if currently single.", is_choice=True),
@@ -118,6 +181,12 @@ EVENT_REGISTRY: Dict[str, Event] = {
     "new_job": Event("new_job", _new_job, description="New job with 20% higher income.", is_choice=False),
     "go_on_vacation": Event("go_on_vacation", _go_on_vacation, description="Spend on vacation; small income dip.", is_choice=True),
     "buy_insurance": Event("buy_insurance", _buy_insurance, description="Purchase insurance coverage.", is_choice=True),
+    "invest_in_stock": Event("invest_in_stock", _invest_in_stock, description="Allocate cash into stock holdings.", is_choice=True),
+    "unexpected_expense": Event("unexpected_expense", _unexpected_expense, description="Sudden 20% cash expense.", is_choice=False),
+    "natural_disaster": Event("natural_disaster", _natural_disaster, description="Disaster impacts finances and income.", is_choice=False),
+    "death": Event("death", _death, description="Terminal life event removing income.", is_choice=False),
+    "stock_market_increase": Event("stock_market_increase", _stock_market_increase, description="Portfolio gains 15%.", is_choice=False),
+    "stock_market_crash": Event("stock_market_crash", _stock_market_crash, description="Portfolio loses 30%.", is_choice=False),
 }
 
 # Defaults used for sampling during simulation.

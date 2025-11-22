@@ -1,7 +1,8 @@
 [
   {
-    "current_income": 82500.0,
+    "current_income": 90000.0,
     "current_loan": 0.0,
+    "stock_value": 0.0,
     "cash": 0.0,
     "family_status": "single",
     "children": 0,
@@ -14,10 +15,11 @@
       "user_extras": {
         "family_status": "single",
         "career_length": 7
-      }
+      },
+      "employment": "employed"
     },
     "trajectory_events": [
-      "income_increase"
+      "new_job"
     ],
     "timestamp": 0
   }

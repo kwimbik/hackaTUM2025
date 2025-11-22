@@ -27,9 +27,11 @@ def create_initial_world(global_cfg: GlobalConfig, user_cfg: UserConfig) -> Worl
     initial_health = user_cfg.extras.get("health_status", "healthy")
     initial_career = int(user_cfg.extras.get("career_length", max(0, user_cfg.age - 18)))
     starting_cash = float(user_cfg.extras.get("starting_cash", 0.0))
+    starting_stock = float(user_cfg.extras.get("starting_stock", 0.0))
     return WorldState(
         current_income=user_cfg.income,
         current_loan=0.0,
+        stock_value=starting_stock,
         cash=starting_cash,
         family_status=str(initial_family),
         children=initial_children,
