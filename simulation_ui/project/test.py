@@ -47,10 +47,10 @@ def test_queue_future_branches():
     
     # Define events for multiple branches
     events = [
-        (0, "promotion", 2025, 6),      # Branch 0 exists
-        (1, "marry", 2025, 12),          # Branch 1 doesn't exist yet!
-        (1, "have_first_child", 2025, 12),  # Another event for branch 1
-        (2, "bonus", 2026, 1),         # Branch 2 doesn't exist yet!
+        (0, "promotion", 2025, 3),      # Branch 0 exists
+        (1, "marry", 2025, 4),          # Branch 1 doesn't exist yet!
+        (1, "have_first_child", 2025, 5),  # Another event for branch 1
+        (2, "bonus", 2025, 6),         # Branch 2 doesn't exist yet!
         (3, "income_increase", 2027, 5),   # Branch 3 doesn't exist yet!
         (4, "go_on_vacation", 2028, 7),    # Branch 4 doesn't exist yet!
         (5, "buy_second_car", 2029, 2),    # Branch 5 doesn't exist yet!
