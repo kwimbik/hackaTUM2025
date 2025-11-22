@@ -200,7 +200,8 @@ async function triggerBackendRun() {
 
 async function handleCtaClick() {
   if (revealStarted) return;
-  await triggerBackendRun();
+  // Fire-and-forget: start backend run but do not block UI countdown
+  triggerBackendRun();
   startRevealAnimation();
 }
 

@@ -195,7 +195,8 @@ function handleCtaClick() {
     return __awaiter(this, void 0, void 0, function* () {
         if (revealStarted)
             return;
-        yield triggerBackendRun();
+        // Fire-and-forget: start backend run but do not block UI countdown
+        triggerBackendRun();
         startRevealAnimation();
     });
 }
