@@ -330,7 +330,7 @@ def extract_most_risky_summary(path: str | Path) -> Dict[str, Any]:
             best = ({
                 "text": comment,
                 "data": {
-                    "id": world.get("id"),
+                    "branchId": world.get("id"),
                     "name": world.get("name"),
                     "current_income": world.get("current_income"),
                     "current_loan": world.get("current_loan"),
