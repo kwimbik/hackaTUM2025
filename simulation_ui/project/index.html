@@ -6,35 +6,68 @@
     <style>
       body {
         margin: 0;
-        background: #eee;
+        background: #f3f6fb;
         font-family: Arial, sans-serif;
-        padding: 20px;
+        color: #1f2937;
+        min-height: 100vh;
+        overflow: hidden;
       }
-
       .header {
         font-size: 32px;
-        font-weight: bold;
+        font-weight: 800;
         margin-bottom: 15px;
-        color: #333;
+        color: #0f172a;
+        letter-spacing: -0.4px;
       }
-
       .ui {
         margin-bottom: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
       }
-
-      button {
-        padding: 8px 12px;
+      .modern-btn {
+        padding: 10px 14px;
         font-size: 14px;
-        margin-right: 8px;
+        font-weight: 700;
+        border-radius: 10px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: linear-gradient(135deg, #6366f1, #22d3ee);
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(34, 211, 238, 0.15);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s;
+      }
+      .modern-btn.secondary {
+        background: #fff;
+        color: #0f172a;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      }
+      .modern-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px rgba(34, 211, 238, 0.22);
+      }
+      .modern-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
       }
       .pre-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
         display: flex;
         gap: 40px;
-        padding: 40px;
-        background: linear-gradient(135deg, #fefefe, #f0f4ff);
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
-        margin-bottom: 30px;
+        padding: 60px 80px;
+        background: linear-gradient(135deg, #ffffff 0%, #eef2f7 100%);
+        border-radius: 0;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+      .pre-screen.pre-screen--collapsed {
+        opacity: 0;
+        transform: translateY(40px);
+        pointer-events: none;
       }
       .hero-text {
         flex: 1;
@@ -49,7 +82,7 @@
       .hero-text h1 {
         font-size: 48px;
         margin: 0 0 16px;
-        color: #1f2933;
+        color: #0f172a;
       }
       .hero-text .subtitle {
         font-size: 18px;
@@ -60,8 +93,14 @@
       .hero-form {
         flex: 1;
         display: grid;
-        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
         gap: 18px;
+        align-self: center;
+        background: rgba(255, 255, 255, 0.82);
+        padding: 24px;
+        border-radius: 18px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
       }
       .hero-form label {
         font-size: 14px;
@@ -75,43 +114,113 @@
       .hero-form select {
         border: 1px solid #cfd5e3;
         border-radius: 10px;
-        padding: 10px 12px;
+        padding: 12px 14px;
         font-size: 15px;
         font-family: inherit;
         background: #fff;
-        transition: border 0.2s, box-shadow 0.2s;
+        transition: border 0.2s, box-shadow 0.2s, transform 0.1s ease;
       }
       .hero-form input:focus,
       .hero-form select:focus {
         outline: none;
         border-color: #4f46e5;
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        transform: translateY(-1px);
       }
       .cta-btn {
         grid-column: span 2;
-        padding: 14px 20px;
+        padding: 16px 20px;
         font-size: 16px;
-        background: #4f46e5;
+        background: linear-gradient(135deg, #4f46e5, #22d3ee);
         color: #fff;
         border: none;
         border-radius: 12px;
         cursor: pointer;
-        box-shadow: 0 15px 35px rgba(79, 70, 229, 0.25);
+        box-shadow: 0 20px 40px rgba(34, 211, 238, 0.25);
         transition: transform 0.2s, box-shadow 0.2s;
+        font-weight: 800;
+        letter-spacing: 0.2px;
       }
       .cta-btn:hover {
         transform: translateY(-1px);
         box-shadow: 0 20px 40px rgba(79, 70, 229, 0.35);
       }
+      .countdown-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 120px;
+        font-weight: 700;
+        color: #1f2937;
+        background: #f3f6fb;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+        z-index: 20;
+      }
+      .countdown-overlay.visible {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .countdown-overlay span {
+        animation: countdownPulse 1s infinite;
+      }
+      @keyframes countdownPulse {
+        0% {
+          transform: scale(0.9);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(0.9);
+          opacity: 0.6;
+        }
+      }
+      .bottom-curtain {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 45vh;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(226, 232, 240, 0.95) 100%);
+        transform: translateY(0);
+        transition: transform 1s ease-in-out;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .bottom-curtain.hidden {
+        transform: translateY(110%);
+      }
+      .simulation-shell {
+        display: block;
+        padding: 20px;
+      }
+      .layout-row {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+      }
 
       .canvas-container {
         position: relative;
-        display: inline-block;
+        flex: 1.2;
       }
 
       canvas {
         display: block;
-        background: #f5f5f5;
+        background: #ffffff;
+        width: 100%;
+        height: 68vh;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 12px;
       }
 
       #stickmanGif {
@@ -121,9 +230,57 @@
         width: 110px;
         height: 70px;
       }
+      .stats-card {
+        flex: 0.8;
+        min-width: 360px;
+        background: #fff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
+        padding: 18px 18px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .stats-card h3 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: -0.2px;
+        color: #0f172a;
+      }
+      .stats-table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+      .stats-table thead {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(34, 211, 238, 0.08));
+      }
+      .stats-table th,
+      .stats-table td {
+        padding: 10px 8px;
+        text-align: left;
+      }
+      .stats-table th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #475569;
+      }
+      .stats-table tbody tr:nth-child(odd) {
+        background: rgba(15, 23, 42, 0.015);
+      }
+      .stats-table tbody tr:hover {
+        background: rgba(99, 102, 241, 0.08);
+      }
     </style>
   </head>
   <body>
+    <div id="countdownOverlay" class="countdown-overlay">
+      <span id="countdownValue"></span>
+    </div>
+    <div id="bottomCurtain" class="bottom-curtain"></div>
+
     <div class="pre-screen">
       <div class="hero-text">
         <p class="eyebrow">Mortgage Journey Setup</p>
@@ -179,39 +336,40 @@
       </form>
     </div>
 
-    <div class="header">This could be your life!</div>
+      <div id="simulationShell" class="simulation-shell">
+        <div class="header">This could be your life!</div>
 
-    <div class="ui">
-      <button id="pauseBtn">Pause</button>
-      <button id="resumeBtn" disabled>Resume</button>
-      <button id="splitAllBtn">Split All</button>
-      <button id="splitOneBtn">Split 1</button>
-      <button id="generateEventBtn">Generate Event</button>
-      <button id="lifeAlteringEventBtn">Generate Life-Altering Event</button>
-      <button id="resetBtn">Reset</button>
-    </div>
+        <div class="ui">
+        <button class="modern-btn secondary" id="pauseBtn">Pause</button>
+        <button class="modern-btn secondary" id="resumeBtn" disabled>Resume</button>
+        <button class="modern-btn" id="splitAllBtn">Split All</button>
+        <button class="modern-btn" id="splitOneBtn">Split 1</button>
+        <button class="modern-btn" id="generateEventBtn">Generate Event</button>
+        <button class="modern-btn" id="lifeAlteringEventBtn">Life-Altering Event</button>
+        <button class="modern-btn secondary" id="resetBtn">Reset</button>
+        </div>
 
-    <div style="display: flex; gap: 20px;">
-      <div class="canvas-container">
-        <canvas id="game" width="1600" height="600"></canvas>
-        <img id="stickmanGif" src="stickman_run.gif" />
-      </div>
+      <div class="layout-row">
+        <div class="canvas-container">
+          <canvas id="game" width="1600" height="600"></canvas>
+          <img id="stickmanGif" src="stickman_run.gif" />
+        </div>
 
-      <div id="statsTable" style="min-width: 300px;">
-        <h3 style="margin-top: 0;">Timeline Stats</h3>
-        <table style="border-collapse: collapse; width: 100%;">
-          <thead>
-            <tr style="border-bottom: 2px solid black;">
-              <th style="padding: 8px; text-align: left;">Branch</th>
-              <th style="padding: 8px; text-align: left;">Money</th>
-              <th style="padding: 8px; text-align: left;">Wage</th>
-              <th style="padding: 8px; text-align: left;">Status</th>
-              <th style="padding: 8px; text-align: left;">Kids</th>
-            </tr>
-          </thead>
-          <tbody id="statsTableBody">
-          </tbody>
-        </table>
+        <div class="stats-card">
+          <h3>Timeline Stats</h3>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Branch</th>
+                <th>Money</th>
+                <th>Wage</th>
+                <th>Status</th>
+                <th>Kids</th>
+              </tr>
+            </thead>
+            <tbody id="statsTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
