@@ -6,6 +6,7 @@ import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBr
 import { startPolling, mapFamilyStatus } from './apiClient.js';
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+const canvasContainer = document.querySelector(".canvas-container");
 // UI Elements
 const pauseBtn = document.getElementById("pauseBtn");
 const resumeBtn = document.getElementById("resumeBtn");
@@ -76,8 +77,16 @@ resetBtn.addEventListener("click", () => {
     updateStatsTable();
 });
 function resizeCanvas() {
-    canvas.width = window.innerWidth - 60;
-    canvas.height = Math.max(480, Math.floor(window.innerHeight * 0.68));
+    if (canvasContainer) {
+        const containerWidth = canvasContainer.clientWidth;
+        const containerHeight = canvasContainer.clientHeight;
+        canvas.width = Math.max(800, containerWidth);
+        canvas.height = Math.max(480, containerHeight);
+    }
+    else {
+        canvas.width = window.innerWidth - 60;
+        canvas.height = Math.max(480, Math.floor(window.innerHeight * 0.68));
+    }
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);

@@ -7,6 +7,7 @@ import { startPolling, stopPolling, mapFamilyStatus, ExternalEvent } from './api
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
+const canvasContainer = document.querySelector(".canvas-container") as HTMLElement | null;
 
 // UI Elements
 const pauseBtn = document.getElementById("pauseBtn") as HTMLButtonElement;
@@ -88,8 +89,15 @@ resetBtn.addEventListener("click", () => {
 });
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth - 60;
-  canvas.height = Math.max(480, Math.floor(window.innerHeight * 0.68));
+  if (canvasContainer) {
+    const containerWidth = canvasContainer.clientWidth;
+    const containerHeight = canvasContainer.clientHeight;
+    canvas.width = Math.max(800, containerWidth);
+    canvas.height = Math.max(480, containerHeight);
+  } else {
+    canvas.width = window.innerWidth - 60;
+    canvas.height = Math.max(480, Math.floor(window.innerHeight * 0.68));
+  }
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);

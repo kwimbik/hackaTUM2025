@@ -6,10 +6,10 @@ let dragStartX = 0;
 let dragStartY = 0;
 let dragStartCameraX = 0;
 let dragStartCameraY = 0;
-// Isometric settings
-export const isoAngle = Math.PI / 6;
+// Isometric settings (flattened a bit for better stickman alignment)
+export const isoAngle = (20 * Math.PI) / 180; // 20 degrees
 export const timelineBaseX = 100;
-export const timelineBaseY = 500;
+export const timelineBaseY = 520;
 // Iso transform with yOffset for branches - includes camera offset
 export function isoTransform(worldX, yOffset = 0) {
     const isoX = timelineBaseX + worldX * Math.cos(isoAngle) + cameraOffsetX;

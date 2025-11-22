@@ -9,8 +9,9 @@ export function drawTimelineLines(ctx: CanvasRenderingContext2D, canvas: HTMLCan
   const lineStartOffset = -800;
   const lineLength = canvas.width + 1000;
   
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 6;
+  ctx.strokeStyle = "#111827";
+  ctx.lineWidth = 5;
+  ctx.lineCap = "round";
   
   for (const branch of branches) {
     const yOffset = calculateBranchYOffset(branch, timelineOffset);
@@ -34,36 +35,28 @@ export function drawEventMarkers(ctx: CanvasRenderingContext2D, timelineOffset: 
     const yOffset = calculateBranchYOffset(branch, timelineOffset);
     const [ex, ey] = isoTransform(eventWorldX, yOffset);
     
-    const size = 20;
+    const baseSize = 14;
     const isLifeAltering = event.causesSplit;
-    const actualSize = isLifeAltering ? size * 1.5 : size;
-    
-    // Color based on whether triggered
-    ctx.fillStyle = event.triggered ? "#B0B0B0" : "#4CAF50";
-    
-    // Draw star shape
+    const innerSize = isLifeAltering ? baseSize * 1.2 : baseSize;
+    const outerSize = innerSize + 8;
+
+    // Modern marker: inner dot with outlined ring
+    ctx.save();
     ctx.beginPath();
-    for (let i = 0; i < 5; i++) {
-      const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-      const radius = i % 2 === 0 ? actualSize : actualSize / 2;
-      const x = ex + Math.cos(angle) * radius;
-      const y = ey + Math.sin(angle) * radius;
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    }
-    ctx.closePath();
+    ctx.fillStyle = event.triggered ? "#cbd5e1" : (isLifeAltering ? "#f59e0b" : "#22c55e");
+    ctx.arc(ex, ey, innerSize, 0, Math.PI * 2);
     ctx.fill();
-    
-    ctx.strokeStyle = isLifeAltering ? "gold" : "black";
-    ctx.lineWidth = isLifeAltering ? 4 : 2;
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = isLifeAltering ? "rgba(245,158,11,0.5)" : "rgba(34,197,94,0.4)";
+    ctx.beginPath();
+    ctx.arc(ex, ey, outerSize, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.restore();
     
     // Draw event name above the star with background for visibility
     const textPadding = 4;
-    ctx.font = "bold 14px Arial";
+    ctx.font = "600 13px 'Segoe UI', Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     
@@ -71,20 +64,20 @@ export function drawEventMarkers(ctx: CanvasRenderingContext2D, timelineOffset: 
     const textWidth = ctx.measureText(event.eventName).width;
     const textHeight = 14;
     const bgX = ex - textWidth / 2 - textPadding;
-    const bgY = ey - actualSize - textHeight - textPadding - 5;
+    const bgY = ey - outerSize - textHeight - textPadding - 6;
     
     // Draw white background rectangle
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
     ctx.fillRect(bgX, bgY, textWidth + textPadding * 2, textHeight + textPadding);
     
     // Draw black border
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
     ctx.lineWidth = 1;
     ctx.strokeRect(bgX, bgY, textWidth + textPadding * 2, textHeight + textPadding);
     
     // Draw text
-    ctx.fillStyle = "black";
-    ctx.fillText(event.eventName, ex, ey - actualSize - 5);
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(event.eventName, ex, ey - outerSize - 6);
     
     // Reset text alignment for other drawing
     ctx.textAlign = "left";
@@ -94,10 +87,10 @@ export function drawEventMarkers(ctx: CanvasRenderingContext2D, timelineOffset: 
 
 // Draw markers for all branches
 export function drawMarkers(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, timelineOffset: number) {
-  ctx.strokeStyle = "black";
-  ctx.fillStyle = "black";
-  ctx.lineWidth = 3;
-  ctx.font = "16px Arial";
+  ctx.strokeStyle = "#111827";
+  ctx.fillStyle = "#111827";
+  ctx.lineWidth = 2;
+  ctx.font = "13px 'Segoe UI', Arial, sans-serif";
 
   const minIndex = Math.floor((-timelineOffset) / markerSpacing);
   const maxIndex = Math.ceil((-timelineOffset + canvas.width) / markerSpacing);
@@ -114,8 +107,8 @@ export function drawMarkers(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 
       // Marker line
       ctx.beginPath();
-      ctx.moveTo(mx, my - 15);
-      ctx.lineTo(mx, my + 15);
+      ctx.moveTo(mx, my - 16);
+      ctx.lineTo(mx, my + 16);
       ctx.stroke();
 
       // Label
@@ -130,7 +123,7 @@ export function drawMarkers(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 
 // Draw reaction emojis/images next to stickmen
 export function drawReactions(ctx: CanvasRenderingContext2D, timelineOffset: number) {
-  const stickmanWorldX = 200;
+  const stickmanWorldX = 160; // align reactions with stickman anchor
   
   for (const reaction of reactions) {
     const branch = branches.find(b => b.id === reaction.branchId);
@@ -172,10 +165,10 @@ export function drawReactions(ctx: CanvasRenderingContext2D, timelineOffset: num
 
 // Draw branch numbers on each timeline
 export function drawBranchNumbers(ctx: CanvasRenderingContext2D, timelineOffset: number) {
-  ctx.fillStyle = "blue";
-  ctx.font = "bold 20px Arial";
+  ctx.fillStyle = "#312e81";
+  ctx.font = "700 16px 'Segoe UI', Arial, sans-serif";
   
-  const stickmanWorldX = 200;
+  const stickmanWorldX = 160;
   
   for (const branch of branches) {
     const yOffset = calculateBranchYOffset(branch, timelineOffset);
@@ -194,14 +187,15 @@ export function drawBranchNumbers(ctx: CanvasRenderingContext2D, timelineOffset:
 
 // Update all stickman positions
 export function updateStickmanPositions(timelineOffset: number) {
-  const stickmanWorldX = 200;
-  const stickmanOffsetY = 10;
+  const stickmanWorldX = 160;
 
   for (const branch of branches) {
     const yOffset = calculateBranchYOffset(branch, timelineOffset);
     const [x, y] = isoTransform(stickmanWorldX, yOffset);
-    
-    branch.stickmanGif.style.left = `${x - branch.stickmanGif.width / 2 - 40}px`;
-    branch.stickmanGif.style.top = `${y - branch.stickmanGif.height + stickmanOffsetY}px`;
+
+    // Lift sprites so feet sit on the rail; slight negative lift moves them up
+    const lift = -Math.round(branch.stickmanGif.height * 0.12);
+    branch.stickmanGif.style.left = `${x - branch.stickmanGif.width / 2}px`;
+    branch.stickmanGif.style.top = `${y - branch.stickmanGif.height + lift}px`;
   }
 }
