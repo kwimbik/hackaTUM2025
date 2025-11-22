@@ -1,9 +1,9 @@
 [
   {
-    "current_income": 71250.0,
+    "current_income": 75000.0,
     "current_loan": 0.0,
     "cash": 0.0,
-    "family_status": "single",
+    "family_status": "married",
     "children": 0,
     "health_status": "healthy",
     "career_length": 7,
@@ -14,11 +14,10 @@
       "user_extras": {
         "family_status": "single",
         "career_length": 7
-      },
-      "recent_vacation": true
+      }
     },
     "trajectory_events": [
-      "go_on_vacation"
+      "marry"
     ],
     "timestamp": 0
   },
@@ -40,7 +39,7 @@
       }
     },
     "trajectory_events": [
-      "go_on_vacation_not_chosen"
+      "marry_not_chosen"
     ],
     "timestamp": 0
   }

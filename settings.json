@@ -1,164 +1,31 @@
 ﻿{
+  "global_config": {
+    "mortgage_rate": 0.04,
+    "interest_rate": 0.03,
+    "risk_factor": 0.3,
+    "inflation": 0.02
+  },
+  "user_config": {
+    "income": 75000,
+    "age": 30,
+    "education": "bachelor",
+    "family_status": "single",
+    "career_length": 7
+  },
   "events": [
-    {
-      "name": "nothing",
-      "probability": 0.40,
-      "flag": 0,
-      "description": "Normal year without special events"
-    },
-    {
-      "name": "income_increase",
-      "probability": 0.75,
-      "flag": 0,
-      "description": "Salary increase 2-6%"
-    },
-    {
-      "name": "promotion",
-      "probability": 0.12,
-      "flag": 0,
-      "description": "Promotion with 10-20% salary jump"
-    },
-    {
-      "name": "bonus",
-      "probability": 0.50,
-      "flag": 0,
-      "description": "Year-end bonus received"
-    },
-    {
-      "name": "layoff",
-      "probability": 0.02,
-      "flag": 0,
-      "description": "Job loss, 6 months unemployment"
-    },
-    {
-      "name": "new_job",
-      "probability": 0.18,
-      "flag": 0,
-      "description": "New job with +10% salary"
-    },
-    {
-      "name": "income_decrease",
-      "probability": 0.08,
-      "flag": 0,
-      "description": "Salary cut or short-time work"
-    },
-    {
-      "name": "sickness",
-      "probability": 0.015,
-      "flag": 0,
-      "description": "Serious illness, 6-12 months reduced income"
-    },
-    {
-      "name": "disability",
-      "probability": 0.008,
-      "flag": 0,
-      "description": "Occupational disability (age-dependent 0.3-1.2%)"
-    },
-    {
-      "name": "divorce",
-      "probability": 0.025,
-      "flag": "married",
-      "description": "Divorce (only if married, peak years 6-10)"
-    },
-    {
-      "name": "inheritance",
-      "probability": 0.015,
-      "flag": 0,
-      "description": "Inheritance €50k-€200k"
-    },
-    {
-      "name": "house_damage_minor",
-      "probability": 0.01,
-      "flag": 0,
-      "description": "Water damage/repair €5k-€15k"
-    },
-    {
-      "name": "house_damage_major",
-      "probability": 0.002,
-      "flag": 0,
-      "description": "Major damage €20k-€50k"
-    },
-    {
-      "name": "car_breakdown",
-      "probability": 0.25,
-      "flag": 0,
-      "description": "Car repair €1k-€5k"
-    }
+    {"name": "nothing", "probability": 0.5, "flag": 0},
+    {"name": "divorce", "probability": 0.5, "flag": 0},
+    {"name": "income_increase", "probability": 0.5, "flag": 0},
+    {"name": "income_decrease", "probability": 0.5, "flag": 0},
+    {"name": "sickness", "probability": 0.5, "flag": 0},
+    {"name": "layoff", "probability": 0.5, "flag": 0},
+    {"name": "new_job", "probability": 0.5, "flag": 0}
   ],
-  
   "choices": [
-    {
-      "name": "marry",
-      "probability": 0.06,
-      "flag": "not_married",
-      "description": "Get married (only if unmarried, peak age 30-35)"
-    },
-    {
-      "name": "have_first_child",
-      "probability": 0.08,
-      "flag": "married_no_kids",
-      "description": "Have first child (peak age 30-35)"
-    },
-    {
-      "name": "have_second_child",
-      "probability": 0.20,
-      "flag": "one_kid",
-      "description": "Have second child (70% of families, 3-4 years after first)"
-    },
-    {
-      "name": "have_third_child",
-      "probability": 0.10,
-      "flag": "two_kids",
-      "description": "Have third child (30% of families)"
-    },
-    {
-      "name": "make_extra_payment",
-      "probability": 0.30,
-      "flag": 0,
-      "description": "Make extra mortgage payment €3k-€15k"
-    },
-    {
-      "name": "increase_payment_rate",
-      "probability": 0.15,
-      "flag": 0,
-      "description": "Increase repayment rate from 2% to 3-4%"
-    },
-    {
-      "name": "decrease_payment_rate",
-      "probability": 0.05,
-      "flag": 0,
-      "description": "Decrease repayment rate (financial hardship)"
-    },
-    {
-      "name": "buy_disability_insurance",
-      "probability": 0.25,
-      "flag": "no_disability_insurance",
-      "description": "Purchase occupational disability insurance"
-    },
-    {
-      "name": "go_on_vacation",
-      "probability": 0.60,
-      "flag": 0,
-      "description": "Vacation €2k-€5k"
-    },
-    {
-      "name": "buy_second_car",
-      "probability": 0.08,
-      "flag": "one_car",
-      "description": "Buy second car (with kids/two jobs)"
-    },
-    {
-      "name": "renovate_house",
-      "probability": 0.10,
-      "flag": 0,
-      "description": "Major renovation €20k-€50k"
-    },
-    {
-      "name": "change_career",
-      "probability": 0.05,
-      "flag": 0,
-      "description": "Further education/career change"
-    }
+    {"name": "marry", "probability": 0.5, "flag": 0},
+    {"name": "kid", "probability": 0.5, "flag": 0},
+    {"name": "go_on_vacation", "probability": 0.5, "flag": 0},
+    {"name": "buy_insurance", "probability": 0.5, "flag": 0}
   ],
   "num_layers": 10,
   "loan_amount": 200000.0
