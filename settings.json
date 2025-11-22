@@ -3,7 +3,8 @@
     "mortgage_rate": 0.04,
     "interest_rate": 0.03,
     "risk_factor": 0.3,
-    "inflation": 0.02
+    "inflation": 0.02,
+    "monthly_rent_payment": 1500.0
   },
   "user_config": {
     "income": 75000,

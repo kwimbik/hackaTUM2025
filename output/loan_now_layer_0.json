@@ -3,48 +3,51 @@
   "worlds": [
     {
       "name": "Bob",
-      "current_income": 75000.0,
-      "current_loan": 187200.0,
+      "current_income": 71250.0,
+      "current_loan": 186575.0,
       "stock_value": 0.0,
-      "cash": 193450.0,
-      "family_status": "married",
-      "children": 0,
-      "health_status": "healthy",
-      "career_length": 7,
-      "metadata": {
-        "global_extras": {
-          "inflation": 0.02
-        },
-        "user_extras": {
-          "family_status": "single",
-          "career_length": 7
-        },
-        "loan_history": [
-          {
-            "layer": 0,
-            "base_amount": 200000.0,
-            "effective_amount": 208000.0
-          }
-        ]
-      },
-      "trajectory_events": [
-        "take_loan_layer_0",
-        "marry"
-      ]
-    },
-    {
-      "name": "Charlie",
-      "current_income": 75000.0,
-      "current_loan": 187200.0,
-      "stock_value": 0.0,
-      "cash": 193450.0,
+      "cash": 190825.0,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
       "metadata": {
         "global_extras": {
-          "inflation": 0.02
+          "inflation": 0.02,
+          "monthly_rent_payment": 1500.0
+        },
+        "user_extras": {
+          "family_status": "single",
+          "career_length": 7
+        },
+        "loan_history": [
+          {
+            "layer": 0,
+            "base_amount": 200000.0,
+            "effective_amount": 208000.0
+          }
+        ],
+        "recent_vacation": true
+      },
+      "trajectory_events": [
+        "take_loan_layer_0",
+        "go_on_vacation"
+      ]
+    },
+    {
+      "name": "Charlie",
+      "current_income": 75000.0,
+      "current_loan": 186575.0,
+      "stock_value": 0.0,
+      "cash": 192825.0,
+      "family_status": "single",
+      "children": 0,
+      "health_status": "healthy",
+      "career_length": 7,
+      "metadata": {
+        "global_extras": {
+          "inflation": 0.02,
+          "monthly_rent_payment": 1500.0
         },
         "user_extras": {
           "family_status": "single",
@@ -60,7 +63,7 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "marry_not_chosen"
+        "go_on_vacation_not_chosen"
       ]
     }
   ]

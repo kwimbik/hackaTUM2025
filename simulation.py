@@ -276,17 +276,27 @@ def apply_loan_repayment(world: WorldState, global_cfg: GlobalConfig) -> WorldSt
     """
     Allow a world to repay part of its loan using available cash.
 
-    Each layer represents a month: add monthly income to cash, then repay 10% of
-    the outstanding loan (capped by available cash).
+    Each layer represents a month:
+    - Add monthly income to cash.
+    - Spend the larger of the configured monthly rent payment or 10% of current
+      cash.
+    - Any portion of that payment that exceeds the remaining loan is treated as
+      general expenses.
     """
-    _ = global_cfg
-    available_cash = world.cash + world.current_income
-    if world.current_loan <= 0:
-        return world.copy_with_updates(cash=available_cash)
-    repayment_target = world.current_loan * 0.10
-    repayment = min(repayment_target, available_cash)
-    new_cash = available_cash - repayment
-    new_loan = world.current_loan - repayment
+    monthly_income = world.current_income / 12.0
+    cash_after_income = world.cash + monthly_income
+    monthly_payment = float(global_cfg.extras.get("monthly_rent_payment", 0.0))
+    ten_percent_cash = cash_after_income * 0.10
+    target_payment = max(monthly_payment, ten_percent_cash)
+    actual_payment = min(target_payment, cash_after_income)
+
+    if world.current_loan > 0:
+        loan_payment = min(actual_payment, world.current_loan)
+        new_loan = world.current_loan - loan_payment
+    else:
+        new_loan = world.current_loan
+
+    new_cash = cash_after_income - actual_payment
     return world.copy_with_updates(current_loan=new_loan, cash=new_cash)
 
 
