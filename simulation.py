@@ -276,10 +276,18 @@ def apply_loan_repayment(world: WorldState, global_cfg: GlobalConfig) -> WorldSt
     """
     Allow a world to repay part of its loan using available cash.
 
-    TODO: Implement repayment strategy based on cash-on-hand and loan terms.
+    Each layer represents a month: add monthly income to cash, then repay 10% of
+    the outstanding loan (capped by available cash).
     """
     _ = global_cfg
-    return world
+    available_cash = world.cash + world.current_income
+    if world.current_loan <= 0:
+        return world.copy_with_updates(cash=available_cash)
+    repayment_target = world.current_loan * 0.10
+    repayment = min(repayment_target, available_cash)
+    new_cash = available_cash - repayment
+    new_loan = world.current_loan - repayment
+    return world.copy_with_updates(current_loan=new_loan, cash=new_cash)
 
 
 def apply_take_loan(world: WorldState, layer_index: int, global_cfg: GlobalConfig, amount: float = 200_000.0) -> WorldState:

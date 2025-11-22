@@ -3,11 +3,11 @@
   "worlds": [
     {
       "name": "Diana",
-      "current_income": 67687.5,
-      "current_loan": 208000.0,
+      "current_income": 71250.0,
+      "current_loan": 168480.0,
       "stock_value": 0.0,
-      "cash": 204000.0,
-      "family_status": "single",
+      "cash": 178980.0,
+      "family_status": "married",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
@@ -30,17 +30,17 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation",
+        "marry",
         "go_on_vacation"
       ]
     },
     {
       "name": "Ethan",
-      "current_income": 71250.0,
-      "current_loan": 208000.0,
+      "current_income": 75000.0,
+      "current_loan": 168480.0,
       "stock_value": 0.0,
-      "cash": 206000.0,
-      "family_status": "single",
+      "cash": 180980.0,
+      "family_status": "married",
       "children": 0,
       "health_status": "healthy",
       "career_length": 7,
@@ -58,21 +58,20 @@
             "base_amount": 200000.0,
             "effective_amount": 208000.0
           }
-        ],
-        "recent_vacation": true
+        ]
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation",
+        "marry",
         "go_on_vacation_not_chosen"
       ]
     },
     {
       "name": "Fiona",
       "current_income": 71250.0,
-      "current_loan": 208000.0,
+      "current_loan": 168480.0,
       "stock_value": 0.0,
-      "cash": 206000.0,
+      "cash": 178980.0,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -96,16 +95,16 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation_not_chosen",
+        "marry_not_chosen",
         "go_on_vacation"
       ]
     },
     {
       "name": "George",
       "current_income": 75000.0,
-      "current_loan": 208000.0,
+      "current_loan": 168480.0,
       "stock_value": 0.0,
-      "cash": 208000.0,
+      "cash": 180980.0,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -128,7 +127,7 @@
       },
       "trajectory_events": [
         "take_loan_layer_0",
-        "go_on_vacation_not_chosen",
+        "marry_not_chosen",
         "go_on_vacation_not_chosen"
       ]
     }

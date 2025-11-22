@@ -2,11 +2,35 @@
   "timestamp": 0,
   "worlds": [
     {
-      "name": "Freya",
+      "name": "Ziva",
+      "current_income": 71250.0,
+      "current_loan": 0.0,
+      "stock_value": 0.0,
+      "cash": 4250.0,
+      "family_status": "single",
+      "children": 0,
+      "health_status": "healthy",
+      "career_length": 7,
+      "metadata": {
+        "global_extras": {
+          "inflation": 0.02
+        },
+        "user_extras": {
+          "family_status": "single",
+          "career_length": 7
+        },
+        "recent_vacation": true
+      },
+      "trajectory_events": [
+        "go_on_vacation"
+      ]
+    },
+    {
+      "name": "Aiden",
       "current_income": 75000.0,
       "current_loan": 0.0,
       "stock_value": 0.0,
-      "cash": 0.0,
+      "cash": 6250.0,
       "family_status": "single",
       "children": 0,
       "health_status": "healthy",
@@ -21,7 +45,7 @@
         }
       },
       "trajectory_events": [
-        "income_increase_skipped"
+        "go_on_vacation_not_chosen"
       ]
     }
   ]
