@@ -30,6 +30,8 @@ const countdownOverlay = document.getElementById("countdownOverlay");
 const countdownValue = document.getElementById("countdownValue");
 const bottomCurtain = document.getElementById("bottomCurtain");
 const simulationShell = document.getElementById("simulationShell");
+const speedSlider = document.getElementById("speedSlider");
+const speedValue = document.getElementById("speedValue");
 // State
 let paused = true;
 let autoPaused = false;
@@ -37,7 +39,7 @@ let timelineOffset = 0;
 let lastMonthIndex = -1; // Track which month we're on
 let revealStarted = false;
 let simulationStarted = false;
-const scrollSpeed = 1.0;
+let scrollSpeed = 1.0;
 // Setup camera controls
 setupCameraControls(canvas);
 // Pause/Resume handlers
@@ -87,6 +89,17 @@ resetBtn.addEventListener("click", () => {
     timelineOffset = 0; // Reset time back to January 2025
     updateStatsTable();
 });
+// Speed control
+speedSlider === null || speedSlider === void 0 ? void 0 : speedSlider.addEventListener("input", () => {
+    const value = parseFloat(speedSlider.value);
+    scrollSpeed = isNaN(value) ? 1.0 : value;
+    if (speedValue) {
+        speedValue.textContent = `${scrollSpeed.toFixed(1)}x`;
+    }
+});
+if (speedValue && speedSlider) {
+    speedValue.textContent = `${parseFloat(speedSlider.value || "1").toFixed(1)}x`;
+}
 function resizeCanvas() {
     if (canvasContainer) {
         const containerWidth = canvasContainer.clientWidth;
