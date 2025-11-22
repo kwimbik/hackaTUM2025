@@ -342,11 +342,12 @@ def extract_most_risky_summary(path: str | Path) -> Dict[str, Any]:
             }, severity)
 
     if best is None:
-        return {
-            "text": "No particularly dangerous events in this file.",
-            "data": None
-        }
 
+        # return {
+        #     "text": "No particularly dangerous events in this file.",
+        #     "data": None
+        # }
+        return None
     return best[0]
 
 

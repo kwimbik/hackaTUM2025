@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import argparse
+import os
+import requests
+import time
 import json
 import shutil
 from pathlib import Path
 from typing import Any, Dict
+
+from interesting_event_explanation import extract_most_risky_summary
 
 from config_models import GlobalConfig, UserConfig
 from simulation import (
@@ -145,8 +150,21 @@ def main() -> None:
     )
 
     print("=== Final worlds: combined scenario ===")
-    print(json.dumps(summarize_worlds(combined_worlds, timestamp=num_layers), indent=2))
+    
+    summaries = (json.dumps(summarize_worlds(combined_worlds, timestamp=num_layers), indent=2))
+    directory = "output"
 
+    for name in os.listdir(directory):
+        print(name)
+        summary = extract_most_risky_summary(directory + '/' + name)
+       #  res = json.dumps(summary, indent=2)
+
+        if summary is not None:
+            time.sleep(0.1)
+            url = "http://localhost:3000/api/event"
+            headers = {"Content-Type": "application/json"}
+            response = requests.post(url, headers=headers, json=summary)
+            print(response.json())
 
 if __name__ == "__main__":
     main()
