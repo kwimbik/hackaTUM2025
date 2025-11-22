@@ -1,0 +1,11 @@
+{
+  "name": "stickman-life",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --target ES6 --module ES6 --outDir dist",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
