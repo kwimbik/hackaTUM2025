@@ -1,14 +1,16 @@
 ﻿{
-  "event_names": [
+  "events": [
     "nothing",
-    "marry",
     "divorce",
     "income_increase",
     "income_decrease",
-    "kid",
     "sickness",
     "layoff",
-    "new_job",
+    "new_job"
+  ],
+  "choices": [
+    "marry",
+    "kid",
     "go_on_vacation",
     "buy_insurance"
   ],

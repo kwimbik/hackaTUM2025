@@ -19,6 +19,7 @@ class Event:
     name: str
     handler: HandlerFn
     description: str = ""
+    is_choice: bool = False  # True when this represents a user decision.
 
     def apply(self, world: WorldState, global_cfg: GlobalConfig, user_cfg: UserConfig) -> WorldState:
         """Apply the event logic to a world."""
@@ -106,21 +107,26 @@ def _buy_insurance(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldS
 
 
 EVENT_REGISTRY: Dict[str, Event] = {
-    "nothing": Event("nothing", _nothing, description="No change this layer."),
-    "marry": Event("marry", _marry, description="Get married if currently single."),
-    "divorce": Event("divorce", _divorce, description="Divorce if currently married."),
-    "income_increase": Event("income_increase", _income_increase, description="Income grows by 10%."),
-    "income_decrease": Event("income_decrease", _income_decrease, description="Income falls by 10%."),
-    "kid": Event("kid", _kid, description="Family gains a child."),
-    "sickness": Event("sickness", _sickness, description="Temporary health setback."),
-    "layoff": Event("layoff", _layoff, description="Lose job and income halves."),
-    "new_job": Event("new_job", _new_job, description="New job with 20% higher income."),
-    "go_on_vacation": Event("go_on_vacation", _go_on_vacation, description="Spend on vacation; small income dip."),
-    "buy_insurance": Event("buy_insurance", _buy_insurance, description="Purchase insurance coverage."),
+    "nothing": Event("nothing", _nothing, description="No change this layer.", is_choice=False),
+    "marry": Event("marry", _marry, description="Get married if currently single.", is_choice=True),
+    "divorce": Event("divorce", _divorce, description="Divorce if currently married.", is_choice=False),
+    "income_increase": Event("income_increase", _income_increase, description="Income grows by 10%.", is_choice=False),
+    "income_decrease": Event("income_decrease", _income_decrease, description="Income falls by 10%.", is_choice=False),
+    "kid": Event("kid", _kid, description="Family gains a child.", is_choice=True),
+    "sickness": Event("sickness", _sickness, description="Temporary health setback.", is_choice=False),
+    "layoff": Event("layoff", _layoff, description="Lose job and income halves.", is_choice=False),
+    "new_job": Event("new_job", _new_job, description="New job with 20% higher income.", is_choice=False),
+    "go_on_vacation": Event("go_on_vacation", _go_on_vacation, description="Spend on vacation; small income dip.", is_choice=True),
+    "buy_insurance": Event("buy_insurance", _buy_insurance, description="Purchase insurance coverage.", is_choice=True),
 }
 
 # Defaults used for sampling during simulation.
-DEFAULT_EVENT_NAMES = tuple(EVENT_REGISTRY.keys())
+DEFAULT_EVENT_NAMES = tuple(
+    name for name, event in EVENT_REGISTRY.items() if not event.is_choice
+)
+DEFAULT_CHOICE_NAMES = tuple(
+    name for name, event in EVENT_REGISTRY.items() if event.is_choice
+)
 
 
 def event_probability(event: Event, world: WorldState, global_cfg: GlobalConfig, user_cfg: UserConfig) -> float:

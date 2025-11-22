@@ -27,16 +27,18 @@ DEFAULT_USER_CONFIG: Dict[str, Any] = {
 }
 
 DEFAULT_SETTINGS: Dict[str, Any] = {
-    "event_names": [
+    "events": [
         "nothing",
-        "marry",
         "divorce",
         "income_increase",
         "income_decrease",
-        "kid",
         "sickness",
         "layoff",
         "new_job",
+    ],
+    "choices": [
+        "marry",
+        "kid",
         "go_on_vacation",
         "buy_insurance",
     ],
@@ -56,7 +58,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--global-config", type=Path, help="Path to global config JSON.")
     parser.add_argument("--user-config", type=Path, help="Path to user config JSON.")
     parser.add_argument("--layers", type=int, default=None, help="Number of simulation layers (overrides settings).")
-    parser.add_argument("--settings", type=Path, help="Path to simulation settings JSON (events, params).")
+    parser.add_argument("--settings", type=Path, help="Path to simulation settings JSON (events, choices, params).")
     return parser.parse_args()
 
 
@@ -82,7 +84,8 @@ def main() -> None:
     global_cfg = GlobalConfig.from_dict(global_data)
     user_cfg = UserConfig.from_dict(user_data)
 
-    event_names = settings_data.get("event_names", DEFAULT_SETTINGS["event_names"])
+    event_names = settings_data.get("events", DEFAULT_SETTINGS["events"])
+    choice_names = settings_data.get("choices", DEFAULT_SETTINGS["choices"])
     num_layers = args.layers if args.layers is not None else settings_data.get("num_layers", DEFAULT_SETTINGS["num_layers"])
     loan_amount = float(settings_data.get("loan_amount", DEFAULT_SETTINGS["loan_amount"]))
 
@@ -92,6 +95,7 @@ def main() -> None:
         take_loan_at_layer=0,
         num_layers=num_layers,
         event_names=event_names,
+        choice_names=choice_names,
         loan_amount=loan_amount,
     )
     loan_next_year_worlds = run_scenario(
@@ -100,6 +104,7 @@ def main() -> None:
         take_loan_at_layer=1,
         num_layers=num_layers,
         event_names=event_names,
+        choice_names=choice_names,
         loan_amount=loan_amount,
     )
 

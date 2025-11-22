@@ -8,7 +8,13 @@ from dataclasses import asdict
 from typing import Iterable, List, Sequence
 
 from config_models import GlobalConfig, UserConfig
-from events import DEFAULT_EVENT_NAMES, EVENT_REGISTRY, Event, event_probability
+from events import (
+    DEFAULT_CHOICE_NAMES,
+    DEFAULT_EVENT_NAMES,
+    EVENT_REGISTRY,
+    Event,
+    event_probability,
+)
 from world_state import WorldState
 
 
@@ -54,15 +60,22 @@ def _branch_worlds_on_event(
     global_cfg: GlobalConfig,
     user_cfg: UserConfig,
 ) -> List[WorldState]:
-    """Create worlds for the event happening vs not happening."""
-    _ = event_probability(event, world, global_cfg, user_cfg)  # TODO: use once probability-based sampling is added.
-    if event.name == "nothing":
-        return [event.apply(world, global_cfg, user_cfg)]
+    """
+    Apply an event or choice.
 
-    happens_world = event.apply(world, global_cfg, user_cfg)
-    not_happens_history = world.trajectory_events + [f"{event.name}_not_happened"]
-    not_happens_world = world.copy_with_updates(trajectory_events=not_happens_history)
-    return [happens_world, not_happens_world]
+    - For choices: branch into yes/no worlds.
+    - For events: apply directly without branching (future logic may add reactions).
+    """
+    _ = event_probability(event, world, global_cfg, user_cfg)  # TODO: use when probability model is added.
+
+    if event.is_choice:
+        happens_world = event.apply(world, global_cfg, user_cfg)
+        not_happens_history = world.trajectory_events + [f"{event.name}_not_chosen"]
+        not_happens_world = world.copy_with_updates(trajectory_events=not_happens_history)
+        return [happens_world, not_happens_world]
+
+    # Events are applied directly (no split for now).
+    return [event.apply(world, global_cfg, user_cfg)]
 
 
 def simulate_layers(
@@ -71,6 +84,7 @@ def simulate_layers(
     initial_worlds: Sequence[WorldState] | None = None,
     num_layers: int = 10,
     event_names: Iterable[str] = DEFAULT_EVENT_NAMES,
+    choice_names: Iterable[str] = DEFAULT_CHOICE_NAMES,
     rng: random.Random | None = None,
 ) -> List[WorldState]:
     """Run the branching simulation for N layers and return resulting worlds."""
@@ -79,9 +93,11 @@ def simulate_layers(
         create_initial_world(global_cfg, user_cfg)
     ]
     events: List[Event] = [EVENT_REGISTRY[name] for name in event_names]
+    choices: List[Event] = [EVENT_REGISTRY[name] for name in choice_names]
+    selectable = events + choices
 
     for _layer_idx in range(num_layers):
-        sampled_event = random_gen.choice(events)
+        sampled_event = random_gen.choice(selectable)
         next_worlds: List[WorldState] = []
         for world in active_worlds:
             next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
@@ -95,6 +111,7 @@ def run_scenario(
     take_loan_at_layer: int,
     num_layers: int = 10,
     event_names: Iterable[str] = DEFAULT_EVENT_NAMES,
+    choice_names: Iterable[str] = DEFAULT_CHOICE_NAMES,
     rng: random.Random | None = None,
     loan_amount: float = 200_000.0,
 ) -> List[WorldState]:
@@ -102,11 +119,13 @@ def run_scenario(
     random_gen = rng or random.Random()
     current_worlds = [create_initial_world(global_cfg, user_cfg)]
     events: List[Event] = [EVENT_REGISTRY[name] for name in event_names]
+    choices: List[Event] = [EVENT_REGISTRY[name] for name in choice_names]
+    selectable = events + choices
 
     for layer_idx in range(num_layers):
         if layer_idx == take_loan_at_layer:
             current_worlds = [apply_take_loan(w, layer_idx, global_cfg, amount=loan_amount) for w in current_worlds]
-        sampled_event = random_gen.choice(events)
+        sampled_event = random_gen.choice(selectable)
         next_worlds: List[WorldState] = []
         for world in current_worlds:
             next_worlds.extend(_branch_worlds_on_event(world, sampled_event, global_cfg, user_cfg))
