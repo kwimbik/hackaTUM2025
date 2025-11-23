@@ -28,6 +28,8 @@ const speedSlider = document.getElementById("speedSlider") as HTMLInputElement |
 const speedValue = document.getElementById("speedValue") as HTMLElement | null;
 const endScreen = document.getElementById("endScreen") as HTMLElement | null;
 const endSubtitle = document.getElementById("endSubtitle") as HTMLElement | null;
+const winningBadge = document.getElementById("winningBadge") as HTMLElement | null;
+const scoreRows = document.getElementById("scoreRows") as HTMLElement | null;
 const restartBtn = document.getElementById("restartBtn") as HTMLButtonElement | null;
 
 // State
@@ -75,6 +77,64 @@ async function loadSimulationConfig() {
   }
 }
 loadSimulationConfig();
+
+function formatCurrency(value: number): string {
+  if (!isFinite(value)) return "-";
+  return `$${Math.round(value).toLocaleString("en-US")}`;
+}
+
+function renderFinalScoreboard() {
+  if (!scoreRows) return;
+  scoreRows.innerHTML = "";
+  const sorted = [...branches]
+    .sort((a, b) => (b.money ?? 0) - (a.money ?? 0))
+    .slice(0, 10);
+  sorted.forEach((branch, idx) => {
+    const row = document.createElement("div");
+    row.className = "score-row";
+    const loan = branch.currentLoan ?? 0;
+    const wage = branch.monthlyWage ?? 0;
+    const kids = branch.childCount ?? 0;
+    const status = branch.maritalStatus || "Single";
+    row.innerHTML = `
+      <div class="score-rank">${idx + 1}</div>
+      <div>
+        <div class="score-name">
+          <span>${branch.name}</span>
+          ${idx === 0 ? '<span class="score-winning">Top player</span>' : ''}
+        </div>
+        <div class="score-metrics">
+          <div class="score-metric">
+            <span>Money</span>
+            <strong>${formatCurrency(branch.money || 0)}</strong>
+          </div>
+          <div class="score-metric">
+            <span>Monthly wage</span>
+            <strong>${formatCurrency(wage)}</strong>
+          </div>
+          <div class="score-metric">
+            <span>Loan</span>
+            <strong>${formatCurrency(loan)}</strong>
+          </div>
+          <div class="score-metric">
+            <span>Family</span>
+            <strong>${status}${kids > 0 ? ` | ${kids} kid${kids > 1 ? "s" : ""}` : ""}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+    scoreRows.appendChild(row);
+  });
+
+  if (winningBadge) {
+    if (sorted.length > 0) {
+      winningBadge.style.display = "inline-flex";
+      winningBadge.textContent = `${sorted[0].name} leads`;
+    } else {
+      winningBadge.style.display = "none";
+    }
+  }
+}
 
 // Setup camera controls
 setupCameraControls(canvas);
@@ -153,6 +213,12 @@ function resetSimulation() {
   updateStatsTable();
   if (endScreen) {
     endScreen.classList.add("hidden");
+  }
+  if (scoreRows) {
+    scoreRows.innerHTML = "";
+  }
+  if (winningBadge) {
+    winningBadge.style.display = "none";
   }
   if (resumeBtn) {
     resumeBtn.disabled = false;
@@ -284,6 +350,8 @@ function showEndScreen() {
   if (endSubtitle) {
     endSubtitle.textContent = `Simulated ${maxMonths} months. Restart to run again.`;
   }
+  // Render final stats before revealing
+  renderFinalScoreboard();
   if (endScreen) {
     endScreen.classList.remove("hidden");
   }
@@ -381,7 +449,7 @@ function handleExternalEvent(event: ExternalEvent) {
     ttsDuration: data.ttsDuration
   };
   
-  console.log(`✓ Event data queued to apply when stickman reaches it:`);
+  console.log(`Event data queued to apply when stickman reaches it:`);
   console.log(`  - Name: ${apiData.name || '(unchanged)'}`);
   console.log(`  - Monthly Wage: ${apiData.monthlyWage}`);
   console.log(`  - Current Loan: ${apiData.currentLoan}`);
@@ -404,7 +472,7 @@ function handleExternalEvent(event: ExternalEvent) {
   );
   
   if (eventQueued) {
-    console.log(`✓ Event "${data.recent_event}" queued for ${data.year}-${data.month}`);
+    console.log(`Event "${data.recent_event}" queued for ${data.year}-${data.month}`);
     console.log(`  - Will be materialized when on-camera and branch exists`);
   } else {
     console.warn(`Failed to queue event "${data.recent_event}" - invalid event name`);

@@ -35,6 +35,8 @@ const speedSlider = document.getElementById("speedSlider");
 const speedValue = document.getElementById("speedValue");
 const endScreen = document.getElementById("endScreen");
 const endSubtitle = document.getElementById("endSubtitle");
+const winningBadge = document.getElementById("winningBadge");
+const scoreRows = document.getElementById("scoreRows");
 const restartBtn = document.getElementById("restartBtn");
 // State
 let paused = true;
@@ -80,6 +82,65 @@ function loadSimulationConfig() {
     });
 }
 loadSimulationConfig();
+function formatCurrency(value) {
+    if (!isFinite(value))
+        return "-";
+    return `$${Math.round(value).toLocaleString("en-US")}`;
+}
+function renderFinalScoreboard() {
+    if (!scoreRows)
+        return;
+    scoreRows.innerHTML = "";
+    const sorted = [...branches]
+        .sort((a, b) => { var _a, _b; return ((_a = b.money) !== null && _a !== void 0 ? _a : 0) - ((_b = a.money) !== null && _b !== void 0 ? _b : 0); })
+        .slice(0, 10);
+    sorted.forEach((branch, idx) => {
+        var _a, _b, _c;
+        const row = document.createElement("div");
+        row.className = "score-row";
+        const loan = (_a = branch.currentLoan) !== null && _a !== void 0 ? _a : 0;
+        const wage = (_b = branch.monthlyWage) !== null && _b !== void 0 ? _b : 0;
+        const kids = (_c = branch.childCount) !== null && _c !== void 0 ? _c : 0;
+        const status = branch.maritalStatus || "Single";
+        row.innerHTML = `
+      <div class="score-rank">${idx + 1}</div>
+      <div>
+        <div class="score-name">
+          <span>${branch.name}</span>
+          ${idx === 0 ? '<span class="score-winning">Top player</span>' : ''}
+        </div>
+        <div class="score-metrics">
+          <div class="score-metric">
+            <span>Money</span>
+            <strong>${formatCurrency(branch.money || 0)}</strong>
+          </div>
+          <div class="score-metric">
+            <span>Monthly wage</span>
+            <strong>${formatCurrency(wage)}</strong>
+          </div>
+          <div class="score-metric">
+            <span>Loan</span>
+            <strong>${formatCurrency(loan)}</strong>
+          </div>
+          <div class="score-metric">
+            <span>Family</span>
+            <strong>${status}${kids > 0 ? ` | ${kids} kid${kids > 1 ? "s" : ""}` : ""}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+        scoreRows.appendChild(row);
+    });
+    if (winningBadge) {
+        if (sorted.length > 0) {
+            winningBadge.style.display = "inline-flex";
+            winningBadge.textContent = `${sorted[0].name} leads`;
+        }
+        else {
+            winningBadge.style.display = "none";
+        }
+    }
+}
 // Setup camera controls
 setupCameraControls(canvas);
 // Pause/Resume handlers
@@ -149,6 +210,12 @@ function resetSimulation() {
     updateStatsTable();
     if (endScreen) {
         endScreen.classList.add("hidden");
+    }
+    if (scoreRows) {
+        scoreRows.innerHTML = "";
+    }
+    if (winningBadge) {
+        winningBadge.style.display = "none";
     }
     if (resumeBtn) {
         resumeBtn.disabled = false;
@@ -276,6 +343,8 @@ function showEndScreen() {
     if (endSubtitle) {
         endSubtitle.textContent = `Simulated ${maxMonths} months. Restart to run again.`;
     }
+    // Render final stats before revealing
+    renderFinalScoreboard();
     if (endScreen) {
         endScreen.classList.remove("hidden");
     }
@@ -359,7 +428,7 @@ function handleExternalEvent(event) {
         ttsAudioId: data.ttsAudioId,
         ttsDuration: data.ttsDuration
     };
-    console.log(`✓ Event data queued to apply when stickman reaches it:`);
+    console.log(`Event data queued to apply when stickman reaches it:`);
     console.log(`  - Name: ${apiData.name || '(unchanged)'}`);
     console.log(`  - Monthly Wage: ${apiData.monthlyWage}`);
     console.log(`  - Current Loan: ${apiData.currentLoan}`);
@@ -374,7 +443,7 @@ function handleExternalEvent(event) {
     timelineOffset, apiData // Pass data to be applied when event triggers
     );
     if (eventQueued) {
-        console.log(`✓ Event "${data.recent_event}" queued for ${data.year}-${data.month}`);
+        console.log(`Event "${data.recent_event}" queued for ${data.year}-${data.month}`);
         console.log(`  - Will be materialized when on-camera and branch exists`);
     }
     else {
