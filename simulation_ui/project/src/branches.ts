@@ -30,8 +30,11 @@ function calculateInitialStats(): BranchStats {
     return {
       money: 50000,
       monthlyWage: 3500,
+      currentLoan: 0,
       maritalStatus: 'Single',
-      childCount: 0
+      childCount: 0,
+      healthStatus: 'Healthy',
+      name: 'Person'
     };
   }
   
@@ -69,8 +72,11 @@ function calculateInitialStats(): BranchStats {
   return {
     money: totalSavings,
     monthlyWage: monthlyWage,
+    currentLoan: 0,
     maritalStatus: onboardingData.familyStatus === 'married' ? 'Married' : 'Single',
-    childCount: 0
+    childCount: 0,
+    healthStatus: 'Healthy',
+    name: 'Person'
   };
 }
 
@@ -84,8 +90,11 @@ export function inheritStats(parent: Branch): BranchStats {
   return {
     money: parent.money,
     monthlyWage: parent.monthlyWage,
+    currentLoan: parent.currentLoan,
     maritalStatus: parent.maritalStatus,
-    childCount: parent.childCount
+    childCount: parent.childCount,
+    healthStatus: parent.healthStatus,
+    name: parent.name
   };
 }
 
@@ -146,6 +155,7 @@ export function initBranches(timelineOffset: number) {
   branches = [
     {
       id: 0,
+      name: statsPrimary.name || 'Branch 0',
       slot: 0,
       startYOffset: offsetPrimary,
       targetYOffset: offsetPrimary,
@@ -153,11 +163,14 @@ export function initBranches(timelineOffset: number) {
       createdAt: timelineOffset,
       money: statsPrimary.money,
       monthlyWage: statsPrimary.monthlyWage,
+      currentLoan: statsPrimary.currentLoan,
       maritalStatus: statsPrimary.maritalStatus,
-      childCount: statsPrimary.childCount
+      childCount: statsPrimary.childCount,
+      healthStatus: statsPrimary.healthStatus
     },
     {
       id: 1,
+      name: statsSecondary.name || 'Branch 1',
       slot: 1,
       startYOffset: offsetSecondary,
       targetYOffset: offsetSecondary,
@@ -165,8 +178,10 @@ export function initBranches(timelineOffset: number) {
       createdAt: timelineOffset,
       money: statsSecondary.money,
       monthlyWage: statsSecondary.monthlyWage,
+      currentLoan: statsSecondary.currentLoan,
       maritalStatus: statsSecondary.maritalStatus,
-      childCount: statsSecondary.childCount
+      childCount: statsSecondary.childCount,
+      healthStatus: statsSecondary.healthStatus
     }
   ];
 }
@@ -187,6 +202,7 @@ export function resetBranches(timelineOffset: number) {
     const originalGif = document.getElementById("stickmanGif") as HTMLImageElement;
     branches.push({
       id: 0,
+      name: statsPrimary.name || 'Branch 0',
       slot: 0,
       startYOffset: offsetPrimary,
       targetYOffset: offsetPrimary,
@@ -194,25 +210,31 @@ export function resetBranches(timelineOffset: number) {
       createdAt: timelineOffset,
       money: statsPrimary.money,
       monthlyWage: statsPrimary.monthlyWage,
+      currentLoan: statsPrimary.currentLoan,
       maritalStatus: statsPrimary.maritalStatus,
-      childCount: statsPrimary.childCount
+      childCount: statsPrimary.childCount,
+      healthStatus: statsPrimary.healthStatus
     });
   } else {
     branches[0].id = 0;
+    branches[0].name = statsPrimary.name || 'Branch 0';
     branches[0].slot = 0;
     branches[0].startYOffset = offsetPrimary;
     branches[0].targetYOffset = offsetPrimary;
     branches[0].createdAt = timelineOffset;
     branches[0].money = statsPrimary.money;
     branches[0].monthlyWage = statsPrimary.monthlyWage;
+    branches[0].currentLoan = statsPrimary.currentLoan;
     branches[0].maritalStatus = statsPrimary.maritalStatus;
     branches[0].childCount = statsPrimary.childCount;
+    branches[0].healthStatus = statsPrimary.healthStatus;
     branches = [branches[0]];
   }
 
   const secondGif = createStickmanGif();
   branches.push({
     id: 1,
+    name: statsSecondary.name || 'Branch 1',
     slot: 1,
     startYOffset: offsetSecondary,
     targetYOffset: offsetSecondary,
@@ -220,8 +242,10 @@ export function resetBranches(timelineOffset: number) {
     createdAt: timelineOffset,
     money: statsSecondary.money,
     monthlyWage: statsSecondary.monthlyWage,
+    currentLoan: statsSecondary.currentLoan,
     maritalStatus: statsSecondary.maritalStatus,
-    childCount: statsSecondary.childCount
+    childCount: statsSecondary.childCount,
+    healthStatus: statsSecondary.healthStatus
   });
 }
 
@@ -263,6 +287,7 @@ export function splitAllBranches(timelineOffset: number) {
     
     newBranches.push({
       id: topId,
+      name: stats1.name || `Branch ${topId}`,
       slot: slotCounter++,
       startYOffset: currentYOffset,
       targetYOffset: topTarget,
@@ -270,12 +295,15 @@ export function splitAllBranches(timelineOffset: number) {
       createdAt: timelineOffset,
       money: stats1.money,
       monthlyWage: stats1.monthlyWage,
+      currentLoan: stats1.currentLoan,
       maritalStatus: stats1.maritalStatus,
-      childCount: stats1.childCount
+      childCount: stats1.childCount,
+      healthStatus: stats1.healthStatus
     });
     
     newBranches.push({
       id: bottomId,
+      name: stats2.name || `Branch ${bottomId}`,
       slot: slotCounter++,
       startYOffset: currentYOffset,
       targetYOffset: bottomTarget,
@@ -283,8 +311,10 @@ export function splitAllBranches(timelineOffset: number) {
       createdAt: timelineOffset,
       money: stats2.money,
       monthlyWage: stats2.monthlyWage,
+      currentLoan: stats2.currentLoan,
       maritalStatus: stats2.maritalStatus,
-      childCount: stats2.childCount
+      childCount: stats2.childCount,
+      healthStatus: stats2.healthStatus
     });
     
     branch.stickmanGif.remove();
@@ -331,20 +361,25 @@ export function splitSpecificBranch(branchId: number, timelineOffset: number): n
   const stats1 = {
     money: branchToSplit.money,
     monthlyWage: branchToSplit.monthlyWage,
+    currentLoan: branchToSplit.currentLoan,
     maritalStatus: branchToSplit.maritalStatus,
-    childCount: branchToSplit.childCount
+    childCount: branchToSplit.childCount,
+    healthStatus: branchToSplit.healthStatus
   };
   const stats2 = {
     money: branchToSplit.money,
     monthlyWage: branchToSplit.monthlyWage,
+    currentLoan: branchToSplit.currentLoan,
     maritalStatus: branchToSplit.maritalStatus,
-    childCount: branchToSplit.childCount
+    childCount: branchToSplit.childCount,
+    healthStatus: branchToSplit.healthStatus
   };
   
   for (let i = 0; i < branches.length; i++) {
     if (i === branchIndex) {
       newBranches.push({
         id: topId,
+        name: branchToSplit.name || `Branch ${topId}`,
         slot: slotCounter++,
         startYOffset: currentYOffset,
         targetYOffset: topTarget,
@@ -352,12 +387,15 @@ export function splitSpecificBranch(branchId: number, timelineOffset: number): n
         createdAt: timelineOffset,
         money: stats1.money,
         monthlyWage: stats1.monthlyWage,
+        currentLoan: stats1.currentLoan,
         maritalStatus: stats1.maritalStatus,
-        childCount: stats1.childCount
+        childCount: stats1.childCount,
+        healthStatus: stats1.healthStatus
       });
       
       newBranches.push({
         id: bottomId,
+        name: branchToSplit.name || `Branch ${bottomId}`,
         slot: slotCounter++,
         startYOffset: currentYOffset,
         targetYOffset: bottomTarget,
@@ -365,8 +403,10 @@ export function splitSpecificBranch(branchId: number, timelineOffset: number): n
         createdAt: timelineOffset,
         money: stats2.money,
         monthlyWage: stats2.monthlyWage,
+        currentLoan: stats2.currentLoan,
         maritalStatus: stats2.maritalStatus,
-        childCount: stats2.childCount
+        childCount: stats2.childCount,
+        healthStatus: stats2.healthStatus
       });
       
       branches[i].stickmanGif.remove();

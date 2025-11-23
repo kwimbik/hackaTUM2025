@@ -294,8 +294,8 @@
         column-gap: 12px;
         row-gap: 6px;
         color: #0b1329;
-        padding: 14px 16px;
-        border-radius: 14px;
+        padding: 10px 12px;
+        border-radius: 12px;
         border: 1px solid rgba(15, 23, 42, 0.08);
         box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
         backdrop-filter: blur(10px) saturate(1.1);
@@ -320,7 +320,7 @@
       .event-popup__icon {
         grid-row: 1 / span 2;
         align-self: start;
-        font-size: 28px;
+        font-size: 30px;
         filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
       }
       .event-popup__eyebrow {
@@ -331,23 +331,17 @@
         color: rgba(255, 255, 255, 0.85);
       }
       .event-popup__title {
-        font-size: 18px;
-        font-weight: 800;
+        font-size: 20px;
+        font-weight: 900;
         letter-spacing: -0.2px;
         color: #0b1329;
       }
       .event-popup__body {
         grid-column: 1 / span 2;
         margin: 0;
-        font-size: 14px;
-        line-height: 1.5;
-        color: rgba(11, 19, 41, 0.95);
-      }
-      .event-popup__meta {
-        grid-column: 1 / span 2;
-        font-size: 12px;
-        color: rgba(11, 19, 41, 0.8);
-        margin-top: 2px;
+        font-size: 16px;
+        line-height: 1.4;
+        color: rgba(11, 19, 41, 0.98);
       }
     </style>
   </head>
@@ -442,11 +436,13 @@
           <table class="stats-table">
             <thead>
               <tr>
-                <th>Branch</th>
+                <th>Name</th>
                 <th>Money</th>
                 <th>Wage</th>
+                <th>Loan</th>
                 <th>Status</th>
                 <th>Kids</th>
+                <th>Health</th>
               </tr>
             </thead>
             <tbody id="statsTableBody"></tbody>

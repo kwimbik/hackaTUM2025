@@ -136,9 +136,9 @@ const gradientPalette = [
 ];
 
 const sizeBuckets = [
-  { name: 'compact', min: 220, max: 260 },
-  { name: 'regular', min: 260, max: 320 },
-  { name: 'wide', min: 320, max: 420 }
+  { name: 'compact', min: 180, max: 220 },
+  { name: 'regular', min: 200, max: 240 },
+  { name: 'wide', min: 220, max: 260 }
 ];
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -218,19 +218,6 @@ export function showEventPopup(eventName: string, info: PopupInfo = {}) {
   body.className = "event-popup__body";
   body.textContent = headline;
 
-  const meta = document.createElement("div");
-  meta.className = "event-popup__meta";
-  const metaBits: string[] = [];
-  if (info.description) metaBits.push(info.description);
-  if (info.apiData?.monthlyWage) metaBits.push(`Income ${info.apiData.monthlyWage.toFixed(0)}/mo`);
-  if (info.apiData?.maritalStatus) metaBits.push(info.apiData.maritalStatus);
-  if (info.apiData?.childCount !== undefined) metaBits.push(`${info.apiData.childCount} kid${info.apiData.childCount === 1 ? '' : 's'}`);
-  if (metaBits.length > 0) {
-    meta.textContent = metaBits.join(" • ");
-  } else {
-    meta.textContent = "Rolling with the timeline.";
-  }
-
   if (info.reactionContent) {
     const glyph = document.createElement("div");
     glyph.className = "event-popup__icon";
@@ -241,7 +228,6 @@ export function showEventPopup(eventName: string, info: PopupInfo = {}) {
   popup.appendChild(eyebrow);
   popup.appendChild(heading);
   popup.appendChild(body);
-  popup.appendChild(meta);
   layer.appendChild(popup);
 
   // Entrance animation

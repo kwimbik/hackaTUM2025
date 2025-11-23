@@ -40,31 +40,6 @@ let scrollSpeed = 1.0;
 // Setup camera controls
 setupCameraControls(canvas);
 
-async function persistOnboardingToSettings(onboardingData: OnboardingData) {
-  try {
-    const response = await fetch("http://localhost:3000/api/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        loanType: onboardingData.loanType,
-        loanYears: onboardingData.loanYears,
-        age: onboardingData.age,
-        education: onboardingData.education,
-        familyStatus: onboardingData.familyStatus,
-        careerLength: onboardingData.careerLength
-      })
-    });
-    if (!response.ok) {
-      console.warn("Settings update failed with status", response.status);
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.warn("Unable to persist onboarding selections to settings.json:", err);
-    return false;
-  }
-}
-
 // Pause/Resume handlers
 pauseBtn.addEventListener("click", () => {
   paused = true;
@@ -155,7 +130,7 @@ function finalizeReveal() {
   paused = false;
 }
 
-async function startRevealAnimation() {
+function startRevealAnimation() {
   if (revealStarted) return;
   revealStarted = true;
   paused = true;
@@ -176,12 +151,8 @@ async function startRevealAnimation() {
       careerLength: parseInt(formData.get('careerLength') as string || '5')
     };
     
-    console.log('Captured onboarding data:', onboardingData);
+    console.log('📋 Captured onboarding data:', onboardingData);
     setOnboardingData(onboardingData);
-    const persisted = await persistOnboardingToSettings(onboardingData);
-    if (!persisted) {
-      console.warn("Proceeding without confirmed settings write.");
-    }
   }
   
   if (preScreen) {
@@ -233,8 +204,9 @@ async function triggerBackendRun() {
 
 async function handleCtaClick() {
   if (revealStarted) return;
-  await startRevealAnimation();
-  await triggerBackendRun();
+  // Fire-and-forget backend run; do not block the countdown
+  triggerBackendRun();
+  startRevealAnimation();
 }
 
 ctaBtn?.addEventListener("click", handleCtaClick);
@@ -316,17 +288,23 @@ function handleExternalEvent(event: ExternalEvent) {
   
   // Prepare API data to be applied when event triggers (not immediately)
   const apiData = {
+    name: data.name,
     monthlyWage: data.current_income / 12, // Convert annual to monthly
+    currentLoan: data.current_loan || 0,
     maritalStatus: mapFamilyStatus(data.family_status),
     childCount: data.children,
+    healthStatus: data.health_status || 'Healthy',
     ttsAudioId: data.ttsAudioId,
     ttsDuration: data.ttsDuration
   };
   
   console.log(`✓ Event data queued to apply when stickman reaches it:`);
+  console.log(`  - Name: ${apiData.name || '(unchanged)'}`);
   console.log(`  - Monthly Wage: ${apiData.monthlyWage}`);
+  console.log(`  - Current Loan: ${apiData.currentLoan}`);
   console.log(`  - Marital Status: ${apiData.maritalStatus}`);
   console.log(`  - Children: ${apiData.childCount}`);
+  console.log(`  - Health Status: ${apiData.healthStatus}`);
   
   // Determine target branch (default to 0 if not specified)
   const targetBranchId = data.branchId !== undefined ? data.branchId : 0;

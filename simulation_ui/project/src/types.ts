@@ -1,6 +1,7 @@
 // Branch management with collision-free positioning and stats
 export interface Branch {
   id: number;
+  name: string; // Display name for the branch
   slot: number; // position in vertical stack (for ordering)
   startYOffset: number; // where the branch started (parent's position at split)
   targetYOffset: number; // final diverged position
@@ -9,8 +10,10 @@ export interface Branch {
   // Stats
   money: number;
   monthlyWage: number;
+  currentLoan: number;
   maritalStatus: string;
-  childCount: number; // Changed from hasChildren boolean to count
+  childCount: number;
+  healthStatus: string;
 }
 
 // Event system
@@ -25,9 +28,12 @@ export interface GameEvent {
   reactionType: 'emoji' | 'image'; // type of reaction to show
   reactionContent: string; // emoji character or path to PNG
   apiData?: {
+    name?: string;
     monthlyWage?: number;
+    currentLoan?: number;
     maritalStatus?: string;
     childCount?: number;
+    healthStatus?: string;
     ttsAudioId?: string; // Audio ID from audio service
     ttsDuration?: number; // TTS duration in seconds
   }; // Data from API to apply when event triggers
@@ -44,6 +50,9 @@ export interface Reaction {
 export interface BranchStats {
   money: number;
   monthlyWage: number;
+  currentLoan: number;
   maritalStatus: string;
   childCount: number;
+  healthStatus: string;
+  name?: string;
 }

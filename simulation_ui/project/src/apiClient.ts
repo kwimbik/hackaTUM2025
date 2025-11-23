@@ -6,6 +6,7 @@ export interface ExternalEventData {
   current_loan?: number;
   family_status: string;
   children: number;
+  health_status?: string;
   recent_event: string;
   year: number;
   month: number;

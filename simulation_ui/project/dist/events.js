@@ -219,9 +219,17 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                     console.log(`  Before: Money=${originalBranch.money}, Wage=${originalBranch.monthlyWage}, Status=${originalBranch.maritalStatus}, Kids=${originalBranch.childCount}`);
                     // Apply API data if present (before modifyBranch so event can override if needed)
                     if (event.apiData) {
+                        if (event.apiData.name !== undefined) {
+                            originalBranch.name = event.apiData.name;
+                            console.log(`  - Applied API name: ${event.apiData.name}`);
+                        }
                         if (event.apiData.monthlyWage !== undefined) {
                             originalBranch.monthlyWage = event.apiData.monthlyWage;
                             console.log(`  - Applied API wage: ${event.apiData.monthlyWage}`);
+                        }
+                        if (event.apiData.currentLoan !== undefined) {
+                            originalBranch.currentLoan = event.apiData.currentLoan;
+                            console.log(`  - Applied API loan: ${event.apiData.currentLoan}`);
                         }
                         if (event.apiData.maritalStatus !== undefined) {
                             originalBranch.maritalStatus = event.apiData.maritalStatus;
@@ -230,6 +238,10 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                         if (event.apiData.childCount !== undefined) {
                             originalBranch.childCount = event.apiData.childCount;
                             console.log(`  - Applied API children: ${event.apiData.childCount}`);
+                        }
+                        if (event.apiData.healthStatus !== undefined) {
+                            originalBranch.healthStatus = event.apiData.healthStatus;
+                            console.log(`  - Applied API health: ${event.apiData.healthStatus}`);
                         }
                     }
                     // Apply event's modifyBranch function if present
@@ -250,9 +262,17 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                     console.log(`  Before: Money=${branch.money}, Wage=${branch.monthlyWage}, Status=${branch.maritalStatus}, Kids=${branch.childCount}`);
                     // Apply API data if present (before modifyBranch so event can override if needed)
                     if (event.apiData) {
+                        if (event.apiData.name !== undefined) {
+                            branch.name = event.apiData.name;
+                            console.log(`  - Applied API name: ${event.apiData.name}`);
+                        }
                         if (event.apiData.monthlyWage !== undefined) {
                             branch.monthlyWage = event.apiData.monthlyWage;
                             console.log(`  - Applied API wage: ${event.apiData.monthlyWage}`);
+                        }
+                        if (event.apiData.currentLoan !== undefined) {
+                            branch.currentLoan = event.apiData.currentLoan;
+                            console.log(`  - Applied API loan: ${event.apiData.currentLoan}`);
                         }
                         if (event.apiData.maritalStatus !== undefined) {
                             branch.maritalStatus = event.apiData.maritalStatus;
@@ -261,6 +281,10 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                         if (event.apiData.childCount !== undefined) {
                             branch.childCount = event.apiData.childCount;
                             console.log(`  - Applied API children: ${event.apiData.childCount}`);
+                        }
+                        if (event.apiData.healthStatus !== undefined) {
+                            branch.healthStatus = event.apiData.healthStatus;
+                            console.log(`  - Applied API health: ${event.apiData.healthStatus}`);
                         }
                     }
                     // Apply event's modifyBranch function if present
