@@ -40,7 +40,7 @@ let lastMonthIndex = -1; // Track which month we're on
 let revealStarted = false;
 let simulationStarted = false;
 
-let scrollSpeed = 1.0;
+let scrollSpeed = 5.0;
 let maxMonths = 30; // default fallback if backend config is unavailable
 let endScreenShown = false;
 
@@ -197,7 +197,7 @@ speedSlider?.addEventListener("input", () => {
   }
 });
 if (speedValue && speedSlider) {
-  speedValue.textContent = `${parseFloat(speedSlider.value || "1").toFixed(1)}x`;
+  speedValue.textContent = `${parseFloat(speedSlider.value || "5").toFixed(1)}x`;
 }
 
 function resetSimulation() {
