@@ -13,6 +13,7 @@
     "family_status": "single",
     "career_length": 0,
     "starting_cash": 3000,
+    "education_status": "master_student",
     "property": {
       "type": "none",
       "rooms": 0,
@@ -20,6 +21,24 @@
     }
   },
   "events": [
+    {
+      "name": "graduate_masters",
+      "probability": 0.5,
+      "flag": 0,
+      "description": "Graduate from Master's degree (guaranteed, increases over time)"
+    },
+    {
+      "name": "first_job",
+      "probability": 0.5,
+      "flag": 0,
+      "description": "Get first professional job (guaranteed after graduation)"
+    },
+    {
+      "name": "interest_rate_change",
+      "probability": 0.1,
+      "flag": 0,
+      "description": "Market interest rates shift (affects all worlds)"
+    },
     {
       "name": "nothing",
       "probability": 0.0426,
@@ -40,9 +59,9 @@
     },
     {
       "name": "promotion",
-      "probability": 0.0106,
+      "probability": 0.003,
       "flag": 0,
-      "description": "Promotion with 10-20% salary jump"
+      "description": "Promotion with 10-20% salary jump (max once per year)"
     },
     {
       "name": "get_loan",

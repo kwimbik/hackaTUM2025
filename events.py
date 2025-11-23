@@ -54,6 +54,20 @@ def _is_event_feasible(event_name: str, world: WorldState, layer_idx: int | None
         return False
     if event_name == "death":
         return world.health_status != "deceased"
+    if event_name == "graduate_masters":
+        # Can only graduate once, and only if currently a student
+        return not world.metadata.get("graduated", False)
+    if event_name == "first_job":
+        # Can only get first job once, and only after graduating
+        return not world.metadata.get("has_first_job", False) and world.metadata.get("graduated", False)
+    if event_name == "promotion":
+        # Need to have a job first, and limit frequency (not within last 12 months)
+        if not world.metadata.get("has_first_job", False):
+            return False
+        months_since_promotion = _months_since(world, "promotion", layer_idx)
+        if months_since_promotion is not None and months_since_promotion < 12:
+            return False
+        return True
     if event_name == "marry":
         return world.family_status != "married"
     if event_name == "divorce":
@@ -90,6 +104,9 @@ def _is_event_feasible(event_name: str, world: WorldState, layer_idx: int | None
 
 
 BASE_EVENT_PROBABILITIES: Dict[str, float] = {
+    "graduate_masters": 0.15,  # Increases over time to 1.0
+    "first_job": 0.20,  # Increases over time to 1.0 after graduation
+    "interest_rate_change": 0.10,  # Regular market fluctuations
     "marry": 0.12,
     "divorce": 0.05,
     "have_first_child": 0.12,
@@ -384,8 +401,45 @@ def _change_career(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldS
     return _with_history(world, "change_career", current_income=new_income, metadata=new_meta)
 
 
+def _graduate_masters(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Graduate from Master's degree - ready to enter job market."""
+    new_meta = {**world.metadata, "education_status": "graduated", "graduated": True}
+    return _with_history(world, "graduate_masters", metadata=new_meta)
+
+
+def _first_job(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Get first real job - income jumps from student (12k) to professional salary.
+    Different archetypes get different salaries based on their path."""
+
+    # Base salary for first job (typical German Informatik/Ingenieur/BWL graduate)
+    # Path can vary: 45k (Leipzig/smaller city) to 65k (Munich/high cost)
+    base_salary = random.uniform(45000, 55000)
+
+    new_meta = {**world.metadata, "has_first_job": True, "employment": "employed"}
+    return _with_history(world, "first_job", current_income=base_salary, metadata=new_meta)
+
+
+def _interest_rate_change(world: WorldState, global_cfg: GlobalConfig, __: UserConfig) -> WorldState:
+    """Global interest rate shifts - affects future mortgages differently than existing ones.
+    This represents market conditions changing (ECB policy, inflation, etc.)"""
+
+    current_market_rate = world.metadata.get("market_interest_rate", global_cfg.mortgage_rate)
+
+    # Random walk: rates can go up or down by 0.1% to 0.5%
+    change = random.uniform(-0.005, 0.005)
+    new_market_rate = max(0.015, min(0.08, current_market_rate + change))  # Clamp between 1.5% and 8%
+
+    new_meta = {**world.metadata, "market_interest_rate": new_market_rate}
+
+    # Note: This doesn't affect existing locked mortgages, only new ones!
+    return _with_history(world, "interest_rate_change", metadata=new_meta)
+
+
 EVENT_REGISTRY: Dict[str, Event] = {
     "nothing": Event("nothing", _nothing, description="No change this layer.", is_choice=False),
+    "graduate_masters": Event("graduate_masters", _graduate_masters, description="Graduate from Master's degree.", is_choice=False),
+    "first_job": Event("first_job", _first_job, description="Get first professional job.", is_choice=False),
+    "interest_rate_change": Event("interest_rate_change", _interest_rate_change, description="Market interest rates shift.", is_choice=False),
     "marry": Event("marry", _marry, description="Get married if currently single.", is_choice=True),
     "divorce": Event("divorce", _divorce, description="Divorce if currently married.", is_choice=False),
     "minor_income": Event("minor_income", _minor_income, description="Small positive income event (100-500€).", is_choice=False),
@@ -440,6 +494,9 @@ def event_probability(
     The return value reflects both whether the event can happen and how likely it
     is given the world's current situation. This is intentionally lightweight and
     state-based rather than purely random.
+
+    Some events have INCREASING probability over time - the longer they don't happen,
+    the more likely they become (guaranteed events like graduation, first job, marriage).
     """
     if not _is_event_feasible(event.name, world, layer_idx):
         return 0.0
@@ -447,10 +504,35 @@ def event_probability(
     age = _age_at_layer(user_cfg, layer_idx)
     base = BASE_EVENT_PROBABILITIES.get(event.name, 0.3)
 
+    # Helper: calculate months since world creation for increasing probability
+    months_alive = layer_idx if layer_idx is not None else 0
+
+    # GUARANTEED EVENTS with increasing probability over time
+    # Graduate after ~6 months as a student
+    if event.name == "graduate_masters":
+        # Check both direct metadata and user_extras for education_status
+        edu_status = world.metadata.get("education_status") or world.metadata.get("user_extras", {}).get("education_status")
+        if edu_status == "master_student" and not world.metadata.get("graduated"):
+            # Starts at 0.1, increases by 0.15 per month, reaches 1.0 at month 6
+            return min(1.0, 0.1 + months_alive * 0.15)
+        return 0.0
+
+    # First job within ~3 months of graduation
+    if event.name == "first_job":
+        months_since_grad = _months_since(world, "graduate_masters", layer_idx)
+        if months_since_grad is not None and not world.metadata.get("has_first_job"):
+            # Starts at 0.2, increases by 0.25 per month, reaches 1.0 at month 3
+            return min(1.0, 0.2 + months_since_grad * 0.25)
+        return 0.0
+
     # Life-stage adjustments
     if event.name == "marry":
         if world.family_status == "single":
             base = 0.25 if 24 <= age <= 38 else 0.08
+            # Increase probability over time - add 0.01 per year unmarried after age 28
+            if age > 28:
+                years_past_28 = age - 28
+                base = min(0.95, base + years_past_28 * 0.01)
         elif world.family_status == "divorced":
             base = 0.12 if age < 55 else 0.03
     elif event.name == "divorce":

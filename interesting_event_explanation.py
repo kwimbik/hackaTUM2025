@@ -246,6 +246,57 @@ def compute_most_risky_event_for_world(
                  base + 1)
             )
 
+    elif recent_event == "graduate_masters":
+        base = 6
+        candidates.append(
+            (f"{name} graduated with a Master's degree this month — ready to enter the workforce!", base)
+        )
+        if thin_buffer or cash < 2000:
+            candidates.append(
+                (f"{name} graduated with very little savings — needs to find a job quickly.",
+                 base + 2)
+            )
+
+    elif recent_event == "first_job":
+        base = 8
+        candidates.append(
+            (f"{name} landed their first professional job this month — major career milestone!", base)
+        )
+        if income and income > 55000:
+            candidates.append(
+                (f"{name} got their first job with a great salary of {income:.0f}€ — strong start!",
+                 base + 2)
+            )
+        elif income and income < 45000:
+            candidates.append(
+                (f"{name} started their career with {income:.0f}€ — modest beginning.",
+                 base - 1)
+            )
+
+    elif recent_event == "interest_rate_change":
+        # This affects everyone differently based on their mortgage situation
+        market_rate = world.get("metadata", {}).get("market_interest_rate")
+        if market_rate is not None and market_rate > 0.045:
+            base = 5
+            candidates.append(
+                (f"Interest rates rose to {market_rate*100:.1f}% this month — mortgages becoming more expensive.", base)
+            )
+            if not has_loan:
+                candidates.append(
+                    (f"Rates jumped to {market_rate*100:.1f}% but {name} hasn't bought yet — timing matters!",
+                     base + 2)
+                )
+        elif market_rate is not None and market_rate < 0.035:
+            base = 5
+            candidates.append(
+                (f"Interest rates dropped to {market_rate*100:.1f}% — great time to buy!", base)
+            )
+            if has_loan:
+                candidates.append(
+                    (f"Rates fell to {market_rate*100:.1f}% but {name} already locked in — missed opportunity.",
+                     base + 1)
+                )
+
     elif recent_event == "go_on_vacation":
         base = 3
         candidates.append(
