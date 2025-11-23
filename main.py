@@ -8,6 +8,7 @@ import requests
 import time
 import json
 import shutil
+import random
 from pathlib import Path
 from typing import Any, Dict
 
@@ -64,6 +65,7 @@ def parse_args() -> argparse.Namespace:
         default=Path("settings.json"),
         help="Path to simulation settings JSON (required if not in default location).",
     )
+    parser.add_argument("--seed", type=int, default=None, help="Seed for deterministic simulation.")
     parser.add_argument("--output-dir", type=Path, default=Path("output"), help="Directory to store per-layer outputs.")
     return parser.parse_args()
 
@@ -119,6 +121,9 @@ def main() -> None:
     if num_layers_setting is None:
         raise ValueError("Settings must define 'num_layers'.")
     num_layers = args.layers if args.layers is not None else int(num_layers_setting)
+    seed_setting = settings_data.get("seed")
+    seed_value = args.seed if args.seed is not None else seed_setting
+    rng = random.Random(seed_value) if seed_value is not None else random.Random()
     loan_amount_setting = settings_data.get("loan_amount")
     if loan_amount_setting is None:
         raise ValueError("Settings must define 'loan_amount'.")
@@ -126,7 +131,13 @@ def main() -> None:
 
     id_provider = IdAllocator()
     name_provider = NameAllocator()
-    base_world = create_initial_world(global_cfg, user_cfg, name=name_provider.next_name(), world_id=id_provider.next_id())
+    base_world = create_initial_world(
+        global_cfg,
+        user_cfg,
+        name=name_provider.next_name(),
+        world_id=id_provider.next_id(),
+        rng=rng,
+    )
     loan_now_world = apply_take_loan(
         base_world,
         layer_index=0,
@@ -158,6 +169,7 @@ def main() -> None:
         scenario_name="combined",
         name_allocator=name_provider,
         id_allocator=id_provider,
+        rng=rng,
     )
 
     print("=== Final worlds: combined scenario ===")

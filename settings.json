@@ -268,5 +268,6 @@
     }
   ],
   "num_layers": 30,
+  "seed": 12345,
   "loan_amount": 200000.0
 }
