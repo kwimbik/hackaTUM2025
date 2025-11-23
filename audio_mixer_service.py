@@ -29,8 +29,8 @@ class AudioMixer:
     def __init__(self, base_dir, positive_dir, negative_dir, chunk_duration_ms=100):
         """Audio mixer with TTS support and PCM streaming."""
         self.chunk_duration_ms = chunk_duration_ms
-        self.crossfade_duration_ms = 2000
-        self.loop_crossfade_duration_ms = 1500  # 1.5 second crossfade for background loop
+        self.crossfade_emotion_ms = 2000
+        self.crossfade_base_ms = 1000
 
         # Check ffmpeg
         try:
@@ -52,14 +52,15 @@ class AudioMixer:
         self.channels = 2
         self.sample_width = 2  # 16-bit
 
-        self.base_audio = self._load_audio_as_pcm(random.choice(self.base_files))
+        # Pre-process base audio with baked-in crossfade for seamless looping
+        raw_base_audio = self._load_audio_as_pcm(random.choice(self.base_files))
+        self.base_audio = self._prepare_seamless_loop(raw_base_audio)
         self.base_position = 0
+        self.base_volume = 1.0  # Overall base audio volume (adjusted during excitement)
 
         self.excitement_audio = None
         self.excitement_position = 0
         self.is_playing_excitement = False
-
-        self.base_volume = 1.0
         self.excitement_volume = 0.0
 
         # TTS storage and queue
@@ -102,48 +103,68 @@ class AudioMixer:
         result = subprocess.run(cmd, capture_output=True, check=True)
         return result.stdout
 
+    def _prepare_seamless_loop(self, audio_data):
+        """Pre-process audio to create a seamless loop with crossfade baked in."""
+        bytes_per_sample = self.channels * self.sample_width
+        crossfade_samples = int((self.crossfade_base_ms / 1000.0) *
+                               self.sample_rate * bytes_per_sample)
+
+        # Extract tail and head for crossfading
+        tail = audio_data[-crossfade_samples:]
+        head = audio_data[:crossfade_samples]
+
+        # Create crossfaded transition
+        crossfaded = bytearray(crossfade_samples)
+
+        for i in range(0, crossfade_samples, 2):
+            if i + 1 < crossfade_samples:
+                # Linear crossfade
+                progress = i / crossfade_samples
+
+                # Tail sample (fading out)
+                tail_sample = struct.unpack('<h', tail[i:i+2])[0]
+                tail_weighted = int(tail_sample * (1.0 - progress))
+
+                # Head sample (fading in)
+                head_sample = struct.unpack('<h', head[i:i+2])[0]
+                head_weighted = int(head_sample * progress)
+
+                # Mix
+                mixed = max(-32768, min(32767, tail_weighted + head_weighted))
+                crossfaded[i:i+2] = struct.pack('<h', mixed)
+
+        # Create seamless loop: [main_audio_without_tail] + [crossfaded_section]
+        looped_audio = audio_data[:-crossfade_samples] + bytes(crossfaded)
+
+        print(f"Created seamless loop: {len(looped_audio)} bytes with {self.crossfade_base_ms}ms crossfade")
+        return looped_audio
+
     def _get_base_chunk(self):
-        """Get next chunk of base audio with crossfade looping."""
+        """Simple chunk retrieval from pre-processed seamless loop."""
         bytes_per_sample = self.channels * self.sample_width
         chunk_size_bytes = int((self.chunk_duration_ms / 1000.0) * self.sample_rate * bytes_per_sample)
-        crossfade_bytes = int((self.loop_crossfade_duration_ms / 1000.0) * self.sample_rate * bytes_per_sample)
 
-        audio_length = len(self.base_audio)
+        # Simple circular buffer approach
+        chunk = bytearray(chunk_size_bytes)
+        bytes_copied = 0
 
-        # Check if we're in the crossfade region (near the end)
-        if self.base_position + chunk_size_bytes > audio_length - crossfade_bytes:
-            # We're in crossfade region - mix end with beginning
+        while bytes_copied < chunk_size_bytes:
+            # How much can we copy from current position?
+            available = len(self.base_audio) - self.base_position
+            to_copy = min(available, chunk_size_bytes - bytes_copied)
 
-            # Get chunk from current position
-            end_chunk = self.base_audio[self.base_position:self.base_position + chunk_size_bytes]
+            # Copy the data
+            chunk[bytes_copied:bytes_copied + to_copy] = \
+                self.base_audio[self.base_position:self.base_position + to_copy]
 
-            # Calculate how far into the crossfade region we are
-            distance_from_crossfade_start = self.base_position - (audio_length - crossfade_bytes)
-            crossfade_progress = max(0, distance_from_crossfade_start) / crossfade_bytes
+            bytes_copied += to_copy
+            self.base_position += to_copy
 
-            # Get corresponding chunk from the beginning
-            begin_chunk = self.base_audio[0:chunk_size_bytes]
+            # Wrap around if needed
+            if self.base_position >= len(self.base_audio):
+                self.base_position = 0
 
-            # Apply crossfade volumes
-            end_volume = 1.0 - crossfade_progress
-            begin_volume = crossfade_progress
-
-            end_chunk = self._apply_volume_to_pcm(end_chunk, end_volume)
-            begin_chunk = self._apply_volume_to_pcm(begin_chunk, begin_volume)
-
-            # Mix the two chunks
-            chunk = self._mix_pcm(end_chunk, begin_chunk)
-
-            # Update position and wrap if needed
-            self.base_position += len(end_chunk)
-            if self.base_position >= audio_length:
-                self.base_position = self.base_position - audio_length
-        else:
-            # Normal playback - no crossfade needed
-            chunk = self.base_audio[self.base_position:self.base_position + chunk_size_bytes]
-            self.base_position += len(chunk)
-
-        return chunk
+        return bytes(chunk)
 
     def _apply_volume_to_pcm(self, pcm_data, volume):
         """Apply volume scaling to PCM data."""
@@ -389,7 +410,7 @@ class AudioMixer:
 
         bytes_per_sample = self.channels * self.sample_width
         excitement_duration = len(self.excitement_audio) / (self.sample_rate * bytes_per_sample)
-        wait_time = excitement_duration - (self.crossfade_duration_ms / 1000.0)
+        wait_time = excitement_duration - (self.crossfade_emotion_ms / 1000.0)
         if wait_time > 0:
             time.sleep(wait_time)
 
@@ -401,7 +422,7 @@ class AudioMixer:
 
     def _crossfade_excitement(self, fade_in=True):
         """Crossfade excitement audio in or out."""
-        duration = self.crossfade_duration_ms / 1000.0
+        duration = self.crossfade_emotion_ms / 1000.0
         steps = 20
         step_duration = duration / steps
 
