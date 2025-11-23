@@ -77,10 +77,11 @@ app.get('/api/config', (_req, res) => {
     const raw = fs.readFileSync(settingsPath, 'utf8');
     const data = JSON.parse(raw);
     const numLayers = Number(data.num_layers) || 30;
-    res.json({ num_layers: numLayers });
+    const globalConfig = data.global_config || {};
+    res.json({ num_layers: numLayers, global_config: globalConfig });
   } catch (error) {
     console.error('Failed to read settings for config endpoint', error);
-    res.status(500).json({ num_layers: 30, error: 'Could not read settings.json' });
+    res.status(500).json({ num_layers: 30, global_config: {}, error: 'Could not read settings.json' });
   }
 });
 
