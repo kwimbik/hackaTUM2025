@@ -1,119 +1,79 @@
 // Curated event copy; each event picks a random line so repeat events stay fresh.
 const EVENT_LINES = {
-    income_increase: [
-        "Paycheck glow-up—somebody noticed the hustle.",
-        "A quiet raise sneaks in. Your wallet smiles.",
-        "Salary steps up a notch. Coffee's on you."
+    graduate_masters: [
+        "Diploma secured! Average starting salary: 48k€. Mortgage capacity: ~200k€.",
+        "Master's complete—your earning potential just jumped 20%. Banks love this.",
+        "Academic finish line crossed. Next race: building that Eigenkapital."
     ],
-    promotion: [
-        "New title unlocked. The ladder just got shorter.",
-        "Promotion landed—fresh responsibilities, fresher pay.",
-        "Badge leveled up. You run a tighter ship now."
+    first_job: [
+        "First paycheck incoming! Pro tip: Save 30% for Eigenkapital from day one.",
+        "Career launched. In 3 years of smart saving, you could have your down payment.",
+        "Real income unlocked. The mortgage clock starts ticking—every month of rent is equity lost."
     ],
-    bonus: [
-        "Surprise bonus drop. Rainy-day fund gets sunnier.",
-        "Extra cash confetti just fell into the account.",
-        "Year-end pat on the back—bank account applauds."
+    interest_rate_change: [
+        "Market shift! Rates move for everyone—timing beats everything in mortgages.",
+        "Interest rate shuffle—a 1% change means 50k€ difference over loan lifetime.",
+        "Rate volatility strikes. Those locked in are sleeping well tonight."
+    ],
+    get_loan: [
+        "Bank says YES! You're mortgage-qualified. The biggest financial decision of your life awaits.",
+        "Green light from lenders! Remember: Just because you CAN borrow 400k€ doesn't mean you SHOULD.",
+        "Loan approved—but wait, have you checked KfW programs? Could save you thousands."
     ],
     layoff: [
-        "Pink slip moment. Time to pivot the storyline.",
-        "Job rug pulled—deep breath, new chapter loading.",
-        "The role vanished. Hustle instincts kick in."
+        "Job lost. This is why emergency funds matter—mortgage payments don't pause.",
+        "Employment ended. Without 6 months buffer, homeownership dreams get derailed.",
+        "Pink slip arrives. Those with mortgages and no safety net are sweating bullets."
     ],
-    new_job: [
-        "Fresh gig, fresh paycheck. New desk smell included.",
-        "Signed a new offer. Momentum stays undefeated.",
-        "Swapped badges—career GPS rerouting upward."
+    interest_rate_shock: [
+        "RATE EXPLOSION! 2% jump = 400€ more monthly. Procrastinators just got priced out.",
+        "Interest spike! A 300k€ mortgage now costs 80k€ more over lifetime. Ouch.",
+        "Rates skyrocket! Those who waited for 'perfect timing' just learned an expensive lesson."
     ],
-    income_decrease: [
-        "Pay took a dip. Budget goggles on.",
-        "Salary trimmed. Time for lean creativity.",
-        "A little belt-tightening enters the chat."
+    interest_rate_opportunity: [
+        "HISTORIC LOWS! Lock in now—this 2.5% rate is a once-in-decade gift.",
+        "Rate paradise! Every 0.5% saved = 30k€ less interest. Time to strike.",
+        "Golden window opens! At these rates, buying beats renting in year one."
     ],
-    sickness: [
-        "Health pause—rest becomes the main quest.",
-        "Recovery arc unlocked. Pace slows, spirit holds.",
-        "Life hit the brakes; healing takes the wheel."
+    housing_boom: [
+        "PRICES SURGE 20%! That 300k€ house is now 360k€. Waiting has a cost.",
+        "Property explosion! Your Eigenkapital just lost massive buying power.",
+        "Market goes vertical! Every month of hesitation = 5k€ more needed."
     ],
-    disability: [
-        "A hard pivot—adapting becomes the superpower.",
-        "Disability detour. Systems get rebuilt with care.",
-        "New constraints, new strategies. Resilience mode."
-    ],
-    divorce: [
-        "Split paths. Assets and emotions reorganize.",
-        "Uncoupling. The story branches in two.",
-        "Divorce ink dries; finances reshape overnight."
+    housing_correction: [
+        "MARKET DROPS 15%! Cash-ready buyers, this is your moment.",
+        "Price correction! Those with Eigenkapital ready are about to win big.",
+        "Buyer's market arrives! Panic sellers meet prepared buyers—guess who wins?"
     ],
     inheritance: [
-        "Legacy lands in the account. A quiet windfall.",
-        "Inheritance arrives—past meets present in cash form.",
-        "Family gift drops in. Plans get taller."
-    ],
-    house_damage_minor: [
-        "Leaky pipes demanded tribute. Wallet obliged.",
-        "Water mischief—called the plumber, paid the fee.",
-        "Minor house chaos fixed with a few thousand tears."
-    ],
-    house_damage_major: [
-        "Major home hit. Insurance papers start flying.",
-        "The house groaned loudly. Repairs roar back.",
-        "Renovation emergency—big bills storm the door."
-    ],
-    car_breakdown: [
-        "Car sulked on the roadside. Mechanic to the rescue.",
-        "Engine drama. Savings play the hero.",
-        "Breakdown blues: a tow, a bill, a story."
+        "Inheritance lands—50k€! Instant 20% down on a 250k€ home. Game-changer.",
+        "Windfall arrives! This could eliminate PMI and secure best rates immediately.",
+        "Life-changing money inherited. The mortgage timeline just shortened by 5 years."
     ],
     marry: [
-        "Rings exchanged. Love and expenses intertwined.",
-        "Wedding bells and receipts both chimed.",
-        "Marriage unlocked—a joyful, slightly pricey patch."
+        "Wedding bells! Dual income = double the mortgage power. 500k€ house now possible.",
+        "Married! Two salaries, one dream. Banks love dual-income households.",
+        "Partnership sealed! Combined finances unlock better rates and bigger homes."
     ],
     have_first_child: [
-        "A first tiny human arrives. Budget gets cuter.",
-        "Parenthood unlocked—new gig, zero onboarding.",
-        "First kid, first lullabies, first sleepless ledger."
+        "Baby arrives! Space needs increase, but income often decreases temporarily.",
+        "First child! That 2-Zimmer suddenly feels tiny. Upgrade pressure begins.",
+        "Parent mode activated! Mortgage planning now includes Kindergeld calculations."
     ],
-    have_second_child: [
-        "Kiddo number two joins the squad. Team chaos grows.",
-        "Second child arrives—noise floor rises lovingly.",
-        "Level two parenting achieved. More snacks required."
+    parents_gift: [
+        "Parents step up with 40k€! Covers all Nebenkosten plus boosts down payment.",
+        "Family assist! This gift just saved you 2 years of saving and unlocked better rates.",
+        "Parental boost deployed! From 5% to 15% Eigenkapital instantly—rate drops 0.7%."
     ],
-    have_third_child: [
-        "Third kid: circus promoted to full festival.",
-        "Big family energy unlocked. Logistics go pro.",
-        "Child three enters—carpool math intensifies."
+    massive_sondertilgung: [
+        "MEGA PAYMENT! 20k€ extra crushes 5 years off mortgage. Freedom at 55, not 60.",
+        "Sondertilgung deployed! This single payment saves 35k€ in interest.",
+        "Bonus to mortgage! While others buy BMWs, you just bought 5 years of freedom."
     ],
-    make_extra_payment: [
-        "Extra mortgage punch landed—debt wobbles.",
-        "Threw cash at the principal. Interest takes a step back.",
-        "Bonus payment made. Future self sends thanks."
-    ],
-    go_on_vacation: [
-        "Bags packed. Memories loading; balance dipping.",
-        "Vacation mode on—spent on sunsets and stories.",
-        "Escaped the grind. Receipts smell like sunscreen."
-    ],
-    buy_second_car: [
-        "Garage just got crowded. Convenience upgraded.",
-        "Second set of wheels acquired—freedom expands.",
-        "Another car rolls in. Budget feels the torque."
-    ],
-    renovate_house: [
-        "Walls knocked down, dreams built up.",
-        "Renovation dust everywhere—future cozy incoming.",
-        "House leveling up. Bank account feeling the reps."
-    ],
-    change_career: [
-        "Career compass spins—new path selected.",
-        "Switched lanes. Learning hat firmly on.",
-        "Career pivot engaged. Short-term dip, long-term plot twist."
-    ],
-    nothing: [
-        "Quiet month—sometimes stable is the flex.",
-        "No plot twist. Breathing room secured.",
-        "Steady as she goes; calm bankroll waters."
+    lifestyle_trap: [
+        "Lifestyle inflation strikes! That BMW lease just delayed homeownership by 3 years.",
+        "Consumption trap sprung! 30k€ on luxury = 100k€ less house you can afford.",
+        "Keeping-up-with-Schmidts syndrome! Short-term flex, long-term mortgage regret."
     ]
 };
 const gradientPalette = [
@@ -124,11 +84,12 @@ const gradientPalette = [
     "linear-gradient(135deg, #c084fc, #60a5fa)"
 ];
 const sizeBuckets = [
-    { name: 'compact', min: 220, max: 260 },
-    { name: 'regular', min: 260, max: 320 },
-    { name: 'wide', min: 320, max: 420 }
+    { name: 'compact', min: 180, max: 220 },
+    { name: 'regular', min: 200, max: 240 },
+    { name: 'wide', min: 220, max: 260 }
 ];
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let currentPopup = null;
 function ensureLayer() {
     let layer = document.getElementById("eventPopupLayer");
     if (!layer) {
@@ -164,24 +125,25 @@ function randomBetween(min, max) {
     return min + Math.random() * (max - min);
 }
 export function showEventPopup(eventName, info = {}) {
-    var _a, _b, _c;
     const layer = ensureLayer();
+    // Remove existing popup if there is one
+    if (currentPopup) {
+        currentPopup.classList.add("event-popup--out");
+        setTimeout(() => currentPopup === null || currentPopup === void 0 ? void 0 : currentPopup.remove(), 300);
+        currentPopup = null;
+    }
     const popup = document.createElement("article");
     popup.className = "event-popup";
+    currentPopup = popup;
     const size = sizeBuckets[Math.floor(Math.random() * sizeBuckets.length)];
     const width = Math.floor(randomBetween(size.min, size.max));
     popup.classList.add(`event-popup--${size.name}`);
     popup.style.width = `${width}px`;
     const gradient = gradientPalette[Math.floor(Math.random() * gradientPalette.length)];
     popup.style.background = gradient;
-    // Random position within layer bounds with a small gutter.
-    const gutter = 16;
-    const layerWidth = layer.clientWidth || window.innerWidth;
-    const layerHeight = layer.clientHeight || window.innerHeight;
-    const maxX = Math.max(gutter, layerWidth - width - gutter);
-    const maxY = Math.max(gutter, layerHeight - 160);
-    popup.style.left = `${randomBetween(gutter, maxX)}px`;
-    popup.style.top = `${randomBetween(gutter, maxY)}px`;
+    // Fixed position in top-left corner
+    popup.style.left = `20px`;
+    popup.style.top = `20px`;
     const title = prettifyName(eventName);
     const headline = chooseLine(eventName, info.description || `Event: ${title}`);
     const eyebrow = document.createElement("div");
@@ -194,23 +156,6 @@ export function showEventPopup(eventName, info = {}) {
     const body = document.createElement("p");
     body.className = "event-popup__body";
     body.textContent = headline;
-    const meta = document.createElement("div");
-    meta.className = "event-popup__meta";
-    const metaBits = [];
-    if (info.description)
-        metaBits.push(info.description);
-    if ((_a = info.apiData) === null || _a === void 0 ? void 0 : _a.monthlyWage)
-        metaBits.push(`Income ${info.apiData.monthlyWage.toFixed(0)}/mo`);
-    if ((_b = info.apiData) === null || _b === void 0 ? void 0 : _b.maritalStatus)
-        metaBits.push(info.apiData.maritalStatus);
-    if (((_c = info.apiData) === null || _c === void 0 ? void 0 : _c.childCount) !== undefined)
-        metaBits.push(`${info.apiData.childCount} kid${info.apiData.childCount === 1 ? '' : 's'}`);
-    if (metaBits.length > 0) {
-        meta.textContent = metaBits.join(" • ");
-    }
-    else {
-        meta.textContent = "Rolling with the timeline.";
-    }
     if (info.reactionContent) {
         const glyph = document.createElement("div");
         glyph.className = "event-popup__icon";
@@ -220,7 +165,6 @@ export function showEventPopup(eventName, info = {}) {
     popup.appendChild(eyebrow);
     popup.appendChild(heading);
     popup.appendChild(body);
-    popup.appendChild(meta);
     layer.appendChild(popup);
     // Entrance animation
     requestAnimationFrame(() => popup.classList.add("event-popup--in"));

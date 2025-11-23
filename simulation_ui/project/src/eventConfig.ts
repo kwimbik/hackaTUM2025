@@ -240,6 +240,123 @@ export const EVENT_DEFINITIONS: EventDefinition[] = [
       branch.money -= 10000; // Education costs
       branch.monthlyWage = Math.floor(branch.monthlyWage * 0.9); // Temporary income decrease
     }
+  },
+  {
+    name: "graduate_masters",
+    description: "Graduate from Master's degree",
+    reactionType: 'emoji',
+    reactionContent: '🎓'
+  },
+  {
+    name: "first_job",
+    description: "First professional job",
+    reactionType: 'emoji',
+    reactionContent: '💼'
+  },
+  {
+    name: "interest_rate_change",
+    description: "Market interest rates shift",
+    reactionType: 'emoji',
+    reactionContent: '📊'
+  },
+  {
+    name: "get_loan",
+    description: "Mortgage loan approved",
+    reactionType: 'emoji',
+    reactionContent: '🏦'
+  },
+  {
+    name: "interest_rate_shock",
+    description: "Rates jump 2%! Monthly payments 400€ higher",
+    reactionType: 'emoji',
+    reactionContent: '📈'
+  },
+  {
+    name: "interest_rate_opportunity",
+    description: "Historic low rates! 2.5% available",
+    reactionType: 'emoji',
+    reactionContent: '📉'
+  },
+  {
+    name: "housing_boom",
+    description: "Property prices surge 20%!",
+    reactionType: 'emoji',
+    reactionContent: '🏠'
+  },
+  {
+    name: "housing_correction",
+    description: "Market correction -15%",
+    reactionType: 'emoji',
+    reactionContent: '🏚️'
+  },
+  {
+    name: "parents_gift",
+    description: "Parents offer 40k€ for down payment",
+    causesSplit: true,
+    reactionType: 'emoji',
+    reactionContent: '🎁',
+    modifyBranch: (branch) => {
+      branch.money += 40000;
+    }
+  },
+  {
+    name: "massive_sondertilgung",
+    description: "Extra payment 20k€ - saves 5 years",
+    causesSplit: true,
+    reactionType: 'emoji',
+    reactionContent: '💸',
+    modifyBranch: (branch) => {
+      branch.money -= 20000;
+      branch.currentLoan = Math.max(0, branch.currentLoan - 20000);
+    }
+  },
+  {
+    name: "lifestyle_trap",
+    description: "New BMW, luxury vacation - savings destroyed",
+    causesSplit: true,
+    reactionType: 'emoji',
+    reactionContent: '🚗',
+    modifyBranch: (branch) => {
+      branch.money -= 30000;
+    }
+  },
+  {
+    name: "buy_disability_insurance",
+    description: "Purchase occupational disability insurance",
+    reactionType: 'emoji',
+    reactionContent: '🛡️'
+  },
+  {
+    name: "increase_payment_rate",
+    description: "Increase repayment rate from 2% to 3-4%",
+    reactionType: 'emoji',
+    reactionContent: '⬆️'
+  },
+  {
+    name: "decrease_payment_rate",
+    description: "Decrease repayment rate (financial hardship)",
+    reactionType: 'emoji',
+    reactionContent: '⬇️'
+  },
+  {
+    name: "minor_income",
+    description: "Small positive income event (100-500€)",
+    reactionType: 'emoji',
+    reactionContent: '💵',
+    modifyBranch: (branch) => {
+      const income = 100 + Math.random() * 400;
+      branch.money += Math.floor(income);
+    }
+  },
+  {
+    name: "minor_expense",
+    description: "Small unexpected expense (100-500€)",
+    reactionType: 'emoji',
+    reactionContent: '💸',
+    modifyBranch: (branch) => {
+      const expense = 100 + Math.random() * 400;
+      branch.money -= Math.floor(expense);
+    }
   }
 ];
 

@@ -4,18 +4,84 @@ import { showEventPopup } from './eventPopups.js';
 export let gameEvents = [];
 export let reactions = [];
 export let nextEventId = 0;
+// Track currently playing TTS
+let currentTTSEndTime = null;
 export const markerSpacing = 400;
 export const reactionDuration = markerSpacing * 1.5;
 // Store event definitions with generated events for later modification
 const eventDefinitionMap = new Map();
 let eventQueue = [];
+let lastQueueLog = 0;
+// Check if TTS is currently playing
+export function isTTSPlaying() {
+    if (currentTTSEndTime === null)
+        return false;
+    const now = Date.now();
+    if (now >= currentTTSEndTime) {
+        currentTTSEndTime = null;
+        return false;
+    }
+    return true;
+}
+// Get remaining TTS duration in seconds
+export function getRemainingTTSDuration() {
+    if (currentTTSEndTime === null)
+        return 0;
+    const now = Date.now();
+    const remaining = (currentTTSEndTime - now) / 1000;
+    return Math.max(0, remaining);
+}
+// Get upcoming events with TTS in a given range
+export function getUpcomingTTSEvents(timelineOffset, lookAheadDistance) {
+    var _a, _b, _c;
+    const currentPosition = -timelineOffset;
+    const eventsWithTTS = [];
+    const now = Date.now();
+    const shouldLog = now - lastQueueLog > 2000; // Log every 2 seconds
+    if (shouldLog) {
+        console.log(`[Queue Debug] Total queued events: ${eventQueue.length}, currentPos: ${currentPosition.toFixed(0)}`);
+        lastQueueLog = now;
+    }
+    for (const queued of eventQueue) {
+        const startYear = 2025;
+        const monthIndex = (queued.year - startYear) * 12 + (queued.month - 1);
+        const eventPosition = monthIndex * markerSpacing;
+        if (shouldLog) {
+            console.log(`  - ${queued.eventName} @ ${eventPosition}, TTS: ${(_b = (_a = queued.apiData) === null || _a === void 0 ? void 0 : _a.ttsDuration) === null || _b === void 0 ? void 0 : _b.toFixed(1)}s`);
+        }
+        // Check if event is ahead of us within look-ahead range
+        if (eventPosition > currentPosition && eventPosition < currentPosition + lookAheadDistance) {
+            if (((_c = queued.apiData) === null || _c === void 0 ? void 0 : _c.ttsDuration) && queued.apiData.ttsDuration > 0) {
+                eventsWithTTS.push({
+                    timelinePosition: eventPosition,
+                    ttsDuration: queued.apiData.ttsDuration,
+                    branchId: queued.branchId,
+                    eventName: queued.eventName
+                });
+            }
+        }
+    }
+    // Sort by position (closest first)
+    eventsWithTTS.sort((a, b) => a.timelinePosition - b.timelinePosition);
+    if (shouldLog) {
+        console.log(`[Queue Debug] Found ${eventsWithTTS.length} upcoming TTS events`);
+    }
+    return eventsWithTTS;
+}
+let lastProcessLog = 0;
 // Process queued events that are now on-camera and whose branches exist
 export function processQueuedEvents(timelineOffset, canvasWidth) {
     if (eventQueue.length === 0)
         return;
+    const now = Date.now();
+    const shouldLog = now - lastProcessLog > 3000;
     // Calculate visible range (add buffer for off-screen markers)
     const visibleStart = -timelineOffset - 800;
     const visibleEnd = -timelineOffset + canvasWidth + 1000;
+    if (shouldLog) {
+        console.log(`[Process Debug] Visible range: ${visibleStart.toFixed(0)} to ${visibleEnd.toFixed(0)}`);
+        lastProcessLog = now;
+    }
     const eventsToProcess = [];
     for (const queued of eventQueue) {
         // Calculate world position of this event
@@ -28,6 +94,9 @@ export function processQueuedEvents(timelineOffset, canvasWidth) {
             const branchExists = branches.find(b => b.id === queued.branchId);
             if (branchExists) {
                 eventsToProcess.push(queued);
+            }
+            else if (shouldLog) {
+                console.log(`  ✗ Event "${queued.eventName}" @ ${eventWorldX} - branch #${queued.branchId} doesn't exist yet`);
             }
         }
     }
@@ -193,7 +262,11 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                 }).catch(err => {
                     console.warn('Failed to trigger audio playback:', err);
                 });
-                console.log(`TTS queued: ${event.apiData.ttsAudioId} (${(_b = event.apiData.ttsDuration) === null || _b === void 0 ? void 0 : _b.toFixed(2)}s)`);
+                // Track when this TTS will finish
+                if (event.apiData.ttsDuration) {
+                    currentTTSEndTime = Date.now() + (event.apiData.ttsDuration * 1000);
+                    console.log(`🎵 TTS started: ${event.apiData.ttsAudioId} (${(_b = event.apiData.ttsDuration) === null || _b === void 0 ? void 0 : _b.toFixed(2)}s) - will finish at ${new Date(currentTTSEndTime).toISOString().substr(11, 8)}`);
+                }
             }
             showEventPopup(event.eventName, {
                 description: event.description,

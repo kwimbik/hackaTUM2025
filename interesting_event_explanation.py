@@ -308,6 +308,94 @@ def compute_most_risky_event_for_world(
                  base + 4)
             )
 
+    elif recent_event == "interest_rate_shock":
+        base = 8
+        candidates.append(
+            (f"**BREAKING NEWS FROM THE FINANCIAL ARENA!** Interest rates just spiked again, and {name}'s feeling the heat on that modest ${income:.0f} income—every basis point counts when you're working with limited financial flexibility! This is a make-or-break moment: will {name.split()[0] if name else 'they'} hunker down and build {name.split()[0] if name else 'their'} emergency fund, or make a bold move with {name.split()[0] if name else 'their'} savings? The clock is ticking, and {name} needs to act FAST to protect {name.split()[0] if name else 'their'} financial position!", base)
+        )
+        if has_loan:
+            candidates.append(
+                (f"INTEREST RATE SHOCK! {name} is locked into a mortgage while rates spike — dodged a bullet!",
+                 base + 2)
+            )
+        if not has_loan and cash > 50000:
+            candidates.append(
+                (f"Rates EXPLODED but {name} has {cash:.0f}€ saved — waiting paid off!",
+                 base + 3)
+            )
+
+    elif recent_event == "interest_rate_opportunity":
+        base = 7
+        candidates.append(
+            (f"HISTORIC LOWS! Interest rates crashed to bargain levels — {name} could lock in MASSIVE savings!",
+             base)
+        )
+        if not has_loan and cash > 40000:
+            candidates.append(
+                (f"PERFECT STORM! Low rates + {name}'s {cash:.0f}€ down payment = mortgage opportunity of a lifetime!",
+                 base + 3)
+            )
+
+    elif recent_event == "housing_boom":
+        base = 7
+        candidates.append(
+            (f"PROPERTY PRICES SURGE 20%! {name} just watched the market run away — hesitation costs thousands!",
+             base)
+        )
+        if not has_loan:
+            candidates.append(
+                (f"Housing market EXPLODED! {name} waited too long — prices up 20%, dream home now out of reach.",
+                 base + 3)
+            )
+
+    elif recent_event == "housing_correction":
+        base = 6
+        candidates.append(
+            (f"MARKET CORRECTION! Prices dropped 15% — {name}'s patient approach might finally pay off!",
+             base)
+        )
+        if not has_loan and cash > 30000:
+            candidates.append(
+                (f"BUYER'S MARKET! {name} has cash ready as prices crash — perfect entry point!",
+                 base + 2)
+            )
+
+    elif recent_event == "parents_gift":
+        base = 8
+        candidates.append(
+            (f"GAME CHANGER! {name}'s parents gifted 40k€ — instant down payment boost from family!",
+             base)
+        )
+        if not has_loan:
+            candidates.append(
+                (f"Family assist unlocked! {name} just jumped from 5% to 20% Eigenkapital — mortgage rates just got WAY better!",
+                 base + 2)
+            )
+
+    elif recent_event == "massive_sondertilgung":
+        base = 7
+        candidates.append(
+            (f"POWER MOVE! {name} threw 20k€ extra at the mortgage — just shaved 5 YEARS off the loan!",
+             base)
+        )
+        if has_loan:
+            candidates.append(
+                (f"While others buy BMWs, {name} bought FREEDOM — 20k€ payment saves 35k€ in interest!",
+                 base + 2)
+            )
+
+    elif recent_event == "lifestyle_trap":
+        base = 6
+        candidates.append(
+            (f"LIFESTYLE INFLATION STRIKES! {name} splurged 30k€ on luxury — homeownership timeline just got delayed 3 years.",
+             base)
+        )
+        if thin_buffer:
+            candidates.append(
+                (f"Keeping up with the Schmidts! {name} destroyed savings on consumption — mortgage dreams on hold.",
+                 base + 3)
+            )
+
     elif recent_event == "get_loan" or recent_event.startswith("take_loan") or recent_event == "initial_loan":
         base = 7
         candidates.append(
