@@ -88,7 +88,7 @@ function renderFinalScoreboard() {
   scoreRows.innerHTML = "";
   const sorted = [...branches]
     .sort((a, b) => (b.money ?? 0) - (a.money ?? 0))
-    .slice(0, 10);
+    .slice(0, 9);
   sorted.forEach((branch, idx) => {
     const row = document.createElement("div");
     row.className = "score-row";

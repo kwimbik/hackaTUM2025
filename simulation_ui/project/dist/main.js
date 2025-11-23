@@ -93,7 +93,7 @@ function renderFinalScoreboard() {
     scoreRows.innerHTML = "";
     const sorted = [...branches]
         .sort((a, b) => { var _a, _b; return ((_a = b.money) !== null && _a !== void 0 ? _a : 0) - ((_b = a.money) !== null && _b !== void 0 ? _b : 0); })
-        .slice(0, 10);
+        .slice(0, 9);
     sorted.forEach((branch, idx) => {
         var _a, _b, _c;
         const row = document.createElement("div");
