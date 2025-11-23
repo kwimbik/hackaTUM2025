@@ -435,6 +435,68 @@ def _interest_rate_change(world: WorldState, global_cfg: GlobalConfig, __: UserC
     return _with_history(world, "interest_rate_change", metadata=new_meta)
 
 
+def _interest_rate_shock(world: WorldState, global_cfg: GlobalConfig, __: UserConfig) -> WorldState:
+    """Rates jump 2% - major market event."""
+    current_market_rate = world.metadata.get("market_interest_rate", global_cfg.mortgage_rate)
+    new_market_rate = min(0.08, current_market_rate + 0.02)
+    new_meta = {**world.metadata, "market_interest_rate": new_market_rate}
+    return _with_history(world, "interest_rate_shock", metadata=new_meta)
+
+
+def _interest_rate_opportunity(world: WorldState, global_cfg: GlobalConfig, __: UserConfig) -> WorldState:
+    """Historic low rates - great buying opportunity."""
+    new_market_rate = 0.025  # 2.5% historic low
+    new_meta = {**world.metadata, "market_interest_rate": new_market_rate}
+    return _with_history(world, "interest_rate_opportunity", metadata=new_meta)
+
+
+def _housing_boom(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Property prices surge 20%."""
+    if world.property_price > 0:
+        # If you own, your property value increases
+        new_price = world.property_price * 1.20
+        return _with_history(world, "housing_boom", property_price=new_price)
+    # If you don't own, prices just got more expensive
+    return _with_history(world, "housing_boom")
+
+
+def _housing_correction(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Market correction -15%."""
+    if world.property_price > 0:
+        # If you own, your property value decreases
+        new_price = world.property_price * 0.85
+        return _with_history(world, "housing_correction", property_price=new_price)
+    # If you don't own, buying opportunity!
+    return _with_history(world, "housing_correction")
+
+
+def _parents_gift(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Parents gift 40k€ for Eigenkapital."""
+    gift = 40_000.0
+    new_meta = {**world.metadata, "parents_gift_received": True}
+    return _with_history(world, "parents_gift", cash=world.cash + gift, metadata=new_meta)
+
+
+def _massive_sondertilgung(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Extra payment 20k€ towards mortgage."""
+    if world.current_loan <= 0:
+        return _with_history(world, "massive_sondertilgung_skipped")
+
+    payment = min(20_000.0, world.cash, world.current_loan)
+    new_cash = max(0.0, world.cash - payment)
+    new_loan = max(0.0, world.current_loan - payment)
+    new_meta = {**world.metadata, "massive_sondertilgung": payment}
+    return _with_history(world, "massive_sondertilgung", cash=new_cash, current_loan=new_loan, metadata=new_meta)
+
+
+def _lifestyle_trap(world: WorldState, _: GlobalConfig, __: UserConfig) -> WorldState:
+    """Lifestyle inflation - BMW, vacation. Savings destroyed."""
+    cost = 30_000.0
+    new_cash = max(0.0, world.cash - cost)
+    new_meta = {**world.metadata, "lifestyle_trap": True}
+    return _with_history(world, "lifestyle_trap", cash=new_cash, metadata=new_meta)
+
+
 EVENT_REGISTRY: Dict[str, Event] = {
     "nothing": Event("nothing", _nothing, description="No change this layer.", is_choice=False),
     "graduate_masters": Event("graduate_masters", _graduate_masters, description="Graduate from Master's degree.", is_choice=False),
@@ -470,6 +532,13 @@ EVENT_REGISTRY: Dict[str, Event] = {
     "buy_second_car": Event("buy_second_car", _buy_second_car, description="Buy second car.", is_choice=True),
     "renovate_house": Event("renovate_house", _renovate_house, description="Major renovation.", is_choice=True),
     "change_career": Event("change_career", _change_career, description="Career change.", is_choice=True),
+    "interest_rate_shock": Event("interest_rate_shock", _interest_rate_shock, description="Rates jump 2%.", is_choice=False),
+    "interest_rate_opportunity": Event("interest_rate_opportunity", _interest_rate_opportunity, description="Historic low rates.", is_choice=False),
+    "housing_boom": Event("housing_boom", _housing_boom, description="Property prices surge 20%.", is_choice=False),
+    "housing_correction": Event("housing_correction", _housing_correction, description="Market correction -15%.", is_choice=False),
+    "parents_gift": Event("parents_gift", _parents_gift, description="Parents gift 40k€.", is_choice=True),
+    "massive_sondertilgung": Event("massive_sondertilgung", _massive_sondertilgung, description="Extra payment 20k€.", is_choice=True),
+    "lifestyle_trap": Event("lifestyle_trap", _lifestyle_trap, description="Lifestyle inflation trap.", is_choice=True),
 }
 
 # Defaults used for sampling during simulation.

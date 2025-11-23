@@ -25,18 +25,21 @@
       "name": "graduate_masters",
       "probability": 0.5,
       "flag": 0,
+      "popup": true,
       "description": "Graduate from Master's degree (guaranteed, increases over time)"
     },
     {
       "name": "first_job",
       "probability": 0.5,
       "flag": 0,
+      "popup": true,
       "description": "Get first professional job (guaranteed after graduation)"
     },
     {
       "name": "interest_rate_change",
       "probability": 0.1,
       "flag": 0,
+      "popup": true,
       "description": "Market interest rates shift (affects all worlds)"
     },
     {
@@ -67,12 +70,14 @@
       "name": "get_loan",
       "probability": 0.0017,
       "flag": 0,
+      "popup": true,
       "description": "You can get loan"
     },
     {
       "name": "layoff",
       "probability": 0.0017,
       "flag": 0,
+      "popup": true,
       "description": "Job loss, 6 months unemployment"
     },
     {
@@ -94,10 +99,39 @@
       "description": "Divorce (only if married, peak years 6-10)"
     },
     {
-      "name": "inheritance",
-      "probability": 0.0013,
+      "name": "interest_rate_shock",
+      "probability": 0.03,
       "flag": 0,
-      "description": "Inheritance €50k-€200k"
+      "popup": true,
+      "description": "Rates jump 2%! Monthly payments would be 400€ higher if buying now"
+    },
+    {
+      "name": "interest_rate_opportunity",
+      "probability": 0.03,
+      "flag": 0,
+      "popup": true,
+      "description": "Historic low rates! 2.5% available - save 80k€ over loan lifetime"
+    },
+    {
+      "name": "housing_boom",
+      "probability": 0.05,
+      "flag": 0,
+      "popup": true,
+      "description": "Property prices surge 20%! Waiting just cost you 60k€"
+    },
+    {
+      "name": "housing_correction",
+      "probability": 0.02,
+      "flag": 0,
+      "popup": true,
+      "description": "Market correction -15% - buyers' opportunity, if you have cash!"
+    },
+    {
+      "name": "inheritance",
+      "probability": 0.015,
+      "flag": 0,
+      "popup": true,
+      "description": "Inheritance 50k€ - instant Eigenkapital game-changer!"
     },
     {
       "name": "house_damage_major",
@@ -126,73 +160,111 @@
       "name": "marry",
       "probability": 0.0052,
       "flag": "not_married",
+      "popup": true,
+      "is_choice": true,
       "description": "Get married (only if unmarried, peak age 30-35)"
     },
     {
       "name": "have_first_child",
       "probability": 0.0069,
       "flag": "married_no_kids",
+      "popup": true,
+      "is_choice": true,
       "description": "Have first child (peak age 30-35)"
     },
     {
       "name": "have_second_child",
       "probability": 0.0185,
       "flag": "one_kid",
+      "is_choice": true,
       "description": "Have second child (70% of families, 3-4 years after first)"
     },
     {
       "name": "have_third_child",
       "probability": 0.0087,
       "flag": "two_kids",
+      "is_choice": true,
       "description": "Have third child (30% of families)"
     },
     {
       "name": "make_extra_payment",
       "probability": 0.0294,
       "flag": 0,
+      "is_choice": true,
       "description": "Make extra mortgage payment €3k-€15k"
     },
     {
       "name": "increase_payment_rate",
       "probability": 0.0135,
       "flag": 0,
+      "is_choice": true,
       "description": "Increase repayment rate from 2% to 3-4%"
     },
     {
       "name": "decrease_payment_rate",
       "probability": 0.0043,
       "flag": 0,
+      "is_choice": true,
       "description": "Decrease repayment rate (financial hardship)"
     },
     {
       "name": "buy_disability_insurance",
       "probability": 0.0239,
       "flag": "no_disability_insurance",
+      "is_choice": true,
       "description": "Purchase occupational disability insurance"
     },
     {
       "name": "go_on_vacation",
       "probability": 0.0746,
       "flag": 0,
+      "is_choice": true,
       "description": "Vacation €2k-€5k"
     },
     {
       "name": "buy_second_car",
       "probability": 0.0069,
       "flag": "one_car",
+      "is_choice": true,
       "description": "Buy second car (with kids/two jobs)"
     },
     {
       "name": "renovate_house",
       "probability": 0.0087,
       "flag": 0,
+      "is_choice": true,
       "description": "Major renovation €20k-€50k"
     },
     {
       "name": "change_career",
       "probability": 0.0043,
       "flag": 0,
+      "is_choice": true,
       "description": "Further education/career change"
+    },
+    {
+      "name": "parents_gift",
+      "probability": 0.02,
+      "flag": 0,
+      "popup": true,
+      "is_choice": true,
+      "description": "Parents offer 40k€ - enough for Nebenkosten + better rate!"
+    },
+    {
+      "name": "massive_sondertilgung",
+      "probability": 0.03,
+      "flag": 0,
+      "popup": true,
+      "is_choice": true,
+      "description": "Bonus! Extra payment 20k€ - just saved 5 years of payments!"
+    },
+    {
+      "name": "lifestyle_trap",
+      "probability": 0.05,
+      "flag": 0,
+      "popup": true,
+      "is_choice": true,
+      "description": "New BMW, luxury vacation - savings rate destroyed for 2 years"
     }
   ],
   "num_layers": 30,

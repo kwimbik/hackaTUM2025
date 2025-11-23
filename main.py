@@ -105,6 +105,16 @@ def main() -> None:
         choice_items = []
     event_names, event_probabilities = _extract_names_and_probs(event_items)
     choice_names, choice_probabilities = _extract_names_and_probs(choice_items)
+
+    # Build set of event names that should trigger popups
+    popup_events = set()
+    for item in event_items:
+        if isinstance(item, dict) and item.get("popup", False):
+            popup_events.add(item.get("name"))
+    for item in choice_items:
+        if isinstance(item, dict) and item.get("popup", False):
+            popup_events.add(item.get("name"))
+
     num_layers_setting = settings_data.get("num_layers")
     if num_layers_setting is None:
         raise ValueError("Settings must define 'num_layers'.")
@@ -164,8 +174,14 @@ def main() -> None:
         # Extract all events with interesting flag
         event_summaries = extract_most_risky_summary(path)
 
-        # Send ALL events (server will decide whether to enrich/TTS based on interesting flag)
+        # Filter to only send popup events (marked in settings.json)
         for summary in event_summaries:
+            recent_event = summary.get("data", {}).get("recent_event", "")
+
+            # Only send if this event type is marked as popup
+            if recent_event not in popup_events:
+                continue
+
             # Add interesting flag to data object if not already there
             data = summary.get("data", {})
             if "interesting" not in data:
