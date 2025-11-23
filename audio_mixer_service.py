@@ -309,7 +309,7 @@ class AudioMixer:
             audio_generator = elevenlabs_client.text_to_speech.convert(
                 text=text,
                 voice_id="QpDQJR3frbDwOhTIo8nW",  # Voice ID
-                model_id="eleven_turbo_v2_5",
+                model_id="eleven_flash_v2_5",
                 output_format="mp3_44100_128",
                 voice_settings={
                     "stability": 0.3,  # Lower = more expressive/energetic (0-1, default 0.5)

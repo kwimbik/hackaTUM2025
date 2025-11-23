@@ -134,7 +134,7 @@ You'll receive life events and generate exciting sports-style commentary for the
         try:
             message = self.client.messages.create(
                 model="claude-haiku-4-5-20251001",
-                max_tokens=100,
+                max_tokens=60,
                 messages=messages
             )
 
