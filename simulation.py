@@ -372,6 +372,18 @@ def apply_take_loan(
     )
 
 
+def _record_event_occurrence(world: WorldState, event_name: str, layer_idx: int | None) -> WorldState:
+    """Stamp the world with the layer index of the last time an event happened."""
+    if layer_idx is None:
+        return world
+    meta = {**world.metadata}
+    history = dict(meta.get("event_history", {}))
+    history[event_name] = layer_idx
+    meta["event_history"] = history
+    meta["last_event_layer"] = layer_idx
+    return world.copy_with_updates(metadata=meta)
+
+
 def _branch_worlds_on_event(
     world: WorldState,
     event: Event,
@@ -380,6 +392,7 @@ def _branch_worlds_on_event(
     rng: random.Random | None = None,
     name_allocator: NameAllocator | None = None,
     id_allocator: IdAllocator | None = None,
+    layer_idx: int | None = None,
 ) -> List[WorldState]:
     """
     Apply an event or choice.
@@ -387,14 +400,14 @@ def _branch_worlds_on_event(
     - For choices: branch into yes/no worlds.
     - For events: apply directly without branching (future logic may add reactions).
     """
-    probability = float(event_probability(event, world, global_cfg, user_cfg))
+    probability = float(event_probability(event, world, global_cfg, user_cfg, layer_idx))
     if probability <= 0.0:
         probability = 0.0
     elif probability >= 1.0:
         probability = 1.0
 
     if event.is_choice:
-        happens_world = event.apply(world, global_cfg, user_cfg)
+        happens_world = _record_event_occurrence(event.apply(world, global_cfg, user_cfg), event.name, layer_idx)
         not_happens_history = world.trajectory_events + [f"{event.name}_not_chosen"]
         not_happens_world = world.copy_with_updates(trajectory_events=not_happens_history)
         if not world.highlight:
@@ -415,7 +428,7 @@ def _branch_worlds_on_event(
         else:
             random_fn = rng.random if rng is not None else random.random
             if probability >= 1.0 or random_fn() < probability:
-                results = [event.apply(world, global_cfg, user_cfg)]
+                results = [_record_event_occurrence(event.apply(world, global_cfg, user_cfg), event.name, layer_idx)]
             else:
                 skipped_history = world.trajectory_events + [f"{event.name}_skipped"]
                 results = [world.copy_with_updates(trajectory_events=skipped_history)]
@@ -454,6 +467,30 @@ def _build_weighted(
         items.append(event)
         weights.append(float(probabilities.get(name, 0.5)))
     return items, weights
+
+
+def _effective_sampling_weights(
+    selectable: Sequence[Event],
+    base_weights: Sequence[float],
+    worlds: Sequence[WorldState],
+    global_cfg: GlobalConfig,
+    user_cfg: UserConfig,
+    layer_idx: int,
+) -> List[float]:
+    """
+    Weight events by how feasible/likely they are for the current set of worlds.
+
+    If everything becomes infeasible (all weights zero), fall back to base weights
+    to avoid stalling the simulation.
+    """
+    adjusted: List[float] = []
+    for event, base in zip(selectable, base_weights):
+        world_probs = [event_probability(event, w, global_cfg, user_cfg, layer_idx) for w in worlds]
+        best_prob = max(world_probs) if world_probs else 0.0
+        adjusted.append(base * best_prob)
+    if not any(adjusted):
+        return list(base_weights)
+    return adjusted
 
 
 def simulate_layers(
@@ -504,7 +541,10 @@ def simulate_layers(
         for idx, world in enumerate(active_worlds):
             if random_gen.random() < 0.1:
                 active_worlds[idx] = world.copy_with_updates(highlight=not world.highlight)
-        sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
+        weights_for_layer = _effective_sampling_weights(
+            selectable, weights, active_worlds, global_cfg, user_cfg, layer_idx
+        )
+        sampled_event = random_gen.choices(selectable, weights=weights_for_layer, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in active_worlds:
             next_worlds.extend(
@@ -516,6 +556,7 @@ def simulate_layers(
                     rng=random_gen,
                     name_allocator=name_alloc,
                     id_allocator=id_alloc,
+                    layer_idx=layer_idx,
                 )
             )
         active_worlds = next_worlds
@@ -568,7 +609,10 @@ def run_scenario(
         for idx, world in enumerate(current_worlds):
             if random_gen.random() < 0.1:
                 current_worlds[idx] = world.copy_with_updates(highlight=not world.highlight)
-        sampled_event = random_gen.choices(selectable, weights=weights, k=1)[0]
+        weights_for_layer = _effective_sampling_weights(
+            selectable, weights, current_worlds, global_cfg, user_cfg, layer_idx
+        )
+        sampled_event = random_gen.choices(selectable, weights=weights_for_layer, k=1)[0]
         next_worlds: List[WorldState] = []
         for world in current_worlds:
             next_worlds.extend(
@@ -580,6 +624,7 @@ def run_scenario(
                     rng=random_gen,
                     name_allocator=name_alloc,
                     id_allocator=id_alloc,
+                    layer_idx=layer_idx,
                 )
             )
         current_worlds = next_worlds

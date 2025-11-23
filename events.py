@@ -13,6 +13,102 @@ from world_state import WorldState
 HandlerFn = Callable[[WorldState, GlobalConfig, UserConfig], WorldState]
 
 
+def _clamp_probability(value: float) -> float:
+    """Keep probability values in the [0, 1] range."""
+    return max(0.0, min(1.0, float(value)))
+
+
+def _age_at_layer(user_cfg: UserConfig, layer_idx: int | None) -> float:
+    """Approximate age in years, assuming one layer equals one month."""
+    months = layer_idx if layer_idx is not None else 0
+    return float(user_cfg.age) + months / 12.0
+
+
+def _months_since(world: WorldState, event_name: str, layer_idx: int | None) -> int | None:
+    """Return months since an event last happened for this world."""
+    if layer_idx is None:
+        return None
+    history = world.metadata.get("event_history", {})
+    last_layer = history.get(event_name)
+    if last_layer is None:
+        return None
+    return int(layer_idx - int(last_layer))
+
+
+def _latest_child_layer(world: WorldState, layer_idx: int | None) -> int | None:
+    """Find the most recent child-related event layer."""
+    child_events = ("kid", "have_first_child", "have_second_child", "have_third_child")
+    layers = []
+    for evt in child_events:
+        months = _months_since(world, evt, layer_idx)
+        if months is not None and layer_idx is not None:
+            layers.append(layer_idx - months)
+    if not layers:
+        return None
+    return max(layers)
+
+
+def _is_event_feasible(event_name: str, world: WorldState, layer_idx: int | None) -> bool:
+    """Return True when an event can sensibly happen in the given world."""
+    if world.health_status == "deceased" or world.metadata.get("world_status") == "terminated":
+        return False
+    if event_name == "death":
+        return world.health_status != "deceased"
+    if event_name == "marry":
+        return world.family_status != "married"
+    if event_name == "divorce":
+        return world.family_status == "married"
+    if event_name == "have_first_child":
+        return world.children == 0
+    if event_name == "have_second_child":
+        return world.children >= 1 and world.children < 2
+    if event_name == "have_third_child":
+        return world.children >= 2 and world.children < 3
+    if event_name == "kid":
+        return world.children < 4  # soft upper bound to keep families reasonable
+    if event_name in ("stock_market_increase", "stock_market_crash"):
+        return world.stock_value > 0
+    if event_name in ("make_extra_payment", "increase_payment_rate", "decrease_payment_rate"):
+        return world.current_loan > 0
+    if event_name == "get_loan":
+        return world.property_price <= 0
+    if event_name == "go_on_vacation":
+        months_since_vacation = _months_since(world, "go_on_vacation", layer_idx)
+        return months_since_vacation is None or months_since_vacation >= 12
+    if event_name == "buy_disability_insurance":
+        return not world.metadata.get("has_disability_insurance", False)
+    if event_name == "buy_insurance":
+        return not world.metadata.get("has_insurance", False)
+    if event_name == "buy_second_car":
+        return not world.metadata.get("second_car", False)
+    if event_name == "renovate_house":
+        return world.property_price > 0 and not world.metadata.get("renovated_house", False)
+    return True
+
+
+BASE_EVENT_PROBABILITIES: Dict[str, float] = {
+    "marry": 0.12,
+    "divorce": 0.05,
+    "have_first_child": 0.12,
+    "have_second_child": 0.10,
+    "have_third_child": 0.06,
+    "kid": 0.08,
+    "go_on_vacation": 0.20,
+    "get_loan": 0.10,
+    "invest_in_stock": 0.18,
+    "make_extra_payment": 0.10,
+    "increase_payment_rate": 0.08,
+    "decrease_payment_rate": 0.05,
+    "buy_disability_insurance": 0.10,
+    "buy_insurance": 0.08,
+    "buy_second_car": 0.05,
+    "renovate_house": 0.05,
+    "sickness": 0.06,
+    "disability": 0.02,
+    "death": 0.005,
+}
+
+
 @dataclass(frozen=True)
 class Event:
     """Unified interface for both events and user choices."""
@@ -352,7 +448,79 @@ DEFAULT_CHOICE_NAMES = tuple(
 )
 
 
-def event_probability(event: Event, world: WorldState, global_cfg: GlobalConfig, user_cfg: UserConfig) -> float:
-    """Placeholder probability model; will be replaced with richer logic."""
-    _ = (event, world, global_cfg, user_cfg)  # reserved for future use
-    return 0.5
+def event_probability(
+    event: Event,
+    world: WorldState,
+    global_cfg: GlobalConfig,
+    user_cfg: UserConfig,
+    layer_idx: int | None = None,
+) -> float:
+    """
+    Probability model that blends feasibility checks with simple life heuristics.
+
+    The return value reflects both whether the event can happen and how likely it
+    is given the world's current situation. This is intentionally lightweight and
+    state-based rather than purely random.
+    """
+    if not _is_event_feasible(event.name, world, layer_idx):
+        return 0.0
+
+    age = _age_at_layer(user_cfg, layer_idx)
+    base = BASE_EVENT_PROBABILITIES.get(event.name, 0.3)
+
+    # Life-stage adjustments
+    if event.name == "marry":
+        if world.family_status == "single":
+            base = 0.25 if 24 <= age <= 38 else 0.08
+        elif world.family_status == "divorced":
+            base = 0.12 if age < 55 else 0.03
+    elif event.name == "divorce":
+        base = 0.08 if world.family_status == "married" else 0.0
+    elif event.name == "have_first_child":
+        base = 0.20 if 24 <= age <= 38 else 0.05
+        last_child = _latest_child_layer(world, layer_idx)
+        if last_child is not None and layer_idx is not None and (layer_idx - last_child) < 10:
+            return 0.0
+    elif event.name == "have_second_child":
+        base = 0.18 if 26 <= age <= 40 else 0.04
+        last_child = _latest_child_layer(world, layer_idx)
+        if last_child is not None and layer_idx is not None and (layer_idx - last_child) < 10:
+            return 0.0
+    elif event.name == "have_third_child":
+        base = 0.10 if 28 <= age <= 42 else 0.02
+        last_child = _latest_child_layer(world, layer_idx)
+        if last_child is not None and layer_idx is not None and (layer_idx - last_child) < 12:
+            return 0.0
+    elif event.name == "kid":
+        base = 0.10 if world.children < 3 else 0.03
+    elif event.name == "go_on_vacation":
+        base = 0.25 if world.cash > 3_000 else 0.12 if world.cash > 1_000 else 0.02
+        months_since_vacation = _months_since(world, "go_on_vacation", layer_idx)
+        if months_since_vacation is not None and months_since_vacation < 12:
+            return 0.0
+    elif event.name == "get_loan":
+        affordability = 1.0 if world.current_income > 3_000 else 0.6
+        base = 0.10 * affordability
+    elif event.name in ("make_extra_payment", "increase_payment_rate"):
+        base = 0.15 if world.cash > 8_000 else 0.08
+    elif event.name == "decrease_payment_rate":
+        base = 0.10 if world.cash < 1_000 else 0.04
+    elif event.name == "invest_in_stock":
+        base = 0.20 if world.cash > 2_000 else 0.05
+    elif event.name == "buy_disability_insurance":
+        base = 0.15 if not world.metadata.get("has_disability_insurance") else 0.0
+    elif event.name == "buy_insurance":
+        base = 0.12 if not world.metadata.get("has_insurance") else 0.0
+    elif event.name == "buy_second_car":
+        base = 0.06 if world.cash > 10_000 else 0.02
+    elif event.name == "renovate_house":
+        base = 0.08 if world.cash > 20_000 else 0.02
+    elif event.name == "sickness":
+        base = 0.06 if world.health_status == "healthy" else 0.02
+    elif event.name == "disability":
+        base = 0.03 if world.health_status != "disabled" else 0.0
+    elif event.name == "death":
+        base = 0.01 if age > 70 else 0.002 if age > 50 else base
+
+    risk_modifier = 1.0 + float(global_cfg.risk_factor) * 0.1
+    return _clamp_probability(base * risk_modifier)
