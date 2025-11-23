@@ -280,6 +280,75 @@
       .stats-table tbody tr:hover {
         background: rgba(99, 102, 241, 0.08);
       }
+      .event-popup-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 7;
+      }
+      .event-popup {
+        position: absolute;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 12px;
+        row-gap: 6px;
+        color: #0b1329;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+        backdrop-filter: blur(10px) saturate(1.1);
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+        transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.18, 0.9, 0.32, 1.2);
+      }
+      .event-popup--in {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      .event-popup--out {
+        opacity: 0;
+        transform: translateY(14px) scale(0.95);
+      }
+      .event-popup--compact {
+        padding: 12px 14px;
+      }
+      .event-popup--wide {
+        grid-template-columns: auto 1fr;
+      }
+      .event-popup__icon {
+        grid-row: 1 / span 2;
+        align-self: start;
+        font-size: 28px;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
+      }
+      .event-popup__eyebrow {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .event-popup__title {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+        color: #0b1329;
+      }
+      .event-popup__body {
+        grid-column: 1 / span 2;
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: rgba(11, 19, 41, 0.95);
+      }
+      .event-popup__meta {
+        grid-column: 1 / span 2;
+        font-size: 12px;
+        color: rgba(11, 19, 41, 0.8);
+        margin-top: 2px;
+      }
     </style>
   </head>
   <body>
@@ -354,11 +423,17 @@
         <button class="modern-btn" id="generateEventBtn">Generate Event</button>
         <button class="modern-btn" id="lifeAlteringEventBtn">Life-Altering Event</button>
         <button class="modern-btn secondary" id="resetBtn">Reset</button>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:#0f172a;">
+          Speed
+          <input id="speedSlider" type="range" min="0.2" max="5" step="0.1" value="1" style="width:140px;">
+          <span id="speedValue">1.0x</span>
+        </label>
         </div>
 
       <div class="layout-row">
         <div class="canvas-container">
           <canvas id="game" width="1600" height="600"></canvas>
+          <div id="eventPopupLayer" class="event-popup-layer"></div>
           <img id="stickmanGif" src="stickman_run.gif" />
         </div>
 

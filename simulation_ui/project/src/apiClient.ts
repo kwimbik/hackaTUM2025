@@ -10,6 +10,8 @@ export interface ExternalEventData {
   year: number;
   month: number;
   branchId?: number; // Optional: which branch to apply event to (defaults to 0)
+  ttsAudioId?: string; // Audio ID from audio service
+  ttsDuration?: number; // TTS duration in seconds
 }
 
 export interface ExternalEvent {

@@ -4,6 +4,7 @@ import { setupCameraControls, areStickmenVisible, resetCamera, isDragging } from
 import { updateStatsTable } from './ui.js';
 import { drawTimelineLines, drawMarkers, drawEventMarkers, drawReactions, drawBranchNumbers, updateStickmanPositions } from './rendering.js';
 import { startPolling, stopPolling, mapFamilyStatus, ExternalEvent } from './apiClient.js';
+import { BackgroundAudioPlayer } from './audioPlayer.js';
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -23,6 +24,8 @@ const countdownOverlay = document.getElementById("countdownOverlay") as HTMLElem
 const countdownValue = document.getElementById("countdownValue") as HTMLElement | null;
 const bottomCurtain = document.getElementById("bottomCurtain") as HTMLElement | null;
 const simulationShell = document.getElementById("simulationShell") as HTMLElement | null;
+const speedSlider = document.getElementById("speedSlider") as HTMLInputElement | null;
+const speedValue = document.getElementById("speedValue") as HTMLElement | null;
 
 // State
 let paused = true;
@@ -32,7 +35,7 @@ let lastMonthIndex = -1; // Track which month we're on
 let revealStarted = false;
 let simulationStarted = false;
 
-const scrollSpeed = 1.0;
+let scrollSpeed = 1.0;
 
 // Setup camera controls
 setupCameraControls(canvas);
@@ -89,6 +92,18 @@ resetBtn.addEventListener("click", () => {
   timelineOffset = 0; // Reset time back to January 2025
   updateStatsTable();
 });
+
+// Speed control
+speedSlider?.addEventListener("input", () => {
+  const value = parseFloat(speedSlider.value);
+  scrollSpeed = isNaN(value) ? 1.0 : value;
+  if (speedValue) {
+    speedValue.textContent = `${scrollSpeed.toFixed(1)}x`;
+  }
+});
+if (speedValue && speedSlider) {
+  speedValue.textContent = `${parseFloat(speedSlider.value || "1").toFixed(1)}x`;
+}
 
 function resizeCanvas() {
   if (canvasContainer) {
@@ -170,7 +185,31 @@ function startRevealAnimation() {
   tick();
 }
 
-ctaBtn?.addEventListener("click", startRevealAnimation);
+async function triggerBackendRun() {
+  try {
+    const response = await fetch("http://localhost:3000/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) {
+      console.warn(`Backend run failed: ${response.status}`);
+    } else {
+      const data = await response.json();
+      console.log("Backend simulation run result:", data);
+    }
+  } catch (err) {
+    console.warn("Unable to trigger backend run from UI:", err);
+  }
+}
+
+async function handleCtaClick() {
+  if (revealStarted) return;
+  // Fire-and-forget backend run; do not block the countdown
+  triggerBackendRun();
+  startRevealAnimation();
+}
+
+ctaBtn?.addEventListener("click", handleCtaClick);
 
 // Auto-pause when stickmen are off-screen
 function checkAutoPause() {
@@ -232,6 +271,15 @@ function loop() {
 initBranches(timelineOffset);
 updateStatsTable();
 
+// Start background audio stream
+let audioPlayer: BackgroundAudioPlayer | null = null;
+try {
+  audioPlayer = new BackgroundAudioPlayer('http://localhost:5000/audio_stream');
+  console.log('Background audio stream started');
+} catch (error) {
+  console.error('Failed to start background audio:', error);
+}
+
 // Handle events from external API
 function handleExternalEvent(event: ExternalEvent) {
   console.log(`📨 Processing external event: ${event.text}`);
@@ -242,7 +290,9 @@ function handleExternalEvent(event: ExternalEvent) {
   const apiData = {
     monthlyWage: data.current_income / 12, // Convert annual to monthly
     maritalStatus: mapFamilyStatus(data.family_status),
-    childCount: data.children
+    childCount: data.children,
+    ttsAudioId: data.ttsAudioId,
+    ttsDuration: data.ttsDuration
   };
   
   console.log(`✓ Event data queued to apply when stickman reaches it:`);
