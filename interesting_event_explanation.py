@@ -351,55 +351,6 @@ def extract_most_risky_summary(path: str | Path) -> Dict[str, Any]:
         return None
     return best[0]
 
-def extract_all_choice_nodes(path: str | Path, choice_names: List[str]) -> List[Dict[str, Any]]:
-    """
-    Extract all worlds where a *choice* was actually selected (not skipped).
-    choice_names = ["marry", "have_first_child", ...].
-
-    Returns: List of data dicts for each selected world (no comments).
-    """
-    worlds = load_worlds(path)
-
-    # ---- Get Timestamp ----
-    timestamp = None
-    try:
-        with Path(path).open("r", encoding="utf-8-sig") as f:
-            raw = json.load(f)
-        if isinstance(raw, dict) and "timestamp" in raw:
-            timestamp = raw["timestamp"]
-    except Exception:
-        timestamp = None
-
-    if timestamp is not None:
-        year, month = timestamp_to_year_month_tuple(timestamp)
-    else:
-        year, month = None, None
-
-    results: List[Dict[str, Any]] = []
-
-    for world in worlds:
-        events = world.get("trajectory_events", []) or []
-        if not events:
-            continue
-
-        last = events[-1]
-
-        # Check if a choice was actually selected
-        if last in choice_names:
-            results.append({
-                "branchId": world.get("id"),
-                "name": world.get("name"),
-                "recent_event": last,
-                "year": year,
-                "month": month,
-                "current_income": world.get("current_income"),
-                "current_loan": world.get("current_loan"),
-                "family_status": world.get("family_status"),
-                "children": world.get("children"),
-            })
-
-    return results
-
 
 # ------------------------------------------------------------
 #  CLI

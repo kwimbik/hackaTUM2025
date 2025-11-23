@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Dict
 
 from interesting_event_explanation import extract_most_risky_summary
-from interesting_event_explanation import extract_all_choice_nodes
 
 from config_models import GlobalConfig, UserConfig
 from simulation import (
@@ -155,40 +154,16 @@ def main() -> None:
     summaries = (json.dumps(summarize_worlds(combined_worlds, timestamp=num_layers), indent=2))
     directory = "output"
 
-    choice_names = [item["name"] for item in settings_data["choices"]]
-    choice_names = [
-        "marry",
-        "have_first_child",
-        "buy_disability_insurance",
-        "renovate_house"
-    ]
-
-    url = "http://localhost:3000/api/event"
-    headers = {"Content-Type": "application/json"}
-
     for name in os.listdir(directory):
-        path = os.path.join(directory, name)
-        print("Processing:", name)
+        print(name)
+        summary = extract_most_risky_summary(directory + '/' + name)
+       #  res = json.dumps(summary, indent=2)
 
-        # ---- A: 既存のコメント（最もリスキーな1件） ----
-        # risky = extract_most_risky_summary(path)
-        # if risky is not None:
-        #     print("Sending risky summary:", risky)
-        #     time.sleep(0.1)
-        #     response = requests.post(url, headers=headers, json=risky)
-        #     print(response.json())
-
-        # ---- B: 選択された Choice を全部送る ----
-        choice_nodes = extract_all_choice_nodes(path, choice_names)
-        
-        for node in choice_nodes:
-            payload = {
-                "text": None,   # コメントなし
-                "data": node
-            }
-            # print("Sending choice node:", payload)
+        if summary is not None:
             time.sleep(0.1)
-            response = requests.post(url, headers=headers, json=payload)
+            url = "http://localhost:3000/api/event"
+            headers = {"Content-Type": "application/json"}
+            response = requests.post(url, headers=headers, json=summary)
             print(response.json())
 
 if __name__ == "__main__":
