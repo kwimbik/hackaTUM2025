@@ -2,6 +2,7 @@ import type { GameEvent } from './types.js';
 
 interface PopupInfo {
   branchId?: number;
+  branchName?: string;
   monthIndex?: number;
   description?: string;
   reactionContent?: string;
@@ -110,14 +111,14 @@ const gradientPalette = [
 ];
 
 const sizeBuckets = [
-  { name: 'compact', min: 180, max: 220 },
-  { name: 'regular', min: 200, max: 240 },
-  { name: 'wide', min: 220, max: 260 }
+  { name: 'compact', min: 120, max: 144 },
+  { name: 'regular', min: 136, max: 160 },
+  { name: 'wide', min: 144, max: 168 }
 ];
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-let currentPopup: HTMLElement | null = null;
+const MIN_POPUP_DISPLAY_MS = 1000;
 
 function ensureLayer(): HTMLDivElement {
   let layer = document.getElementById("eventPopupLayer") as HTMLDivElement | null;
@@ -159,16 +160,8 @@ function randomBetween(min: number, max: number): number {
 export function showEventPopup(eventName: string, info: PopupInfo = {}) {
   const layer = ensureLayer();
 
-  // Remove existing popup if there is one
-  if (currentPopup) {
-    currentPopup.classList.add("event-popup--out");
-    setTimeout(() => currentPopup?.remove(), 300);
-    currentPopup = null;
-  }
-
   const popup = document.createElement("article");
   popup.className = "event-popup";
-  currentPopup = popup;
 
   const size = sizeBuckets[Math.floor(Math.random() * sizeBuckets.length)];
   const width = Math.floor(randomBetween(size.min, size.max));
@@ -178,16 +171,27 @@ export function showEventPopup(eventName: string, info: PopupInfo = {}) {
   const gradient = gradientPalette[Math.floor(Math.random() * gradientPalette.length)];
   popup.style.background = gradient;
 
-  // Fixed position in top-left corner
-  popup.style.left = `20px`;
-  popup.style.top = `20px`;
+  // Randomized position within the simulation container with padding
+  const container = (popup.parentElement as HTMLElement) || document.body;
+  const viewportWidth = container.clientWidth || window.innerWidth || 1280;
+  const viewportHeight = container.clientHeight || window.innerHeight || 720;
+  const margin = 12;
+  const estimatedHeight = 140;
+  const maxLeft = Math.max(margin, viewportWidth - width - margin);
+  const maxTop = Math.max(margin, viewportHeight - estimatedHeight - margin);
+  const left = margin + Math.random() * Math.max(0, maxLeft - margin);
+  const top = margin + Math.random() * Math.max(0, maxTop - margin);
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
 
   const title = prettifyName(eventName);
   const headline = chooseLine(eventName, info.description || `Event: ${title}`);
 
   const eyebrow = document.createElement("div");
   eyebrow.className = "event-popup__eyebrow";
-  const branchLabel = info.branchId !== undefined ? `Branch #${info.branchId}` : "Branch ?";
+  const branchLabel =
+    info.branchName ??
+    (info.branchId !== undefined ? `Branch #${info.branchId}` : "Branch ?");
   eyebrow.textContent = `${formatMonth(info.monthIndex)} • ${branchLabel}`;
 
   const heading = document.createElement("div");
@@ -214,7 +218,7 @@ export function showEventPopup(eventName: string, info: PopupInfo = {}) {
   requestAnimationFrame(() => popup.classList.add("event-popup--in"));
 
   // Schedule removal
-  const lifetime = 3500 + Math.random() * 2000;
+  const lifetime = Math.max(MIN_POPUP_DISPLAY_MS, 1800 + Math.random() * 1200);
   setTimeout(() => {
     popup.classList.add("event-popup--out");
     setTimeout(() => popup.remove(), 600);

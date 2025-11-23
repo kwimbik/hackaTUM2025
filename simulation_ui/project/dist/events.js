@@ -268,9 +268,11 @@ export function checkEventTriggers(timelineOffset, onBranchModified) {
                     console.log(`🎵 TTS started: ${event.apiData.ttsAudioId} (${(_b = event.apiData.ttsDuration) === null || _b === void 0 ? void 0 : _b.toFixed(2)}s) - will finish at ${new Date(currentTTSEndTime).toISOString().substr(11, 8)}`);
                 }
             }
+            const targetBranch = branches.find(b => b.id === event.branchId);
             showEventPopup(event.eventName, {
                 description: event.description,
                 branchId: event.branchId,
+                branchName: targetBranch === null || targetBranch === void 0 ? void 0 : targetBranch.name,
                 monthIndex: event.monthIndex,
                 reactionContent: event.reactionContent,
                 apiData: event.apiData

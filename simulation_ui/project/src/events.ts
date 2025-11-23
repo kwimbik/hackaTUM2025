@@ -353,9 +353,12 @@ export function checkEventTriggers(timelineOffset: number, onBranchModified?: ()
         }
       }
 
+      const targetBranch = branches.find(b => b.id === event.branchId);
+
       showEventPopup(event.eventName, {
         description: event.description,
         branchId: event.branchId,
+        branchName: targetBranch?.name,
         monthIndex: event.monthIndex,
         reactionContent: event.reactionContent,
         apiData: event.apiData

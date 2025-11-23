@@ -163,11 +163,11 @@ export function drawReactions(ctx: CanvasRenderingContext2D, timelineOffset: num
   }
 }
 
-// Draw branch numbers on each timeline
+// Draw branch labels on each timeline
 export function drawBranchNumbers(ctx: CanvasRenderingContext2D, timelineOffset: number) {
   ctx.fillStyle = "#312e81";
   ctx.font = "700 16px 'Segoe UI', Arial, sans-serif";
-  
+
   const stickmanWorldX = 160;
   
   for (const branch of branches) {
@@ -177,11 +177,8 @@ export function drawBranchNumbers(ctx: CanvasRenderingContext2D, timelineOffset:
     const numberOffsetX = -100;
     const numberOffsetY = -10;
     
-    ctx.fillText(
-      `#${branch.id}`,
-      x + numberOffsetX,
-      y + numberOffsetY
-    );
+    const label = branch.name || `#${branch.id}`;
+    ctx.fillText(label, x + numberOffsetX, y + numberOffsetY);
   }
 }
 
