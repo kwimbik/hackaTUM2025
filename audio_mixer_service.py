@@ -25,6 +25,14 @@ CORS(app)
 # ElevenLabs configuration
 ELEVENLABS_API_KEY = os.getenv('Eleven_API', '')
 
+# Initialize ElevenLabs client
+try:
+    from elevenlabs.client import ElevenLabs
+    elevenlabs_client = ElevenLabs(api_key=ELEVENLABS_API_KEY) if ELEVENLABS_API_KEY else None
+except ImportError:
+    print("Warning: elevenlabs package not installed. Run: pip install elevenlabs")
+    elevenlabs_client = None
+
 class AudioMixer:
     def __init__(self, base_dir, positive_dir, negative_dir, chunk_duration_ms=100):
         """Audio mixer with TTS support and PCM streaming."""
@@ -291,35 +299,27 @@ class AudioMixer:
 
     def generate_tts(self, text):
         """Generate TTS audio using ElevenLabs API and store it."""
-        if not ELEVENLABS_API_KEY:
-            print("Warning: No ElevenLabs API key set")
+        if not elevenlabs_client:
+            print("Warning: ElevenLabs client not initialized")
             return None, 0
 
         try:
-            import requests
-
-            response = requests.post(
-                'https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB',
-                headers={
-                    'Accept': 'audio/mpeg',
-                    'Content-Type': 'application/json',
-                    'xi-api-key': ELEVENLABS_API_KEY
-                },
-                json={
-                    'text': text,
-                    'model_id': 'eleven_monolingual_v1',
-                    'voice_settings': {
-                        'stability': 0.5,
-                        'similarity_boost': 0.5
-                    }
+            # Use ElevenLabs SDK with turbo v2.5 model
+            # Voice settings: lower stability = more expressive/excited, higher similarity_boost = more consistent
+            audio_generator = elevenlabs_client.text_to_speech.convert(
+                text=text,
+                voice_id="QpDQJR3frbDwOhTIo8nW",  # Voice ID
+                model_id="eleven_turbo_v2_5",
+                output_format="mp3_44100_128",
+                voice_settings={
+                    "stability": 0.3,  # Lower = more expressive/energetic (0-1, default 0.5)
+                    "speed": 1.0,
+                    "similarity": 0.75,  # Higher = more consistent with voice (0-1, default 0.75)
                 }
             )
 
-            if response.status_code != 200:
-                print(f"ElevenLabs API error: {response.status_code}")
-                return None, 0
-
-            mp3_data = response.content
+            # Collect all audio chunks into bytes
+            mp3_data = b"".join(audio_generator)
             pcm_data = self._mp3_to_pcm(mp3_data)
 
             audio_id = str(uuid.uuid4())
