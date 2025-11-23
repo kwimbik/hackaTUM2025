@@ -33,6 +33,9 @@ const bottomCurtain = document.getElementById("bottomCurtain");
 const simulationShell = document.getElementById("simulationShell");
 const speedSlider = document.getElementById("speedSlider");
 const speedValue = document.getElementById("speedValue");
+const endScreen = document.getElementById("endScreen");
+const endSubtitle = document.getElementById("endSubtitle");
+const restartBtn = document.getElementById("restartBtn");
 // State
 let paused = true;
 let autoPaused = false;
@@ -41,6 +44,42 @@ let lastMonthIndex = -1; // Track which month we're on
 let revealStarted = false;
 let simulationStarted = false;
 let scrollSpeed = 1.0;
+let maxMonths = 30; // default fallback if backend config is unavailable
+let endScreenShown = false;
+function getCurrentMonthIndex() {
+    const stickmanWorldX = 200;
+    return Math.floor((stickmanWorldX - timelineOffset) / markerSpacing);
+}
+function publishDebugState() {
+    window.stickmanState = {
+        timelineOffset,
+        monthIndex: getCurrentMonthIndex(),
+        paused,
+        scrollSpeed,
+        maxMonths,
+        endScreenShown
+    };
+}
+function loadSimulationConfig() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield fetch("http://localhost:3000/api/config");
+            if (!response.ok) {
+                console.warn(`Failed to load config, status ${response.status}`);
+                return;
+            }
+            const data = yield response.json();
+            if (typeof data.num_layers === "number" && !Number.isNaN(data.num_layers)) {
+                maxMonths = data.num_layers;
+                console.log(`Loaded num_layers from backend: ${maxMonths}`);
+            }
+        }
+        catch (error) {
+            console.warn("Unable to fetch simulation config; using default maxMonths", error);
+        }
+    });
+}
+loadSimulationConfig();
 // Setup camera controls
 setupCameraControls(canvas);
 // Pause/Resume handlers
@@ -84,11 +123,7 @@ lifeAlteringEventBtn.addEventListener("click", () => {
     generateLifeAlteringEvent(timelineOffset);
 });
 resetBtn.addEventListener("click", () => {
-    resetBranches(timelineOffset);
-    clearEvents();
-    lastMonthIndex = -1;
-    timelineOffset = 0; // Reset time back to January 2025
-    updateStatsTable();
+    resetSimulation();
 });
 // Speed control
 speedSlider === null || speedSlider === void 0 ? void 0 : speedSlider.addEventListener("input", () => {
@@ -101,6 +136,30 @@ speedSlider === null || speedSlider === void 0 ? void 0 : speedSlider.addEventLi
 if (speedValue && speedSlider) {
     speedValue.textContent = `${parseFloat(speedSlider.value || "1").toFixed(1)}x`;
 }
+function resetSimulation() {
+    paused = true;
+    autoPaused = false;
+    endScreenShown = false;
+    simulationStarted = false;
+    revealStarted = false;
+    lastMonthIndex = -1;
+    timelineOffset = 0; // Reset time back to January 2025
+    clearEvents();
+    resetBranches(timelineOffset);
+    updateStatsTable();
+    if (endScreen) {
+        endScreen.classList.add("hidden");
+    }
+    if (resumeBtn) {
+        resumeBtn.disabled = false;
+    }
+    if (pauseBtn) {
+        pauseBtn.disabled = true;
+    }
+}
+restartBtn === null || restartBtn === void 0 ? void 0 : restartBtn.addEventListener("click", () => {
+    resetSimulation();
+});
 function resizeCanvas() {
     if (canvasContainer) {
         const containerWidth = canvasContainer.clientWidth;
@@ -206,6 +265,19 @@ function handleCtaClick() {
     });
 }
 ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.addEventListener("click", handleCtaClick);
+function showEndScreen() {
+    if (endScreenShown)
+        return;
+    endScreenShown = true;
+    paused = true;
+    autoPaused = false;
+    if (endSubtitle) {
+        endSubtitle.textContent = `Simulated ${maxMonths} months. Restart to run again.`;
+    }
+    if (endScreen) {
+        endScreen.classList.remove("hidden");
+    }
+}
 // Auto-pause when stickmen are off-screen
 function checkAutoPause() {
     if (paused)
@@ -239,6 +311,10 @@ function loop() {
         timelineOffset -= scrollSpeed;
         checkEventTriggers(timelineOffset, updateStatsTable);
         checkMonthlyWage();
+        const monthsElapsed = getCurrentMonthIndex() + 1;
+        if (!endScreenShown && monthsElapsed >= maxMonths) {
+            showEndScreen();
+        }
     }
     if (!isDragging) {
         checkAutoPause();
@@ -252,6 +328,7 @@ function loop() {
     drawReactions(ctx, timelineOffset);
     drawBranchNumbers(ctx, timelineOffset);
     updateStickmanPositions(timelineOffset);
+    publishDebugState();
 }
 // Initialize and start
 initBranches(timelineOffset);

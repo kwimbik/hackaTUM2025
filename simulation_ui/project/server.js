@@ -70,6 +70,20 @@ app.post('/api/settings', (req, res) => {
   }
 });
 
+// Expose minimal config data (num_layers) to the frontend
+app.get('/api/config', (_req, res) => {
+  try {
+    const settingsPath = path.join(__dirname, '..', '..', 'settings.json');
+    const raw = fs.readFileSync(settingsPath, 'utf8');
+    const data = JSON.parse(raw);
+    const numLayers = Number(data.num_layers) || 30;
+    res.json({ num_layers: numLayers });
+  } catch (error) {
+    console.error('Failed to read settings for config endpoint', error);
+    res.status(500).json({ num_layers: 30, error: 'Could not read settings.json' });
+  }
+});
+
 // POST endpoint to receive events from external programs
 app.post('/api/event', async (req, res) => {
   const { text, data } = req.body;
