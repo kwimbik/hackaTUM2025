@@ -8,6 +8,7 @@ const app = express();
 const PORT = 3000;
 const BRIDGE_PORT = 5001;
 const AUDIO_SERVICE_PORT = 5000;
+const ENRICHMENT_SERVICE_PORT = 5002;
 
 // TTS control flag
 const DISABLE_TTS = process.env.DISABLE_TTS === 'true';
@@ -83,6 +84,27 @@ app.post('/api/event', async (req, res) => {
     });
   }
 
+  // Enrich the event text with Claude Haiku commentary
+  let enrichedText = text; // Fallback to original text
+  try {
+    console.log('Enriching event with sports commentary...');
+    const enrichResponse = await fetch(`http://localhost:${ENRICHMENT_SERVICE_PORT}/enrich`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (enrichResponse.ok) {
+      const enrichData = await enrichResponse.json();
+      enrichedText = enrichData.enriched_text;
+      console.log(`Enriched text: "${enrichedText}"`);
+    } else {
+      console.warn('Enrichment failed, using original text:', enrichResponse.statusText);
+    }
+  } catch (error) {
+    console.warn('Could not connect to enrichment service, using original text:', error.message);
+  }
+
   // Generate TTS audio and WAIT for completion
   let ttsAudioId = null;
   let ttsDuration = 0;
@@ -95,7 +117,7 @@ app.post('/api/event', async (req, res) => {
       const ttsResponse = await fetch('http://localhost:5000/generate_tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify({ text: enrichedText })
       });
 
       if (ttsResponse.ok) {
@@ -113,7 +135,8 @@ app.post('/api/event', async (req, res) => {
 
   // Only add to queue AFTER TTS is ready (or failed)
   pendingEvents.push({
-    text,
+    text: enrichedText,  // Use enriched text for display
+    originalText: text,   // Keep original for reference
     data: {
       ...data,
       ttsAudioId: ttsAudioId,
@@ -209,6 +232,19 @@ function startBridgeServer() {
   });
 }
 
+// Spawn the event enrichment service
+function startEnrichmentService() {
+  const enrichmentPath = path.join(__dirname, '..', '..', 'event_enrichment_service.py');
+  const enrichmentProc = spawn('python3', [enrichmentPath], {
+    cwd: path.join(__dirname, '..', '..'),
+    stdio: 'inherit',
+    shell: false
+  });
+  enrichmentProc.on('exit', (code) => {
+    console.log(`event_enrichment_service.py exited with code ${code}`);
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`\nTimeline API Server running on http://localhost:${PORT}`);
   console.log(`Frontend: http://localhost:${PORT}`);
@@ -223,4 +259,6 @@ app.listen(PORT, () => {
   startAudioService();
   console.log(`Starting Python bridge on http://localhost:${BRIDGE_PORT} (ui_bridge.py)...`);
   startBridgeServer();
+  console.log(`Starting event enrichment service on http://localhost:${ENRICHMENT_SERVICE_PORT}...`);
+  startEnrichmentService();
 });
