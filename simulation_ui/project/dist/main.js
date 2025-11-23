@@ -181,6 +181,8 @@ function finalizeReveal() {
     if (bottomCurtain) {
         bottomCurtain.classList.add("hidden");
     }
+    // Start the animation loop NOW (after countdown, events are queued)
+    loop();
     simulationStarted = true;
     paused = false;
 }
@@ -382,4 +384,5 @@ function handleExternalEvent(event) {
 // Start polling for external events from API
 startPolling(handleExternalEvent);
 console.log('🔗 API integration enabled - listening for external events');
-loop();
+// Don't start loop() here - it will be started in finalizeReveal() after countdown
+// This ensures events are queued BEFORE the animation loop processes them

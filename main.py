@@ -168,10 +168,16 @@ def main() -> None:
     url = "http://localhost:3000/api/event"
     headers = {"Content-Type": "application/json"}
 
-    for name in os.listdir(directory):
-        path = os.path.join(directory, name)
+    # Sort files by layer number to process in chronological order
+    layer_files = sorted([f for f in os.listdir(directory) if f.startswith("combined_layer_")],
+                        key=lambda x: int(x.split("_")[-1].split(".")[0]))
 
-        # Extract all events with interesting flag
+    for filename in layer_files:
+        # Extract layer number from filename (e.g., "combined_layer_0.json" -> 0)
+        layer_num = int(filename.split("_")[-1].split(".")[0])
+        path = os.path.join(directory, filename)
+
+        # Extract all events with interesting flag, using correct timestamp for this layer
         event_summaries = extract_most_risky_summary(path)
 
         # Filter to only send popup events (marked in settings.json)
