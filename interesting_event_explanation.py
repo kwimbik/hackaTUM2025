@@ -98,8 +98,8 @@ def get_this_year_event(world: Dict[str, Any]) -> Optional[str]:
         return None
 
     last = events[-1]
-    if last.endswith("_not_chosen") or last.endswith("_not_happened"):
-        return None
+    # if last.endswith("_not_chosen") or last.endswith("_not_happened"):
+    #     return None
 
     return last
 
