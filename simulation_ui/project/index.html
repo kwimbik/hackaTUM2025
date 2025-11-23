@@ -343,6 +343,42 @@
         line-height: 1.4;
         color: rgba(11, 19, 41, 0.98);
       }
+      .end-screen {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.2), transparent 35%),
+                    radial-gradient(circle at 80% 30%, rgba(34, 211, 238, 0.18), transparent 40%),
+                    #0f172a;
+        color: #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        z-index: 50;
+        text-align: center;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+      .end-screen.hidden {
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+      }
+      .end-screen h2 {
+        margin: 0;
+        font-size: 42px;
+        letter-spacing: -0.6px;
+      }
+      .end-screen p {
+        margin: 0;
+        font-size: 18px;
+        color: rgba(226, 232, 240, 0.85);
+      }
+      .end-screen .end-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+      }
     </style>
   </head>
   <body>
@@ -350,6 +386,13 @@
       <span id="countdownValue"></span>
     </div>
     <div id="bottomCurtain" class="bottom-curtain"></div>
+    <div id="endScreen" class="end-screen hidden">
+      <h2>Simulation complete</h2>
+      <p id="endSubtitle">You've reached the end of the planned timeline.</p>
+      <div class="end-actions">
+        <button class="modern-btn" id="restartBtn">Restart</button>
+      </div>
+    </div>
 
     <div class="pre-screen">
       <div class="hero-text">
