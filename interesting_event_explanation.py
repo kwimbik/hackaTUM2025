@@ -116,7 +116,7 @@ def compute_most_risky_event_for_world(
     and its severity, based on this year's event and the current state.
 
     Returns:
-      (comment, severity, recent_event) or None if nothing interesting happened.
+      (comment, severity, recent_event) or None if nothing meets the interesting criteria.
     """
     name: str = world.get("name", "This person")
 
@@ -292,11 +292,12 @@ def compute_most_risky_event_for_world(
 
 
 # ------------------------------------------------------------
-#  GLOBAL MOST RISKY EVENT IN A FILE
+#  FLAG INTERESTING EVENTS IN ALL WORLDS
 # ------------------------------------------------------------
-def extract_most_risky_summary(path: str | Path) -> Dict[str, Any]:
+def extract_most_risky_summary(path: str | Path) -> List[Dict[str, Any]]:
     """
-    Extract the single most risky event across all worlds in the file.
+    Process all worlds and return summaries for each with an 'interesting' field.
+    Returns a list of all worlds with text, data, and interesting flag.
     """
     worlds = load_worlds(path)
 
@@ -310,24 +311,22 @@ def extract_most_risky_summary(path: str | Path) -> Dict[str, Any]:
     except:
         timestamp = None
 
-    best: Optional[Tuple[Dict[str, Any], int]] = None  # (summary, severity)
+    result_worlds = []
 
     for world in worlds:
+        recent_event = get_this_year_event(world)
+
+        # ---- CONVERT TIMESTAMP TO YEAR+MONTH ----
+        if timestamp is not None:
+            year, month = timestamp_to_year_month_tuple(timestamp)
+        else:
+            year, month = None, None
+
         result = compute_most_risky_event_for_world(world)
-        if result is None:
-            continue
 
-        comment, severity, recent_event = result
-
-        if best is None or severity > best[1]:
-
-            # ---- CONVERT TIMESTAMP TO YEAR+MONTH ----
-            if timestamp is not None:
-                year, month = timestamp_to_year_month_tuple(timestamp)
-            else:
-                year, month = None, None
-
-            best = ({
+        if result is not None:
+            comment, severity, recent_event = result
+            world_summary = {
                 "text": comment,
                 "data": {
                     "branchId": world.get("id"),
@@ -339,17 +338,29 @@ def extract_most_risky_summary(path: str | Path) -> Dict[str, Any]:
                     "recent_event": recent_event,
                     "year": year,
                     "month": month
-                }
-            }, severity)
+                },
+                "interesting": 1
+            }
+        else:
+            world_summary = {
+                "text": "",
+                "data": {
+                    "branchId": world.get("id"),
+                    "name": world.get("name"),
+                    "current_income": world.get("current_income"),
+                    "current_loan": world.get("current_loan"),
+                    "family_status": world.get("family_status"),
+                    "children": world.get("children"),
+                    "recent_event": recent_event,
+                    "year": year,
+                    "month": month
+                },
+                "interesting": 0
+            }
 
-    if best is None:
+        result_worlds.append(world_summary)
 
-        # return {
-        #     "text": "No particularly dangerous events in this file.",
-        #     "data": None
-        # }
-        return None
-    return best[0]
+    return result_worlds
 
 
 # ------------------------------------------------------------
