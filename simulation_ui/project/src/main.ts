@@ -40,6 +40,31 @@ let scrollSpeed = 1.0;
 // Setup camera controls
 setupCameraControls(canvas);
 
+async function persistOnboardingToSettings(onboardingData: OnboardingData) {
+  try {
+    const response = await fetch("http://localhost:3000/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        loanType: onboardingData.loanType,
+        loanYears: onboardingData.loanYears,
+        age: onboardingData.age,
+        education: onboardingData.education,
+        familyStatus: onboardingData.familyStatus,
+        careerLength: onboardingData.careerLength
+      })
+    });
+    if (!response.ok) {
+      console.warn("Settings update failed with status", response.status);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn("Unable to persist onboarding selections to settings.json:", err);
+    return false;
+  }
+}
+
 // Pause/Resume handlers
 pauseBtn.addEventListener("click", () => {
   paused = true;
@@ -130,7 +155,7 @@ function finalizeReveal() {
   paused = false;
 }
 
-function startRevealAnimation() {
+async function startRevealAnimation() {
   if (revealStarted) return;
   revealStarted = true;
   paused = true;
@@ -151,8 +176,12 @@ function startRevealAnimation() {
       careerLength: parseInt(formData.get('careerLength') as string || '5')
     };
     
-    console.log('📋 Captured onboarding data:', onboardingData);
+    console.log('Captured onboarding data:', onboardingData);
     setOnboardingData(onboardingData);
+    const persisted = await persistOnboardingToSettings(onboardingData);
+    if (!persisted) {
+      console.warn("Proceeding without confirmed settings write.");
+    }
   }
   
   if (preScreen) {
@@ -204,9 +233,8 @@ async function triggerBackendRun() {
 
 async function handleCtaClick() {
   if (revealStarted) return;
-  // Fire-and-forget backend run; do not block the countdown
-  triggerBackendRun();
-  startRevealAnimation();
+  await startRevealAnimation();
+  await triggerBackendRun();
 }
 
 ctaBtn?.addEventListener("click", handleCtaClick);

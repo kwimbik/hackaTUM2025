@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 const app = express();
@@ -18,6 +19,55 @@ app.use(express.static(path.join(__dirname)));
 
 // In-memory storage for incoming events
 let pendingEvents = [];
+let lastOnboarding = null;
+
+function updateSettingsFile(selection) {
+  const settingsPath = path.join(__dirname, '..', '..', 'settings.json');
+  const raw = fs.readFileSync(settingsPath, 'utf8');
+  const data = JSON.parse(raw);
+
+  data.user_config = {
+    ...(data.user_config || {}),
+    age: Number(selection.age) || 0,
+    education: selection.education || (data.user_config || {}).education,
+    family_status: selection.familyStatus || (data.user_config || {}).family_status,
+    career_length: Number(selection.careerLength) || (data.user_config || {}).career_length || 0
+  };
+
+  data.global_config = {
+    ...(data.global_config || {}),
+    loan_type: selection.loanType || (data.global_config || {}).loan_type,
+    loan_years: Number(selection.loanYears) || (data.global_config || {}).loan_years
+  };
+
+  fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2), 'utf8');
+  return data;
+}
+
+// Persist onboarding selections into settings.json
+app.post('/api/settings', (req, res) => {
+  const { loanType, loanYears, age, education, familyStatus, careerLength } = req.body || {};
+
+  if (
+    loanType === undefined ||
+    loanYears === undefined ||
+    age === undefined ||
+    education === undefined ||
+    familyStatus === undefined ||
+    careerLength === undefined
+  ) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const updated = updateSettingsFile({ loanType, loanYears, age, education, familyStatus, careerLength });
+    lastOnboarding = { loanType, loanYears, age, education, familyStatus, careerLength };
+    res.json({ success: true, settings: updated });
+  } catch (err) {
+    console.error('Failed to update settings.json', err);
+    res.status(500).json({ success: false, error: 'Could not update settings' });
+  }
+});
 
 // POST endpoint to receive events from external programs
 app.post('/api/event', async (req, res) => {
@@ -96,6 +146,15 @@ app.get('/api/health', (req, res) => {
 
 // Trigger main.py directly from the Node server (alternative to the Python bridge)
 app.post('/run', (req, res) => {
+  if (lastOnboarding) {
+    try {
+      updateSettingsFile(lastOnboarding);
+      console.log('Settings refreshed from last onboarding selection before run.');
+    } catch (err) {
+      console.warn('Failed to refresh settings before run:', err);
+    }
+  }
+
   const mainPath = path.join(__dirname, '..', '..', 'main.py');
   console.log(`Executing main.py via Node bridge: ${mainPath}`);
   const proc = spawn('python', [mainPath], {

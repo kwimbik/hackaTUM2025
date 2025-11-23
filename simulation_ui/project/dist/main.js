@@ -43,6 +43,33 @@ let simulationStarted = false;
 let scrollSpeed = 1.0;
 // Setup camera controls
 setupCameraControls(canvas);
+function persistOnboardingToSettings(onboardingData) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield fetch("http://localhost:3000/api/settings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    loanType: onboardingData.loanType,
+                    loanYears: onboardingData.loanYears,
+                    age: onboardingData.age,
+                    education: onboardingData.education,
+                    familyStatus: onboardingData.familyStatus,
+                    careerLength: onboardingData.careerLength
+                })
+            });
+            if (!response.ok) {
+                console.warn("Settings update failed with status", response.status);
+                return false;
+            }
+            return true;
+        }
+        catch (err) {
+            console.warn("Unable to persist onboarding selections to settings.json:", err);
+            return false;
+        }
+    });
+}
 // Pause/Resume handlers
 pauseBtn.addEventListener("click", () => {
     paused = true;
@@ -126,55 +153,61 @@ function finalizeReveal() {
     paused = false;
 }
 function startRevealAnimation() {
-    if (revealStarted)
-        return;
-    revealStarted = true;
-    paused = true;
-    if (ctaBtn) {
-        ctaBtn.disabled = true;
-    }
-    // Capture form data before hiding pre-screen
-    const form = document.querySelector('.hero-form');
-    if (form) {
-        const formData = new FormData(form);
-        const onboardingData = {
-            loanType: formData.get('loanType') || 'fixed',
-            loanYears: parseInt(formData.get('loanYears') || '25'),
-            age: parseInt(formData.get('age') || '30'),
-            education: formData.get('education') || 'bachelor',
-            familyStatus: formData.get('familyStatus') || 'single',
-            careerLength: parseInt(formData.get('careerLength') || '5')
-        };
-        console.log('📋 Captured onboarding data:', onboardingData);
-        setOnboardingData(onboardingData);
-    }
-    if (preScreen) {
-        preScreen.style.display = "none";
-    }
-    if (!countdownOverlay || !countdownValue) {
-        finalizeReveal();
-        return;
-    }
-    countdownOverlay.classList.add("visible");
-    let count = 3;
-    const tick = () => {
-        if (!countdownValue)
+    return __awaiter(this, void 0, void 0, function* () {
+        if (revealStarted)
             return;
-        if (count > 0) {
-            countdownValue.textContent = count.toString();
-            count -= 1;
-            setTimeout(tick, 1000);
+        revealStarted = true;
+        paused = true;
+        if (ctaBtn) {
+            ctaBtn.disabled = true;
         }
-        else {
-            countdownValue.textContent = "GO!";
-            setTimeout(() => {
-                countdownOverlay.classList.remove("visible");
-                countdownValue.textContent = "";
-                finalizeReveal();
-            }, 700);
+        // Capture form data before hiding pre-screen
+        const form = document.querySelector('.hero-form');
+        if (form) {
+            const formData = new FormData(form);
+            const onboardingData = {
+                loanType: formData.get('loanType') || 'fixed',
+                loanYears: parseInt(formData.get('loanYears') || '25'),
+                age: parseInt(formData.get('age') || '30'),
+                education: formData.get('education') || 'bachelor',
+                familyStatus: formData.get('familyStatus') || 'single',
+                careerLength: parseInt(formData.get('careerLength') || '5')
+            };
+            console.log('Captured onboarding data:', onboardingData);
+            setOnboardingData(onboardingData);
+            const persisted = yield persistOnboardingToSettings(onboardingData);
+            if (!persisted) {
+                console.warn("Proceeding without confirmed settings write.");
+            }
         }
-    };
-    tick();
+        if (preScreen) {
+            preScreen.style.display = "none";
+        }
+        if (!countdownOverlay || !countdownValue) {
+            finalizeReveal();
+            return;
+        }
+        countdownOverlay.classList.add("visible");
+        let count = 3;
+        const tick = () => {
+            if (!countdownValue)
+                return;
+            if (count > 0) {
+                countdownValue.textContent = count.toString();
+                count -= 1;
+                setTimeout(tick, 1000);
+            }
+            else {
+                countdownValue.textContent = "GO!";
+                setTimeout(() => {
+                    countdownOverlay.classList.remove("visible");
+                    countdownValue.textContent = "";
+                    finalizeReveal();
+                }, 700);
+            }
+        };
+        tick();
+    });
 }
 function triggerBackendRun() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -200,9 +233,8 @@ function handleCtaClick() {
     return __awaiter(this, void 0, void 0, function* () {
         if (revealStarted)
             return;
-        // Fire-and-forget backend run; do not block the countdown
-        triggerBackendRun();
-        startRevealAnimation();
+        yield startRevealAnimation();
+        yield triggerBackendRun();
     });
 }
 ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.addEventListener("click", handleCtaClick);
