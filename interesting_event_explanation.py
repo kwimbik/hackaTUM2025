@@ -230,31 +230,20 @@ def compute_most_risky_event_for_world(
                  base + 2)
             )
 
-    elif recent_event == "income_decrease":
-        base = 6
+    elif recent_event == "promotion":
+        base = 7
         candidates.append(
-            (f"{name}'s income decreased this month.", base)
+            (f"{name} got promoted this month — significant income boost!", base)
         )
         if has_loan:
             candidates.append(
-                (f"{name} faces reduced income while carrying debt — repayment is more difficult.",
-                 base + 3)
+                (f"{name} got promoted while carrying debt — can now pay down faster.",
+                 base + 2)
             )
         if has_kids:
             candidates.append(
-                (f"{name}'s household income decreased while raising children — tough month.",
-                 base + 2)
-            )
-
-    elif recent_event == "income_increase":
-        base = 2
-        candidates.append(
-            (f"{name}'s income increased this month.", base)
-        )
-        if has_loan and thin_buffer:
-            candidates.append(
-                (f"{name} gained more income but remains fragile due to debt and low savings.",
-                 base + 2)
+                (f"{name} got promoted while raising children — financial relief for the family.",
+                 base + 1)
             )
 
     elif recent_event == "go_on_vacation":
