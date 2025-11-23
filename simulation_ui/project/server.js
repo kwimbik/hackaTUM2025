@@ -84,34 +84,39 @@ app.post('/api/event', async (req, res) => {
     });
   }
 
-  // Enrich the event text with Claude Haiku commentary
+  // Enrich the event text with Claude Haiku commentary and generate TTS
+  // Only for interesting events (interesting flag === 1)
   let enrichedText = text; // Fallback to original text
-  try {
-    console.log('Enriching event with sports commentary...');
-    const enrichResponse = await fetch(`http://localhost:${ENRICHMENT_SERVICE_PORT}/enrich`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-
-    if (enrichResponse.ok) {
-      const enrichData = await enrichResponse.json();
-      enrichedText = enrichData.enriched_text;
-      console.log(`Enriched text: "${enrichedText}"`);
-    } else {
-      console.warn('Enrichment failed, using original text:', enrichResponse.statusText);
-    }
-  } catch (error) {
-    console.warn('Could not connect to enrichment service, using original text:', error.message);
-  }
-
-  // Generate TTS audio and WAIT for completion
   let ttsAudioId = null;
   let ttsDuration = 0;
 
+  const isInteresting = data.interesting === 1;
+
   if (DISABLE_TTS) {
-    console.log('TTS disabled - skipping generation');
+    console.log('TTS and enrichment disabled - skipping both');
+  } else if (!isInteresting) {
+    console.log('Event not marked as interesting - skipping enrichment and TTS');
   } else {
+    try {
+      console.log('Enriching event with sports commentary...');
+      const enrichResponse = await fetch(`http://localhost:${ENRICHMENT_SERVICE_PORT}/enrich`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (enrichResponse.ok) {
+        const enrichData = await enrichResponse.json();
+        enrichedText = enrichData.enriched_text;
+        console.log(`Enriched text: "${enrichedText}"`);
+      } else {
+        console.warn('Enrichment failed, using original text:', enrichResponse.statusText);
+      }
+    } catch (error) {
+      console.warn('Could not connect to enrichment service, using original text:', error.message);
+    }
+
+    // Generate TTS audio and WAIT for completion
     try {
       console.log('Generating TTS for event...');
       const ttsResponse = await fetch('http://localhost:5000/generate_tts', {

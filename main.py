@@ -158,80 +158,22 @@ def main() -> None:
     url = "http://localhost:3000/api/event"
     headers = {"Content-Type": "application/json"}
 
-    # for name in os.listdir(directory):
-    #     print(name)
-    #     summary = extract_most_risky_summary(directory + '/' + name)
-    #    #  res = json.dumps(summary, indent=2)
-
-    #     if summary is not None:
-    #         time.sleep(0.1)
-    #         response = requests.post(url, headers=headers, json=summary)
-    #         print(response.json())
-
-    choice_names = [
-        "marry",
-        "have_first_child",
-        "increase_payment_rate",
-        "have_second_child",
-        "have_third_child",
-        # "buy_disability_insurance",
-        "go_on_vacation",
-        "make_extra_payment",
-        "increase_payment_rate",
-        "decrease_payment_rate",
-        "have_second_child",
-        "nothing"
-    ]
-
     for name in os.listdir(directory):
         path = os.path.join(directory, name)
-        # print("Processing:", name)
 
-        with open(path, "r", encoding="utf-8-sig") as f:
-            data = json.load(f)
+        # Extract all events with interesting flag
+        event_summaries = extract_most_risky_summary(path)
 
-        # worlds と timestamp を取り出す
-        if isinstance(data, dict) and "worlds" in data:
-            worlds = data["worlds"]
-            timestamp = data.get("timestamp")
-        elif isinstance(data, list):
-            worlds = data
-            timestamp = None
-        else:
-            continue
+        # Send ALL events (server will decide whether to enrich/TTS based on interesting flag)
+        for summary in event_summaries:
+            # Add interesting flag to data object if not already there
+            data = summary.get("data", {})
+            if "interesting" not in data:
+                data["interesting"] = summary.get("interesting", 0)
 
-        if isinstance(timestamp, int):
-            year, month = timestamp_to_year_month_tuple(timestamp)
-        else:
-            year, month = None, None
-
-        for world in worlds:
-            events = world.get("trajectory_events") or []
-            if not events:
-                continue
-
-            last = events[-1]
-
-            # 指定した choice が実際に「選ばれた」world だけ送る
-            if last not in choice_names:
-                continue
-
-            person_name = world.get("name", "This person")
-
-            # ★ メッセージと同じ形式に整形する
             payload = {
-                "text": f"{person_name} chose {last.replace('_', ' ')}.",
-                "data": {
-                    "branchId": world.get("id"),
-                    "name": person_name,
-                    "current_income": world.get("current_income"),
-                    "current_loan": world.get("current_loan"),
-                    "family_status": world.get("family_status"),
-                    "children": world.get("children"),
-                    "recent_event": last,
-                    "year": year,
-                    "month": month,
-                },
+                "text": summary.get("text", ""),
+                "data": data
             }
             print(payload)
             time.sleep(0.05)

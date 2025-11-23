@@ -140,7 +140,24 @@ def compute_most_risky_event_for_world(
 
     # ---- Event-specific logic ----
 
-    if recent_event == "layoff":
+    # Handle child events (have_first_child, have_second_child, have_third_child, or old "kid")
+    if recent_event in ("have_first_child", "have_second_child", "have_third_child", "kid"):
+        base = 6
+        candidates.append(
+            (f"{name} had a child this month — major life change.", base)
+        )
+        if has_loan:
+            candidates.append(
+                (f"{name} had a child while still in debt — financial pressure increases.",
+                 base + 2)
+            )
+        if income_low:
+            candidates.append(
+                (f"{name} had a child despite low income — budgeting will be challenging.",
+                 base + 3)
+            )
+
+    elif recent_event == "layoff":
         base = 8
         candidates.append(
             (f"{name} got laid off this month — a serious negative shock.", base)
@@ -159,22 +176,6 @@ def compute_most_risky_event_for_world(
             candidates.append(
                 (f"{name} was laid off with almost no cash buffer — highly risky.",
                  base + 2)
-            )
-
-    elif recent_event == "kid":
-        base = 6
-        candidates.append(
-            (f"{name} had a child this month — major life change.", base)
-        )
-        if has_loan:
-            candidates.append(
-                (f"{name} had a child while still in debt — financial pressure increases.",
-                 base + 2)
-            )
-        if income_low:
-            candidates.append(
-                (f"{name} had a child despite low income — budgeting will be challenging.",
-                 base + 3)
             )
 
     elif recent_event == "marry":
@@ -267,7 +268,7 @@ def compute_most_risky_event_for_world(
                  base + 4)
             )
 
-    elif recent_event.startswith("take_loan"):
+    elif recent_event == "get_loan" or recent_event.startswith("take_loan") or recent_event == "initial_loan":
         base = 7
         candidates.append(
             (f"{name} took out a loan this month — long-term obligations increased.", base)
@@ -337,7 +338,8 @@ def extract_most_risky_summary(path: str | Path) -> List[Dict[str, Any]]:
                     "children": world.get("children"),
                     "recent_event": recent_event,
                     "year": year,
-                    "month": month
+                    "month": month,
+                    "severity": severity
                 },
                 "interesting": 1
             }
@@ -353,7 +355,8 @@ def extract_most_risky_summary(path: str | Path) -> List[Dict[str, Any]]:
                     "children": world.get("children"),
                     "recent_event": recent_event,
                     "year": year,
-                    "month": month
+                    "month": month,
+                    "severity": 0
                 },
                 "interesting": 0
             }

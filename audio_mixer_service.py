@@ -56,12 +56,12 @@ class AudioMixer:
         raw_base_audio = self._load_audio_as_pcm(random.choice(self.base_files))
         self.base_audio = self._prepare_seamless_loop(raw_base_audio)
         self.base_position = 0
-        self.base_volume = 1.0  # Overall base audio volume (adjusted during excitement)
+        self.base_volume = 0.5  # Overall base audio volume (adjusted during excitement)
 
         self.excitement_audio = None
         self.excitement_position = 0
         self.is_playing_excitement = False
-        self.excitement_volume = 0.0
+        self.excitement_volume = 0.5
 
         # TTS storage and queue
         self.tts_storage = {}  # audioId -> PCM data
